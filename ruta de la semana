@@ -1,0 +1,48 @@
+[*]: realización obligatoria
+-: sin hacer
+—-: mirado y sin hacer
++: hecho
+*: notas especiales
+
+bibliotecas de visualización de datos
+——————————————————
+
+[*] chart.js
+	
+
++Desempolvar javascript
+	*code cademy
+	o pillar de un fichero json
++Buscar bibliotecas dashboard open source
++Buscar scrum
+-Empezar a usar plantilla en latex para el proyecto
++bootstrap
++hacer ejemplo con higcharts
+	-Me permite modificar el chart a mi gusto y como yo quiera
+
+*Subir todo a Github
+*Desplegar heroku
+
+
+———————————————
+
+Títulos:
+
+[*] Aplicación HTML5 para mostrar información de desarrollo de software.
+Sistema de información web para la visualización de software.
+
++Leer la normativa de fin de grado.
++Enviar url del repositorio.
++Buscar github pages
+-Mirar fechas de entrega del proyecto.
+	*no vienen especificadas	
++Mirar bibliotecas que van a mandar
+--Mirar angular.
+	*necesitamos tutorales de referencia de angular
+-yui interfaz de usuario javascript
++recordar plantilla en latex
++documentar bibliotecas
++subir también a Github la memoria
+-json para trabajar
+
+Día 6 de noviembre jueves. A las 10h.
