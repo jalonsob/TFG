@@ -1,0 +1,46 @@
+.muestra{
+	position:relative;
+	background: #F2F2F2;
+	display: inline-block;
+	float:center;
+	width:400px;
+	min-height:350px;
+	margin: 0.75em;
+	margin-left: 30em;
+	padding: 1em;
+	border-radius: 8px;
+	-webkit-border-radius: 3px;
+	-o-border-radius: 3px;
+	-moz-border-radius: 3px;
+	box-shadow: 0px 0px 4px 0px #5E5E5E;
+}
+
+.catalogo{
+	background: #F2F2F2;
+	margin: 0.75em;
+	padding: 1em;
+	border-radius: 8px;
+	-webkit-border-radius: 3px;
+	-o-border-radius: 3px;
+	-moz-border-radius: 3px;
+	box-shadow: 0px 0px 4px 0px #5E5E5E;
+}
+
+
+.button{
+	padding: 0.2em 1.6em;
+	text-shadow: 0px 0px 1px #FFF;
+	color: #fff;
+	background: #227DD3;
+	text-transform:uppercase;
+	border-radius: 80px;
+	-webkit-border-radius: 2px;
+	-o-border-radius: 2px;
+	-moz-border-radius: 2px;
+	
+
+}
+.button:active
+{
+	background: #0058AC;
+}
