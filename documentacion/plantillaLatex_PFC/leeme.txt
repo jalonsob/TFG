@@ -1,0 +1,2 @@
+	Esta plantilla está organizada en varios ficheros. El principal y el que se usa para compilar todo es plantilla_PFC.tex.
+	El resto de ficheros corresponde a los distintos puntos del indice.
