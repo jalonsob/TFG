@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="us">
+<head>
+	<meta charset="utf-8">
+	<title>jQuery UI Example Page</title>
+	<link href="jquery-ui.css" rel="stylesheet">
+	<link href="dinamic.css" rel="stylesheet">
+	<link href="js/dinamic.js" rel="stylesheet">
+	<script src="external/jquery/jquery.js"></script>
+	<script src="jquery-ui.js"></script>
+	<script src="Highcharts/js/highcharts.js"></script>
+	<script src="chartmaster/Chart.js"></script>
+
+
+	<script>
+		var toRepresent=[];
+		var Graphic=[];
+		var datos=[];
+
+		$(document).ready(function() {
+
+		    var keys=getKeysJson('/Users/jesus/Desktop/jquery-ui-1.11.2.custom/data/Adobe-Systems-its-com-evolutionary.json')
+		    var data=getDataJson('/Users/jesus/Desktop/jquery-ui-1.11.2.custom/data/Adobe-Systems-its-com-evolutionary.json')
+		    var objAux={name:"Adobe-Systems-its-com-evolutionary",key:keys,datas:data};
+		    datos.push(objAux)
+
+		    var keys=getKeysJson('/Users/jesus/Desktop/jquery-ui-1.11.2.custom/data/BMW-Group-its-com-evolutionary.json')
+		    var data=getDataJson('/Users/jesus/Desktop/jquery-ui-1.11.2.custom/data/BMW-Group-its-com-evolutionary.json')
+		    var objAux={name:"BMW-Group-its-com-evolutionary",key:keys,datas:data};
+		    datos.push(objAux)
+
+			var keys=getKeysJson('/Users/jesus/Desktop/jquery-ui-1.11.2.custom/data/Google-Inc.-its-com-evolutionary.json')
+		    var data=getDataJson('/Users/jesus/Desktop/jquery-ui-1.11.2.custom/data/Google-Inc.-its-com-evolutionary.json')
+		    var objAux={name:"Google-Inc.-its-com-evolutionary",key:keys,datas:data};
+		    datos.push(objAux)
+
+
+
+			$("#p").tabs()
+			$("#represent").click(function(){
+				var selected = [];
+				var x='';
+				$('#empresas input:checked').each(function() {
+				    selected.push($(this).attr('name'));
+				});
+				i= parseInt($("#p ul li").length)+1
+				$("#p ul").append('<li><a href="#tabs-'+i+'">'+i+'</a></li>')
+				$("#p").append('<div id = "tabs-'+i+'"></div>')
+				$("#p #tabs-"+i).append('<div class="datos"></div>')
+				selected.forEach(function(element){
+					y=(datos[parseInt(element)].name)
+					x=x+'<h3><a>'+datos[parseInt(element)].name+'</a></h3><div class="inside"><p>'
+					datos[parseInt(element)].key.forEach(function(dato){
+						x=x+'<li><input id="'+y+'//'+dato+'" onclick="toRepresentGet(this)" type="checkbox"/>"'+dato+'"</li>'
+					})
+					x=x+'</p></div>'
+					
+
+				});
+				$("#p #tabs-"+i+" .datos").append(x)
+				$("#p #tabs-"+i+" .datos").accordion();
+				$("#p").tabs("refresh")
+				$("#p #tabs-"+i+" .datos").append('<a class="button" id="represent//tabs-'+i+'" onclick="representStyle(this)">Get Data</a>')
+			})
+			
+		});
+
+		function getKeysJson(path){
+			var jsonfile = path;
+		    var data = jQuery.parseJSON(
+		        jQuery.ajax({
+		            url: jsonfile, 
+		            async: false,
+		            dataType: 'json'
+		        }).responseText
+		    );
+		    var keys=Object.keys(data)
+		    return keys;
+		};
+		function getDataJson(path){
+			var jsonfile = path;
+		    var data = jQuery.parseJSON(
+		        jQuery.ajax({
+		            url: jsonfile, 
+		            async: false,
+		            dataType: 'json'
+		        }).responseText
+		    );
+		    return data;
+		};
+		function toRepresentGet(check){
+			if(check.checked){
+				toRepresent.push(check.id)
+			}else if(!check.checked){
+				toRepresent.splice(toRepresent.indexOf(check.id),1);
+			}
+		}
+
+		function representStyle(here){
+			y=(here.id.split("//")[1])
+			x="";
+			$("#p #"+y).append('<div class="datos"><div id="style">')
+			toRepresent.forEach(function(dato){
+				x=x+'<h3><a>'+dato.split("//")[0]+" "+dato.split("//")[1]+'</a></h3><div class="inside"><p>'
+				x=x+'<li><input id="'+y+'//'+dato+'//column" onclick="toRepresentStyle(this)" type="checkbox"/>"Column"</li>'
+				x=x+'<li><input id="'+y+'//'+dato+'//line" onclick="toRepresentStyle(this)" type="checkbox"/>"Line"</li>'
+				x=x+'<li><input id="'+y+'//'+dato+'//spline" onclick="toRepresentStyle(this)" type="checkbox"/>"Spline"</li>'
+				x=x+'</p></div>'
+			})
+			x=x+'</div>'
+			$("#p #"+y+" .datos #style").append(x)
+			$("#p #"+y+" .datos #style").accordion();
+			$("#p #"+y+" .datos #style").append('<a class="button" id="represent//tabs-'+i+'//style" onclick="Represent(this)">Get Data</a>')
+
+		}
+
+		function toRepresentStyle(format){
+			if(format.checked){
+				Graphic.push(format.id)
+			}else if(!format.checked){
+				Graphic.splice(Graphic.indexOf(format.id),1);
+			}
+			alert(Graphic);
+		}
+
+		function Represent(checked){
+			series=[];
+			toRepresent=[];
+			$("#"+checked.id.split("//")[1]).append('<div class="datos"><div id="graphic"><div id="container" style="width:900; height:400;"></div></div></div>')
+			$("#"+checked.id.split("//")[1]+" .datos #style input:checked").each(function() {
+				    this.checked=false;
+			});
+			$("#"+checked.id.split("//")[1]+" .datos input:checked").each(function() {
+				    this.checked=false;
+			});
+
+			Graphic.forEach(function(variable){
+				aux= $.grep(datos,function(v){
+					return v.name===variable.split("//")[1]
+				})
+				obj={
+					type: variable.split("//")[3],
+					name: variable.split("//")[1]+" "+variable.split("//")[2],
+					data: aux[0].datas[variable.split("//")[2]]
+				}
+				series.push(obj)
+			});
+			var options={
+		        chart:{
+		            renderTo:"container"
+		        },
+		        title: {
+		            text: ''
+		        },
+		        series: series
+	    	}
+	    	var chart= new Highcharts.Chart(options);
+
+
+		}
+	</script>
+</head>
+<body>
+	<div id="p">
+		<ul>
+			<li><a href="#tabs-1">Companies</a></li>
+			
+		</ul>
+		<div id = "tabs-1">
+			<div id = "empresas">
+             	<p><input id="chkbx_0" type="checkbox" name="0" />Adobe-Systems-its-com-evolutionary</p>
+             	<p><input id="chkbx_1" type="checkbox" name="1" />BMW-Group-its-com-evolutionary</p>
+    			<p><input id="chkbx_2" type="checkbox" name="2" />Google-Inc.-its-com-evolutionary</p>
+    			<a class="button" id="represent">Filter it</a>
+    		</div>
+        </div>
+	</ul>
+	</div>
+</body>
+</html>

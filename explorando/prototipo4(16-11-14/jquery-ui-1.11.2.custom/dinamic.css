@@ -1,0 +1,39 @@
+#empresas{
+    border:2px solid black; 
+    border-radius: 20px;
+    width:420px;  
+    margin:20px 0 0 0;
+    padding: 10px;
+    height: auto;
+    box-shadow: 5px 9px 3px grey;
+}
+
+.datos{
+    float:left;
+    display:inline-block
+    border:2px solid black; 
+    border-radius: 20px;
+    width:420px;  
+    margin:20px 0 0 0;
+    padding: 10px;
+    height: auto;
+    box-shadow: 5px 9px 3px grey;
+}
+
+.button{
+	padding: 0.2em 1.6em;
+	text-shadow: 0px 0px 1px #FFF;
+	color: #fff;
+	background: #227DD3;
+	text-transform:uppercase;
+	border-radius: 80px;
+	-webkit-border-radius: 2px;
+	-o-border-radius: 2px;
+	-moz-border-radius: 2px;
+	
+
+}
+.button:active
+{
+	background: #0058AC;
+}
