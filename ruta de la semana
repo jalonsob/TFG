@@ -38,7 +38,7 @@ Sistema de información web para la visualización de software.
 	*no vienen especificadas	
 +Mirar bibliotecas que van a mandar
 --Mirar angular.
-	*necesitamos tutorales de referencia de angular
+	*necesitamos tutoriales de referencia de angular
 -yui interfaz de usuario javascript
 +recordar plantilla en latex
 +documentar bibliotecas
@@ -49,9 +49,35 @@ Día 6 de noviembre jueves. A las 10h.
 
 ———————————
 
-+Crear gráficas de forma dinamica
--Destruir gráficas de forma dinamica
++Crear gráficas de forma dinámica
++Destruir gráficas de forma dinamica
 -Escribir alguna parte de la memoria
 +Seleccionar los datos que queramos de las gráficas 
 
 Jueves 20 a las 10h
+
+——————————————————
+
++Lista de tecnologías que estamos usando para memoria documentadas
+-Documentar el backlog, los resultados y los requisitos del cliente
+	Crear gráficas personalizadas
+	Compartir gráficas personalizadas
+-Capturas de pantalla para la memoria
+-Documentar al menos el primer ciclo
++Explorar gridster
+-Que el código de creación sea el mismo de configuración
+--Intentar relacionar gráficas (click en zonas)
+—-Mirar angular como opcional, y grister con angular
+
+Martes 2 a las 10h
+
+——————
+
+-Manejar función on para manejar eventos ajenos a la gráfica de higth charts
+	Puede ser sacar una copia
++Opciones: crear gráfica simple, mostrar opciones.
+-Crear backlog para la siguiente iteración informando de todo lo que hice hasta la fecha
++Probarlo con grister
+-Buscar como guardar el estado 
+
+Jueves 18 a las 10h
