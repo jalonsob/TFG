@@ -263,7 +263,7 @@ function showTimeSettings(dash){
   var keys=getKeysJson('json/scm-evolutionary.json').filter(filterKeyDate)
   $("#settings"+dash).append('<div id="actualMenu"></div>')
   keys.forEach(function(element){
-    $("#actualMenu").append('<p>'+element+':   <input type="radio" name="'+element+'" class="radios" value="column">Barras<input type="radio" name="'+element+'" class="radios" value="spline">Lineas</p>')
+    $("#actualMenu").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas    <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>')
   })
   var data=getDataJson('json/scm-evolutionary.json')
   $("#actualMenu").append('From')
@@ -366,12 +366,12 @@ function settingsTimeGraph(numGraph){
     if(existLabel(chart,element)){
       auxseries=getSeriesbyName(chart,element);
       if(auxseries.type=="column"){
-        $("#actualMenu").append('<p>'+element+':   <input type="radio" name="'+element+'" class="radios" value="column" checked>Barras<input type="radio" name="'+element+'" class="radios" value="spline">Lineas</p>');
+        $("#actualMenu").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column" checked>Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>');
       }else{
-        $("#actualMenu").append('<p>'+element+':   <input type="radio" name="'+element+'" class="radios" value="column" >Barras<input type="radio" name="'+element+'" class="radios" value="spline" checked>Lineas</p>');
+        $("#actualMenu").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column" >Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline" checked>Lineas <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>');
       }
     }else{
-      $("#actualMenu").append('<p>'+element+':   <input type="radio" name="'+element+'" class="radios" value="column">Barras<input type="radio" name="'+element+'" class="radios" value="spline">Lineas</p>');
+      $("#actualMenu").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>');
     }
   })
   $("#actualMenu").append('From')
@@ -397,6 +397,11 @@ function settingsTimeGraph(numGraph){
   $("#actualMenu").append('<button onclick="takeDataTime('+numGraph+')" type="button" class="btn btn-xs btn-default">Create</button>')
   $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
 
+}
+
+function resetRatios(element1,element2){
+  element1.checked=false;
+  element2.checked=false;
 }
 
 //************************************************ FUNCIONES DE MOVIMIENTOS DEL DASH Y DEMÁS************
