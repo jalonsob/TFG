@@ -144,6 +144,7 @@ function takeDataAging(numGraph){
   var data;
   var series=[];
   var max=0;
+  var title='';
   if($("#aging").is(':checked')){
     if($("#actualMenu #agingColor").val()==''){
       colorbar=($("#actualMenu #agingColor").attr("placeholder"))
@@ -161,6 +162,7 @@ function takeDataAging(numGraph){
           color: colorbar
     }
     series.push(objaux)
+    title+="scm-demographics-aging"
   }
   if($("#birth").is(':checked')){
    if($("#actualMenu #birthColor").val()==''){
@@ -179,9 +181,10 @@ function takeDataAging(numGraph){
           color: colorbar
     }
     series.push(objaux)
+    title+= " scm-demographics-birth"
   }
   var axisx=createAxisx(max)
-  makeGraphDemograph(actualDash,series,axisx,"scm-demographics",numGraph)
+  makeGraphDemograph(actualDash,series,axisx,title,numGraph)
 }
 
 function makeGraphDemograph(dash,series,axis,titl,numGraph){
@@ -204,6 +207,21 @@ function makeGraphDemograph(dash,series,axis,titl,numGraph){
             xAxis: {
               categories: axis
             },
+
+            plotOptions: {
+                        series: {
+                            cursor: 'pointer',
+                            point: {
+                                events: {
+                                    click: function () {
+                                      makeAutorsGraph(this.category,titl);
+                                      console.log(this)
+                                    }
+                                }
+                            }
+                        }
+                    },
+           
             title: {
                 text: titl
             },
@@ -213,9 +231,79 @@ function makeGraphDemograph(dash,series,axis,titl,numGraph){
   $("#actualMenu").remove();
 }
 
+function makeAutorsGraph(categoria,title){
+  var jsons= title.split(" ")
+  var aux= categoria.split("-")
+  var from= parseInt(aux[0])
+  var to= parseInt(aux[1])
+
+  var series= parseLookInfo(from,to,title)
+  numGraph+=1;
+  var inDash= "dash"+actualDash.toString()
+  var gridster = $("#"+inDash+" ul").gridster().data('gridster');
+  gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary"><div class="panel-heading"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 2, 2);
+
+  var options={
+            chart:{
+                renderTo:numGraph.toString(),
+                width: 700,
+                height: 400
+            },
+
+            xAxis: {
+              categories: ["Age"]
+            },
+            title: {
+                text: "Usuarios entre "+from+"-"+to+" de "+title
+            },
+            series: parserAutorsData(series)
+  }
+  chart= new Highcharts.Chart(options);
+}
+
+function parserAutorsData(series){
+  var result=[];
+  for(i=0;i<=series.dato.length;i++){
+    objaux={
+          type: "column",
+          name: series.xAxis[i],
+          data: [series.dato[i]]
+      }
+    result.push(objaux)
+  }
+  return result
+  }
+
+function parseLookInfo(from,to,who){
+  var result={
+    xAxis: [],
+    dato: []
+  }
+  var jsons= who.split(" ")
+  var datos;
+  var i=0
+  alert(jsons)
+  jsons.forEach(function (element){
+      var path= "json/"+element+".json"
+      datos=getDataJson(path)
+
+      datos.persons.age.forEach(function(element){
+        aux=Math.floor(element/181)
+        if(aux>=Math.floor(from/181) && aux<Math.floor(to/181)){
+          result.dato.push(element)
+          result.xAxis.push(datos.persons.name[i])
+               
+        }
+        i++
+      })
+      
+  })
+  return result
+}
+
 function createAxisx(max){
   var result=[];
-  for (i = 0; i < max; i++) {
+  for (i = 0; i <= max; i++) {
     result[i]= (i*181)+"-"+((i+1)*181)
   }
   return result
