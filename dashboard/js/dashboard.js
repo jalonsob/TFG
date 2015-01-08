@@ -58,14 +58,15 @@ function takeDataInfo(numGraph){
   }
 }
 
-function makeGraphInfo(dash,selected,titl,numGraph){
-  if(numGraph==undefined){
+function makeGraphInfo(dash,selected,titl,graph){
+  if(isNaN(graph)){
     numGraph+=1;
+    graph=numGraph;
     var inDash= "dash"+dash.toString()
     var gridster = $("#"+inDash+" ul").gridster().data('gridster');
     gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary"><div class="panel-heading"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 1, 1);
   }else{
-    var chart = $('#'+numGraph).highcharts();
+    var chart = $('#'+graph).highcharts();
     chart.destroy()
   }
   var data=getDataJson('json/scm-static.json')
@@ -187,19 +188,20 @@ function takeDataAging(numGraph){
   makeGraphDemograph(actualDash,series,axisx,title,numGraph)
 }
 
-function makeGraphDemograph(dash,series,axis,titl,numGraph){
-  if(numGraph==undefined){
+function makeGraphDemograph(dash,series,axis,titl,graph){
+  if(isNaN(graph)){
     numGraph+=1;
+    graph=numGraph
     var inDash= "dash"+dash.toString()
     var gridster = $("#"+inDash+" ul").gridster().data('gridster');
     gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary"><div class="panel-heading"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 2, 2);
   }else{
-    var chart = $('#'+numGraph).highcharts();
+    var chart = $('#'+graph).highcharts();
     chart.destroy()
   }
   var options={
             chart:{
-                renderTo:numGraph.toString(),
+                renderTo:graph.toString(),
                 width: 700,
                 height: 400
             },
@@ -241,7 +243,7 @@ function makeAutorsGraph(categoria,title){
   numGraph+=1;
   var inDash= "dash"+actualDash.toString()
   var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-  gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary"><div class="panel-heading"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 2, 2);
+  gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary"><div class="panel-heading"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 2, 2);
 
   var options={
             chart:{
@@ -398,21 +400,24 @@ function deleteCreation(){
 }
 
 //Creamos la gráfica correspondiente al tipo seleccionado
-function makeGraphSeries(dash,selected,from,to,titl,numGraph){
-  if(numGraph==undefined){
+function makeGraphSeries(dash,selected,from,to,titl,graph){
+  var data=getDataJson('json/scm-evolutionary.json')
+  var series= parserGraph(from,to,data,selected);
+  if(isNaN(graph)){
     numGraph+=1;
+    graph=numGraph;
     var inDash= "dash"+dash.toString()
     var gridster = $("#"+inDash+" ul").gridster().data('gridster');
     gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary"><div class="panel-heading"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 2, 2);
   }else{
-    var chart = $('#'+numGraph).highcharts();
+    var chart = $('#'+graph).highcharts();
     chart.destroy()
   }
   var data=getDataJson('json/scm-evolutionary.json')
   var series= parserGraph(from,to,data,selected);
   var options={
             chart:{
-                renderTo:numGraph.toString(),
+                renderTo:graph.toString(),
                 width: 700,
                 height: 400
             },
