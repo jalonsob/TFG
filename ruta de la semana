@@ -71,7 +71,7 @@ Jueves 20 a las 10h
 
 Martes 2 a las 10h
 
-——————
+——————————————————
 
 +Manejar función on para manejar eventos ajenos a la gráfica de higth charts
 	Puede ser sacar una copia
@@ -81,3 +81,21 @@ Martes 2 a las 10h
 +Buscar como guardar el estado 
 
 Jueves 18 a las 10h
+——————————————————
+
++Hacerlo asincrono el json
+
+——Dinamico——
+
++Hacer el cargador de jsones (preguntar)
+	función dentro del json para ver cuando esté disponible.
+	Mirar función json de jquery
+	
+
+—-Estatico—
+
++Mejorar interfaz mas visible
+-Pensar nuevos cambios para proponer
++Reestructuración del código
+
+Martes o Jueves de la siguiente semana

@@ -2,9 +2,12 @@ var actualDash=0;
 var numDash=0;
 var numGraph=0;
 var allInfo=[];
+
 $(document).ready(function() {
 
-
+    //En esta zona obtengo todas las keys de manera rápida nada más empezar el programa, de esta forma
+    //compruebo en un futuro si existen errores a la hora de obtenerlo y se que clase de grafica puedo pintar
+    //de paso me ahorro unos cuantos getjson del futuro cuando necesite los datos a pintar
     $.getJSON("json/scm-static.json").success(function(data) {
             var objaux={
               from: "scm-static.json",
@@ -22,7 +25,7 @@ $(document).ready(function() {
             allInfo.push(objaux)
     });
 
-    $.getJSON("json/scm-evolutionary.json").success(function(data) {
+    $.getJSON("json/scmonary.json").success(function(data) {
             var objaux={
               from: "scm-evolutionary.json",
               inside: []
@@ -30,6 +33,12 @@ $(document).ready(function() {
             Object.keys(data).forEach(function(element){
                 objaux.inside.push(element)
             })
+            allInfo.push(objaux)
+    }).error(function(){
+      var objaux={
+              from: "scm-evolutionary.json",
+              inside: "error"
+            }
             allInfo.push(objaux)
     });
     $.getJSON("json/scm-demographics-aging.json").success(function(data) {
@@ -489,33 +498,41 @@ function settingsDemoGraph(numGraph){
 //************************************** Crear una gráfica del tipo Time series chart *******************//
 //personalizacion de la gráfica desde 0
 function showTimeSettings(dash){
-  var keys = getKeysJson('scm-evolutionary.json').filter(filterKeyDate)
-  $("#settings"+dash).append('<div id="actualMenu"><div id="list" style="height: 200px; overflow-y: scroll;"></div></div>')
-  keys.forEach(function(element){
-    $("#actualMenu #list").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas    <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>')
-  })
-  var data=getDataJson('json/scm-evolutionary.json')
-  $("#actualMenu").append('From')
-  $("#actualMenu").append('<select id="from" class="form-control">')
-  data.date.forEach(function(element){
-    $("#actualMenu #from").append('<option value="'+element+'">'+element+'</option>')
-  })
-  $("actualMenu").append('</select>')
-  $("#actualMenu").append('To')
-  $("#actualMenu").append('<select id="to" class="form-control">')
-  data.date.forEach(function(element){
-    $("#actualMenu #to").append('<option value="'+element+'">'+element+'</option>')
-  })
-  $("actualMenu").append('</select>')
-  $("#to").val(data.date[data.date.length-1])
-  $("#actualMenu").append('<button onclick="takeDataTime()" type="button" class="btn btn-xs btn-default">Create</button>')
-  $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+    $("#settings"+dash).append('<div id="actualMenu"><div id="list" style="height: 200px; overflow-y: scroll;"></div></div>')
+    if(getKeysJson("scm-evolutionary.json")!="error"){
+    $.getJSON("json/scm-evolutionary.json").success(function(data) {
+      var keys = Object.keys(data).filter(filterKeyDate)
+      keys.forEach(function(element){
+        $("#actualMenu #list").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas    <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>')
+      })
+      $("#actualMenu").append('From')
+      $("#actualMenu").append('<select id="from" class="form-control">')
+      data.date.forEach(function(element){
+        $("#actualMenu #from").append('<option value="'+element+'">'+element+'</option>')
+      })
+      $("actualMenu").append('</select>')
+      $("#actualMenu").append('To')
+      $("#actualMenu").append('<select id="to" class="form-control">')
+      data.date.forEach(function(element){
+        $("#actualMenu #to").append('<option value="'+element+'">'+element+'</option>')
+      })
+      $("actualMenu").append('</select>')
+      $("#to").val(data.date[data.date.length-1])
+      $("#actualMenu").append('<button onclick="takeDataTime()" type="button" class="btn btn-xs btn-default">Create</button>')
+      $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+    });
+  }else{
+    $("#actualMenu").append('<p>Existe un error al ahora de obtener los datos del fichero deseado. No se pueden crear gráficas de este tipo</p>')
+    $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
 
+  }
 }
 
 //funcion para recoger los datos para crear la grafica
 function takeDataTime(numGraph){
-  var data=getDataJson('json/scm-evolutionary.json')//DE MOMENTO ME HACE FALTA HASTA QUE DEFINA DE DONDE LO SACO
+  //En esta zona obtengo los datos de forma sincrona, en este caso soy invulnerable a errores en la descarga
+  //del json por si el nombre esta mal introducido dado queya lo he comprobado al principio
+  var data=getDataJson('json/scm-evolutionary.json')
   var selected = [];
   $("#actualMenu input[type='radio']:checked").each(function() {
     objaux={
