@@ -1,12 +1,79 @@
 var actualDash=0;
 var numDash=0;
 var numGraph=0;
-
+var allInfo=[];
 $(document).ready(function() {
+
+
+    $.getJSON("json/scm-static.json").success(function(data) {
+            var objaux={
+              from: "scm-static.json",
+              inside: []
+            }
+            Object.keys(data).forEach(function(element){
+                objaux.inside.push(element)
+            })
+            allInfo.push(objaux)
+    }).error(function(){
+      var objaux={
+              from: "scm-static.json",
+              inside: "error"
+            }
+            allInfo.push(objaux)
+    });
+
+    $.getJSON("json/scm-evolutionary.json").success(function(data) {
+            var objaux={
+              from: "scm-evolutionary.json",
+              inside: []
+            }
+            Object.keys(data).forEach(function(element){
+                objaux.inside.push(element)
+            })
+            allInfo.push(objaux)
+    });
+    $.getJSON("json/scm-demographics-aging.json").success(function(data) {
+            var objaux={
+              from: "scm-demographics-aging.json",
+              inside: []
+            }
+            Object.keys(data.persons).forEach(function(element){
+                objaux.inside.push(element)
+            })
+            allInfo.push(objaux)
+    }).error(function(){
+      var objaux={
+              from: "scm-demographics-aging.json",
+              inside: "error"
+            }
+            allInfo.push(objaux)
+    });
+    $.getJSON("json/scm-demographics-birth.json").success(function(data) {
+            var objaux={
+              from: "scm-demographics-birth.json",
+              inside: []
+            }
+            Object.keys(data.persons).forEach(function(element){
+                objaux.inside.push(element)
+            })
+            allInfo.push(objaux)
+    }).error(function(){
+      var objaux={
+              from: "scm-demographics-birth.json",
+              inside: "error"
+            }
+            allInfo.push(objaux)
+    });
+
+    console.log(allInfo)
 
   $("#addDash").click(function(){
     numDash+=1;
-    $(".container-fluid").append('<div id="settings'+(numDash)+'"class="panel-body" hidden><ul><button onclick="showTimeSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="showAgingSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="showInfoSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Info widget</button></ul></div><div id="dash'+(numDash)+'" class="gridster"><ul></ul></div> ')
+    $(".container-fluid").append('<div id="settings'+(numDash)+'"class="panel-body" hidden><ul><button onclick="showTimeSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="showAgingSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="showInfoSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Info widget</button></ul></div><div id="dash'+(numDash)+'" class="gridster" style="background:#A0CDE5"><ul></ul></div> ')
+    $(".gridster ul").gridster({
+      widget_margins: [6, 6],
+      widget_base_dimensions: [400, 230]
+    }).data('gridster');
     $("#dashboards").append('<li onclick="showDash('+numDash+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollDash'+numDash+'"><i class="fa fa-fw fa-edit"></i> Dashboard '+numDash+' <i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollDash'+numDash+'" class="collapse"><li><a onclick="showSettings('+numDash+')" href="#">Add Graph</a></li><li><a onclick="deleteAllGraphs('+numDash+')" href="#">Delete all</a></li></ul></li>')
     if(actualDash==0){
       actualDash=1;
@@ -23,22 +90,28 @@ function showSettings(dash){
 
 //************************************** Crear una gráfica del tipo Info chart *************************//
 function showInfoSettings(dash){
-  var keys=getKeysJson('json/scm-static.json').filter(filterKeyURL)
-  $("#settings"+dash).append('<div id="actualMenu"></div>')
-  $("#actualMenu").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column">Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras  </p>');
-  keys.forEach(function(element){
-    $("#actualMenu").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
-  })
+  var keys=getKeysJson('scm-static.json')
+  if(keys=="error"){
+    $("#settings"+dash).append('<div id="actualMenu"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
+    $("#actualMenu").append('<p> Se ha producido un error en la obtencion de datos del fichero de configuracion. No se pueden crar gráficas de este tipo</p>');
+    $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+  }else{
+    keys=keys.filter(filterKeyURL)
+    $("#settings"+dash).append('<div id="actualMenu"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
+    $("#actualMenu").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column">Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras  </p>');
+    keys.forEach(function(element){
+      $("#actualMenu #list").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
+    })
 
-  $("#actualMenu").append('<button onclick="takeDataInfo()" type="button" class="btn btn-xs btn-default">Create</button>')
-  $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+    $("#actualMenu").append('<button onclick="takeDataInfo()" type="button" class="btn btn-xs btn-default">Create</button>')
+    $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+  }
 }
 
 //funcion para recoger los datos para crear la grafica
 function takeDataInfo(numGraph){
   var forma=$("#actualMenu input[type='radio']:checked").attr("value");
   if(forma!=undefined){
-    var data=getDataJson('json/scm-static.json')//DE MOMENTO ME HACE FALTA HASTA QUE DEFINA DE DONDE LO SACO
     var selected = [];
     var forma=$("#actualMenu input[type='radio']:checked").attr("value");
     $("#actualMenu input[type='checkbox']:checked").each(function() {
@@ -69,49 +142,51 @@ function makeGraphInfo(dash,selected,titl,graph){
     var chart = $('#'+graph).highcharts();
     chart.destroy()
   }
-  var data=getDataJson('json/scm-static.json')
-  var series= parserGraphInfo(data,selected);
-  var options={
-            chart:{
-                renderTo:numGraph.toString(),
-                width: 370,
-                height: 160
-            },
+  $.getJSON("json/scm-static.json").success(function(data) {
+    var serie= parserGraphInfo(selected,data);
+    console.log(serie)
+    var options={
+              chart:{
+                  renderTo:numGraph.toString(),
+                  width: 370,
+                  height: 160
+              },
 
-            xAxis: {
-              categories: ["Total"]
-            },
-            title: {
-                text: titl
-            },
-            series: series
-        }
-  var chart= new Highcharts.Chart(options);
-  $("#actualMenu").remove();
+              xAxis: {
+                categories: ["Total"]
+              },
+              title: {
+                  text: titl
+              },
+              series: serie
+          }
+    var chart= new Highcharts.Chart(options);
+    $("#actualMenu").remove();
+  });
 
 }
 
-function parserGraphInfo(data,selected){
-    var selection=[];
-    var dataAux;
-    var arrayAux;
-    selected.forEach(function(element){
-      dataAux=data[element.name];
-      arrayAux=[dataAux]
-      obj={
-          type: element.form,
-          name: element.name,
-          data: arrayAux
-      }
-      selection.push(obj)
-    })
-    return selection;
+function parserGraphInfo(selected,data){
+  var selection=[];
+  selected.forEach(function(element){
+    dataAux=data[element.name];
+    arrayAux=[dataAux]
+    obj={
+      type: element.form,
+      name: element.name,
+      data: arrayAux
+    }
+    selection.push(obj)
+  })
+  
+  console.log(selection[0])
+  return selection
 }
 
 
 function settingsInfoGraph(numGraph){
   var chart = $('#'+numGraph).highcharts();
-  var keys=getKeysJson('json/'+chart.title.textStr+'.json').filter(filterKeyURL)
+  var keys=getKeysJson(chart.title.textStr+'.json').filter(filterKeyURL)
   var auxseries;
   $("#settings"+actualDash).append('<div id="actualMenu"></div>')
   if(chart.series[0].type=="column"){
@@ -146,46 +221,111 @@ function takeDataAging(numGraph){
   var series=[];
   var max=0;
   var title='';
-  if($("#aging").is(':checked')){
-    if($("#actualMenu #agingColor").val()==''){
-      colorbar=($("#actualMenu #agingColor").attr("placeholder"))
+  if($("#aging").is(':checked') && $("#birth").is(":checkbox:not(:checked)")){
+    if(getKeysJson("scm-demographics-aging.json")!="error"){
+      if($("#actualMenu #agingColor").val()==''){
+        colorbar=($("#actualMenu #agingColor").attr("placeholder"))
+      }else{
+        colorbar=$("#actualMenu #agingColor").val()
+      }
+      $.getJSON("json/scm-demographics-aging.json").success(function(data) {
+        var dato=parserDemograph(data)
+        max=data.persons.age.length
+        var objaux={
+              type: "bar",
+              name: "aging",
+              data: dato,
+              color: colorbar
+        }
+        series.push(objaux)
+        title+="scm-demographics-aging"
+        var axisx=createAxisx(max)
+        makeGraphDemograph(actualDash,series,axisx,title,numGraph)
+      })
     }else{
-      colorbar=$("#actualMenu #agingColor").val()
+      alert("Me temo señor que hubo un error en la descarga del fichero seleccionado")
     }
-    var data1=parserDemograph("json/scm-demographics-aging.json")
-    if(max<data1.length){
-      max=data1.length
-    }
-    var objaux={
-          type: "bar",
-          name: "aging",
-          data: data1,
-          color: colorbar
-    }
-    series.push(objaux)
-    title+="scm-demographics-aging"
-  }
-  if($("#birth").is(':checked')){
-   if($("#actualMenu #birthColor").val()==''){
-      colorbar=($("#actualMenu #birthColor").attr("placeholder"))
+  }else if($("#birth").is(':checked') && $("#aging").is(":checkbox:not(:checked)")){
+   if(getKeysJson("scm-demographics-birth.json")!="error"){
+     if($("#actualMenu #birthColor").val()==''){
+        colorbar=($("#actualMenu #birthColor").attr("placeholder"))
+      }else{
+        colorbar=$("#actualMenu #birthColor").val()
+      }
+      $.getJSON("json/scm-demographics-birth.json").success(function(data) {
+        var dato=parserDemograph(data)
+        max=data.persons.age.length
+        
+        var objaux={
+              type: "bar",
+              name: "aging",
+              data: dato,
+              color: colorbar
+        }
+        series.push(objaux)
+        title+="scm-demographics-birth"
+        var axisx=createAxisx(max)
+        makeGraphDemograph(actualDash,series,axisx,title,numGraph)
+      })
     }else{
-      colorbar=$("#actualMenu #birthColor").val()
+      alert("Me temo señor que hubo un error en la descarga del fichero seleccionado")
     }
-    var data2=parserDemograph("json/scm-demographics-birth.json")
-    if(max<data2.length){
-      max=data2.length
+  }else if ($("#birth").is(':checked') && $("#aging").is(':checked')){
+    if((getKeysJson("scm-demographics-aging.json")!="error") || (getKeysJson("scm-demographics-birth.json")!="error")){
+      var graphicAging, graphicBirth;
+      $.when(
+        $.getJSON("json/scm-demographics-aging.json").success(function(data) { 
+            graphicAging = data;
+        }),
+        $.getJSON("json/scm-demographics-birth.json").success(function(data) {
+            graphicBirth = data;
+        })
+      ).then(function() {
+        if(graphicBirth.persons.age.length>=graphicAging.persons.age.length){
+          max=graphicBirth.persons.age.length
+        }else{
+          max=graphicAging.persons.age.length
+        }
+
+        if($("#actualMenu #agingColor").val()==''){
+        colorbar=($("#actualMenu #agingColor").attr("placeholder"))
+        }else{
+          colorbar=$("#actualMenu #agingColor").val()
+        }
+        var dato=parserDemograph(graphicAging)
+        
+        var objaux={
+              type: "bar",
+              name: "aging",
+              data: dato,
+              color: colorbar
+        }
+        series.push(objaux)
+
+        if($("#actualMenu #birthColor").val()==''){
+        colorbar=($("#actualMenu #birthColor").attr("placeholder"))
+        }else{
+          colorbar=$("#actualMenu #birthColor").val()
+        }
+        var dato=parserDemograph(graphicBirth)
+        
+        var objaux={
+              type: "bar",
+              name: "aging",
+              data: dato,
+              color: colorbar
+        }
+        series.push(objaux)
+        title+="scm-demographics-aging scm-demographics-birth"
+        var axisx=createAxisx(max)
+        makeGraphDemograph(actualDash,series,axisx,title,numGraph)
+      })
+    }else{
+      alert("Me temo señor que hubo un error en la descarga de alguno de los ficheros seleccionados")
     }
-    var objaux={
-          type: "bar",
-          name: "birth",
-          data: data2,
-          color: colorbar
-    }
-    series.push(objaux)
-    title+= " scm-demographics-birth"
+  }else{
+    alert("Para crear un tipo de gráfica de edades debe seleccionar una de las opciones anteriores")
   }
-  var axisx=createAxisx(max)
-  makeGraphDemograph(actualDash,series,axisx,title,numGraph)
 }
 
 function makeGraphDemograph(dash,series,axis,titl,graph){
@@ -311,8 +451,7 @@ function createAxisx(max){
   return result
 }
 
-function parserDemograph(path){
-  var data=getDataJson(path)
+function parserDemograph(data){
   var aux=0;
   var result=[];
 
@@ -350,10 +489,10 @@ function settingsDemoGraph(numGraph){
 //************************************** Crear una gráfica del tipo Time series chart *******************//
 //personalizacion de la gráfica desde 0
 function showTimeSettings(dash){
-  var keys=getKeysJson('json/scm-evolutionary.json').filter(filterKeyDate)
-  $("#settings"+dash).append('<div id="actualMenu"></div>')
+  var keys = getKeysJson('scm-evolutionary.json').filter(filterKeyDate)
+  $("#settings"+dash).append('<div id="actualMenu"><div id="list" style="height: 200px; overflow-y: scroll;"></div></div>')
   keys.forEach(function(element){
-    $("#actualMenu").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas    <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>')
+    $("#actualMenu #list").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas    <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>')
   })
   var data=getDataJson('json/scm-evolutionary.json')
   $("#actualMenu").append('From')
@@ -413,8 +552,6 @@ function makeGraphSeries(dash,selected,from,to,titl,graph){
     var chart = $('#'+graph).highcharts();
     chart.destroy()
   }
-  var data=getDataJson('json/scm-evolutionary.json')
-  var series= parserGraph(from,to,data,selected);
   var options={
             chart:{
                 renderTo:graph.toString(),
@@ -452,7 +589,7 @@ function parserGraph(from,to,data,selected){
 function settingsTimeGraph(numGraph){
   var chart = $('#'+numGraph).highcharts();
   var data=getDataJson('json/'+chart.title.textStr+'.json')
-  var keys=getKeysJson('json/'+chart.title.textStr+'.json').filter(filterKeyDate)
+  var keys=getKeysJson(chart.title.textStr+'.json').filter(filterKeyDate)
   var auxseries;
   $("#settings"+actualDash).append('<div id="actualMenu"></div>')
   keys.forEach(function(element){
@@ -528,18 +665,37 @@ function deleteGraph(dash,num){
 
 //**********************************  FUNCIONES DE FILTRADO Y SELECCION DE DATOS ********************////
 //función que obtiene todas las keys de un json
-function getKeysJson(path){
-  var jsonfile = path;
-    var data = jQuery.parseJSON(
-        jQuery.ajax({
-            url: jsonfile, 
-            async: false,
-            dataType: 'json'
-        }).responseText
-    );
-    var keys=Object.keys(data)
-    return keys;
-};
+function getKeysJson(from){
+  var result;
+  allInfo.forEach(function(element){
+    if(from==element.from){
+      result=element.inside
+    }
+  })
+  return result;
+}
+
+//función que encuentra donde está situado un tipo de dato unico sin necesidad de descargarlo
+function findKey(key){
+  var result;
+  allInfo.forEach(function(element){
+    if(element.inside.indexOf(element)){
+      result=element.from
+    }
+  });
+  return result;
+}
+
+//funcion para obtener un dato de toda la info descargada
+function findInfo(path){
+  var result;
+    allInfo.forEach(function(element){
+    if(element.inside.indexOf(element)){
+      result=element;
+    }
+  });
+  return result
+}
 
 //función que filtra eliminando una key concreta para filtrar sin la fecha que es siempre igual
 function filterKeyDate(element){

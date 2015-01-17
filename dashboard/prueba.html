@@ -16,13 +16,15 @@
     <script src="Highcharts/js/highcharts.js"></script>
     <script src="chartmaster/Chart.js"></script>
     <script>
-    	var request="hola";
+    	var request=[];
 		$.getJSON("json/scm-static.json").success(function(data) {
-			console.log(data)
-			console.log(request)
-            request=data;
+			
+            Object.keys(data).forEach(function(element){
+                request.push(element)
+            })
+			
 		});
-        console.log(request)
+       console.log(request)
 		
 	</script>
 </head>
