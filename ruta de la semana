@@ -95,7 +95,10 @@ Jueves 18 a las 10h
 —-Estatico—
 
 +Mejorar interfaz mas visible
--Pensar nuevos cambios para proponer
++Pensar nuevos cambios para proponer
+	Nueva relación entre edades y commits a lo largo del tiempo en una gráfica
+	Intentar crear el draggable y el dropable de gridster
+	Empezar con el menú de guardado y del servidor
 +Reestructuración del código
 
 Martes o Jueves de la siguiente semana
