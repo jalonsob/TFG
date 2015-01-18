@@ -25,7 +25,7 @@ $(document).ready(function() {
             allInfo.push(objaux)
     });
 
-    $.getJSON("json/scmonary.json").success(function(data) {
+    $.getJSON("json/scm-evolutionary.json").success(function(data) {
             var objaux={
               from: "scm-evolutionary.json",
               inside: []
