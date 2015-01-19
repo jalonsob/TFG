@@ -78,10 +78,11 @@ $(document).ready(function() {
 
   $("#addDash").click(function(){
     numDash+=1;
-    $(".container-fluid").append('<div id="settings'+(numDash)+'"class="panel-body" hidden><ul><button onclick="showTimeSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="showAgingSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="showInfoSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Info widget</button></ul></div><div id="dash'+(numDash)+'" class="gridster" style="background:#A0CDE5"><ul></ul></div> ')
+    var color=getRandomColor()
+    $(".container-fluid").append('<div id="settings'+(numDash)+'"class="panel-body" hidden><ul><button onclick="showTimeSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="showAgingSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="showInfoSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Info widget</button></ul></div><div id="dash'+(numDash)+'" class="gridster ready" style="background-color:'+color+'"><ul></ul></div> ')
     $(".gridster ul").gridster({
       widget_margins: [6, 6],
-      widget_base_dimensions: [400, 230]
+      widget_base_dimensions: [10, 10]
     }).data('gridster');
     $("#dashboards").append('<li onclick="showDash('+numDash+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollDash'+numDash+'"><i class="fa fa-fw fa-edit"></i> Dashboard '+numDash+' <i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollDash'+numDash+'" class="collapse"><li><a onclick="showSettings('+numDash+')" href="#">Add Graph</a></li><li><a onclick="deleteAllGraphs('+numDash+')" href="#">Delete all</a></li></ul></li>')
     if(actualDash==0){
@@ -146,7 +147,8 @@ function makeGraphInfo(dash,selected,titl,graph){
     graph=numGraph;
     var inDash= "dash"+dash.toString()
     var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary"><div class="panel-heading"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 1, 1);
+    color=($("#dash"+dash).css('background-color'))
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 17, 12);
   }else{
     var chart = $('#'+graph).highcharts();
     chart.destroy()
@@ -157,8 +159,8 @@ function makeGraphInfo(dash,selected,titl,graph){
     var options={
               chart:{
                   renderTo:numGraph.toString(),
-                  width: 370,
-                  height: 160
+                  width: 340,
+                  height: 180
               },
 
               xAxis: {
@@ -239,16 +241,17 @@ function takeDataAging(numGraph){
       }
       $.getJSON("json/scm-demographics-aging.json").success(function(data) {
         var dato=parserDemograph(data)
-        max=data.persons.age.length
+        max=dato.length
         var objaux={
               type: "bar",
               name: "aging",
-              data: dato,
+              data: dato.reverse(),
               color: colorbar
         }
         series.push(objaux)
         title+="scm-demographics-aging"
-        var axisx=createAxisx(max)
+        var axisx=createAxisx(max).reverse()
+        
         makeGraphDemograph(actualDash,series,axisx,title,numGraph)
       })
     }else{
@@ -263,17 +266,17 @@ function takeDataAging(numGraph){
       }
       $.getJSON("json/scm-demographics-birth.json").success(function(data) {
         var dato=parserDemograph(data)
-        max=data.persons.age.length
+        max=dato.length
         
         var objaux={
               type: "bar",
               name: "aging",
-              data: dato,
+              data: dato.reverse(),
               color: colorbar
         }
         series.push(objaux)
         title+="scm-demographics-birth"
-        var axisx=createAxisx(max)
+        var axisx=createAxisx(max).reverse()
         makeGraphDemograph(actualDash,series,axisx,title,numGraph)
       })
     }else{
@@ -290,10 +293,10 @@ function takeDataAging(numGraph){
             graphicBirth = data;
         })
       ).then(function() {
-        if(graphicBirth.persons.age.length>=graphicAging.persons.age.length){
-          max=graphicBirth.persons.age.length
+        if(parserDemograph(graphicBirth).length>=parserDemograph(graphicAging).length){
+          max=parserDemograph(graphicBirth).length
         }else{
-          max=graphicAging.persons.age.length
+          max=parserDemograph(graphicAging).length
         }
 
         if($("#actualMenu #agingColor").val()==''){
@@ -301,7 +304,7 @@ function takeDataAging(numGraph){
         }else{
           colorbar=$("#actualMenu #agingColor").val()
         }
-        var dato=parserDemograph(graphicAging)
+        var dato=parserDemograph(graphicAging).reverse()
         
         var objaux={
               type: "bar",
@@ -316,7 +319,7 @@ function takeDataAging(numGraph){
         }else{
           colorbar=$("#actualMenu #birthColor").val()
         }
-        var dato=parserDemograph(graphicBirth)
+        var dato=parserDemograph(graphicBirth).reverse();
         
         var objaux={
               type: "bar",
@@ -326,7 +329,7 @@ function takeDataAging(numGraph){
         }
         series.push(objaux)
         title+="scm-demographics-aging scm-demographics-birth"
-        var axisx=createAxisx(max)
+        var axisx=createAxisx(max).reverse();
         makeGraphDemograph(actualDash,series,axisx,title,numGraph)
       })
     }else{
@@ -342,8 +345,9 @@ function makeGraphDemograph(dash,series,axis,titl,graph){
     numGraph+=1;
     graph=numGraph
     var inDash= "dash"+dash.toString()
+    color=($("#dash"+dash).css('background-color'))
     var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary"><div class="panel-heading"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 2, 2);
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 23, 22);
   }else{
     var chart = $('#'+graph).highcharts();
     chart.destroy()
@@ -351,8 +355,8 @@ function makeGraphDemograph(dash,series,axis,titl,graph){
   var options={
             chart:{
                 renderTo:graph.toString(),
-                width: 700,
-                height: 400
+                width: 460,
+                height: 395
             },
 
             xAxis: {
@@ -454,7 +458,7 @@ function parseLookInfo(from,to,who){
 
 function createAxisx(max){
   var result=[];
-  for (i = 0; i <= max; i++) {
+  for (i = 0; i < max; i++) {
     result[i]= (i*181)+"-"+((i+1)*181)
   }
   return result
@@ -564,25 +568,65 @@ function makeGraphSeries(dash,selected,from,to,titl,graph){
     graph=numGraph;
     var inDash= "dash"+dash.toString()
     var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary"><div class="panel-heading"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 2, 2);
+    color=($("#dash"+dash).css('background-color'))
+    if((to-from)<=12 && (to-from)>8){
+      gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 23, 22);
+    }else if((to-from)<8){
+      gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 17, 12);
+    }else{
+      gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 22);
+
+    }
   }else{
     var chart = $('#'+graph).highcharts();
     chart.destroy()
   }
-  var options={
-            chart:{
-                renderTo:graph.toString(),
-                width: 700,
-                height: 400
-            },
-            xAxis: {
-              categories: data.date.slice(from,to)
-            },
-            title: {
-                text: titl
-            },
-            series: series
-        }
+  if((to-from)<=12 && (to-from)>8){
+    var options={
+              chart:{
+                  renderTo:graph.toString(),
+                  width: 400,
+                  height: 400
+              },
+              xAxis: {
+                categories: data.date.slice(from,to)
+              },
+              title: {
+                  text: titl
+              },
+              series: series
+          }
+  }else if((to-from)<8){
+    var options={
+        chart:{
+            renderTo:graph.toString(),
+            width: 340,
+            height: 185
+        },
+        xAxis: {
+          categories: data.date.slice(from,to)
+        },
+        title: {
+            text: titl
+        },
+        series: series
+    }
+  }else{
+    var options={
+        chart:{
+            renderTo:graph.toString(),
+            width: 700,
+            height: 400
+        },
+        xAxis: {
+          categories: data.date.slice(from,to)
+        },
+        title: {
+            text: titl
+        },
+        series: series
+    }
+  }
   var chart= new Highcharts.Chart(options);
   $("#actualMenu").remove();
 }
@@ -723,7 +767,11 @@ function filterKeyURL(element){
   return element != "url";
 }
 
-//funcion para obtener todos los nombres de los elementos de un chart
+//funcion para obtener un color ramdon
+function getRandomColor() {
+    var colors= ["#EBA550","#95EB50","#5095EB","#745CDF","#DE5169","#9DE0DF","#E0E060"]
+    return colors[Math.floor(Math.random() * 7)]
+}
 
 //función para saber si un elemento está dentro e un chart
 function existLabel(chart,label){
