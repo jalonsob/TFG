@@ -81,6 +81,15 @@ $(document).ready(function() {
       
     })*/
     
+    $.ajax({
+      type: "POST",
+      url: "/saveall/",
+      data: "tonteria",
+      success: function(){
+        alert("mola!")
+      }
+    });
+
 
   })
 
