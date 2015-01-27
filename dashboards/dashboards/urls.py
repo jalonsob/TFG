@@ -8,8 +8,9 @@ urlpatterns = patterns('',
 
     url(r'^admin/', include(admin.site.urls)),
     url(r'static/(?P<path>.*)$','django.views.static.serve',{'document_root':'static'}),
-    url(r'^$','dinamic.views.home'),
+    url(r'^\d*$','dinamic.views.home'),
     url(r'saveall/$','dinamic.views.saveall'),
+    url(r'loadall/$','dinamic.views.loadall'),
     url(r'templates/(?P<path>.*)$','django.views.static.serve',{'document_root':'templates'}),
 
 )

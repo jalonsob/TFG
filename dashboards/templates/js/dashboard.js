@@ -5,7 +5,11 @@ var allInfo=[];
 var configuration={};
 var takeinfo={}
 $(document).ready(function() {
-
+    alert(document.URL);
+    var stateObject = {};
+    var newUrl = "http://localhost:8000/123123123";
+    history.pushState(stateObject,"",newUrl);
+    alert(document.URL);
     //En esta zona obtengo todas las keys de manera rápida nada más empezar el programa, de esta forma
     //compruebo en un futuro si existen errores a la hora de obtenerlo y se que clase de grafica puedo pintar
     //de paso me ahorro unos cuantos getjson del futuro cuando necesite los datos a pintar
@@ -69,7 +73,10 @@ $(document).ready(function() {
   $("#save").click(function(){
 
     
-   /* var gridster = $("#dash1 ul").gridster().data('gridster');
+   /* 
+    como renderizar todas las graficas
+
+    var gridster = $("#dash1 ul").gridster().data('gridster');
     var gridata=gridster.serialize()
     var content= $("#"+gridata[0].id)*/
 
@@ -80,7 +87,12 @@ $(document).ready(function() {
     chart.series.forEach(function(i, serie){
       
     })*/
-    
+
+
+    /*
+
+    Como hacer un post
+
     $.ajax({
       type: "POST",
       url: "/saveall/",
@@ -88,7 +100,33 @@ $(document).ready(function() {
       success: function(){
         alert("mola!")
       }
+    });*/
+
+    /*
+
+    Como conseguir un json en string y al reves
+
+    var obj = {
+      name: 'myObj'
+    };
+
+    console.log(JSON.stringify(obj));
+    console.log(JSON.parse(JSON.stringify(obj)));
+    */
+
+    /*
+
+    
+
+    $.ajax({
+      type: "GET",
+      url: "/loadall/",
+      data: "tonteria",
+      success: function(data){
+        alert(data)
+      }
     });
+  */
 
 
   })
@@ -435,30 +473,78 @@ function makeAutorsGraph(categoria,title){
   var aux= categoria.split("-")
   var from= parseInt(aux[0])
   var to= parseInt(aux[1])
+  if(jsons.length==2){
+      var graphicAging, graphicBirth;
+      var whereaging=takeinfo.aging;
+      var wherebirth=takeinfo.birth;
+      $.when(
+        $.getJSON("../templates/json/"+whereaging).success(function(data) { 
+            graphicAging = data;
+        }),
+        $.getJSON("../templates/json/"+wherebirth).success(function(data) {
+            graphicBirth = data;
+        })
+      ).then(function() {
+        var series= parseLookInfo(from,to,graphicAging)
+        series=parseLookInfo(from,to,graphicBirth,series)
+        numGraph+=1;
+        var inDash= "dash"+actualDash.toString()
+        color=($("#dash"+actualDash).css('background-color'))
+        var gridster = $("#"+inDash+" ul").gridster().data('gridster');
+        gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 24);
 
-  var series= parseLookInfo(from,to,title)
-  numGraph+=1;
-  var inDash= "dash"+actualDash.toString()
-  color=($("#dash"+actualDash).css('background-color'))
-  var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-  gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 24);
+        var options={
+                  chart:{
+                      renderTo:numGraph.toString(),
+                      width: 700,
+                      height: 400
+                  },
 
-  var options={
-            chart:{
-                renderTo:numGraph.toString(),
-                width: 700,
-                height: 400
-            },
+                  xAxis: {
+                    categories: ["Age"]
+                  },
+                  title: {
+                      text: "Usuarios entre "+from+"-"+to+" de "+title
+                  },
+                  series: parserAutorsData(series)
+        }
+        chart= new Highcharts.Chart(options);
+      })
+  }else{
+    var where= "../templates/json/"+title+".json"
+    $.getJSON(where).success(function(data){
+        var series= parseLookInfo(from,to,data)
+        numGraph+=1;
+        var inDash= "dash"+actualDash.toString()
+        color=($("#dash"+actualDash).css('background-color'))
+        var gridster = $("#"+inDash+" ul").gridster().data('gridster');
+        gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 24);
 
-            xAxis: {
-              categories: ["Age"]
-            },
-            title: {
-                text: "Usuarios entre "+from+"-"+to+" de "+title
-            },
-            series: parserAutorsData(series)
+        var options={
+                  chart:{
+                      renderTo:numGraph.toString(),
+                      width: 700,
+                      height: 400
+                  },
+
+                  xAxis: {
+                    categories: ["Age"]
+                  },
+                  title: {
+                      text: "Usuarios entre "+from+"-"+to+" de "+title
+                  },
+                  series: parserAutorsData(series)
+        }
+        chart= new Highcharts.Chart(options);
+      }).error(function(){
+        numGraph+=1;
+        var inDash= "dash"+actualDash.toString()
+        color=($("#dash"+actualDash).css('background-color'))
+        var gridster = $("#"+inDash+" ul").gridster().data('gridster');
+        gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div> Hubo un error para descargar el json correspondiente</div>', 10, 10);
+
+      })
   }
-  chart= new Highcharts.Chart(options);
 }
 
 function parserAutorsData(series){
@@ -474,30 +560,27 @@ function parserAutorsData(series){
   return result
   }
 
-function parseLookInfo(from,to,who){
-  var result={
-    xAxis: [],
-    dato: []
+function parseLookInfo(from,to,data,aux){
+  if(aux==undefined){
+    var result={
+      xAxis: [],
+      dato: []
+    }
+  }else{
+    var result=aux;
+    
   }
-  var jsons= who.split(" ")
-  var datos;
-  var i=0
-  alert(jsons)
-  jsons.forEach(function (element){
-      var path= "json/"+element+".json"
-      datos=getDataJson(path)
-
-      datos.persons.age.forEach(function(element){
-        aux=Math.floor(element/181)
-        if(aux>=Math.floor(from/181) && aux<Math.floor(to/181)){
-          result.dato.push(element)
-          result.xAxis.push(datos.persons.name[i])
-               
-        }
-        i++
-      })
-      
+  var i=0;
+  data.persons.age.forEach(function(element){
+    aux=Math.floor(element/181)
+    if(aux>=Math.floor(from/181) && aux<Math.floor(to/181)){
+      result.dato.push(element)
+      result.xAxis.push(data.persons.name[i])
+           
+    }
+    i++
   })
+
   return result
 }
 
