@@ -5,16 +5,11 @@ var allInfo=[];
 var configuration={};
 var takeinfo={}
 $(document).ready(function() {
-    alert(document.URL);
-    var stateObject = {};
-    var newUrl = "http://localhost:8000/123123123";
-    history.pushState(stateObject,"",newUrl);
-    alert(document.URL);
     //En esta zona obtengo todas las keys de manera rápida nada más empezar el programa, de esta forma
     //compruebo en un futuro si existen errores a la hora de obtenerlo y se que clase de grafica puedo pintar
     //de paso me ahorro unos cuantos getjson del futuro cuando necesite los datos a pintar
 
-    $.getJSON("../templates/json/configurationfile.json").success(function(data){
+    $.getJSON("templates/json/configurationfile.json").success(function(data){
       var objaux;
       Object.keys(data).forEach(function(element){
           objaux={
@@ -25,7 +20,7 @@ $(document).ready(function() {
       })
     })
 
-    $.getJSON("../templates/json/referenceinfo.json").success(function(data){
+    $.getJSON("templates/json/referenceinfo.json").success(function(data){
       var objaux;
       Object.keys(data).forEach(function(element){
           objaux={
@@ -36,57 +31,70 @@ $(document).ready(function() {
       })
     })
 
-    $.getJSON("../templates/json/scm-demographics-aging.json").success(function(data) {
-            var objaux={
-              from: "aging",
-              inside: []
-            }
-            Object.keys(data.persons).forEach(function(element){
-                objaux.inside.push(element)
-            })
-            allInfo.push(objaux)
-    }).error(function(){
-      var objaux={
-              from: "scm-demographics-aging.json",
-              inside: "error"
-            }
-            allInfo.push(objaux)
-    });
-    $.getJSON("../templates/json/scm-demographics-birth.json").success(function(data) {
-            var objaux={
-              from: "birth",
-              inside: []
-            }
-            Object.keys(data.persons).forEach(function(element){
-                objaux.inside.push(element)
-            })
-            allInfo.push(objaux)
-    }).error(function(){
-      var objaux={
-              from: "scm-demographics-birth.json",
-              inside: "error"
-            }
-            allInfo.push(objaux)
-    });
-
 
   $("#save").click(function(){
 
-    
-   /* 
-    como renderizar todas las graficas
-
-    var gridster = $("#dash1 ul").gridster().data('gridster');
-    var gridata=gridster.serialize()
-    var content= $("#"+gridata[0].id)*/
-
-    /*
-    numGraph=1
-    var chart = $('#1').highcharts();
-    console.log(chart.title.textStr)
-    chart.series.forEach(function(i, serie){
+    var finalObj={}
+ 
+    if(numDash>0){
       
-    })*/
+      for (i=1; i<=numDash;i++){
+       
+        if($("#dash"+i+" ul")){
+          finalObj["#dash"+i]=[]
+          var gridster = $("#dash"+i+" ul").gridster().data('gridster');
+          var gridata=gridster.serialize()
+          for(j=0; j<gridata.length; j++){
+            content= $("#"+gridata[j].id)
+            var chart = $("#"+content.selector.split("#graph")[1]).highcharts()
+            var objaux={
+              graph: content.selector.split("#graph")[1],
+              xAxis:chart.series[0].xAxis.categories,
+              title: chart.title.textStr,
+              series: []
+            }
+            chart.series.forEach(function(serie){
+              var name= serie.name
+              var type= serie.options.type
+              if(serie.options.color==undefined){
+                var color=""
+              }else{
+                var color= serie.options.color
+              }
+              var objaux2={
+                name: name,
+                type: type,
+                color: color
+              }
+              objaux.series.push(objaux2)
+            })
+            finalObj["#dash"+i].push(objaux)
+          }
+        }
+      }
+
+      if(document.URL.split("http://localhost:8000/")[1].length!=2){
+        var id= Math.floor((Math.random() * 1000000000000000) + 1)
+        var envio={
+          N: id,
+          C: finalObj
+        }
+        var data = {
+          foo: 'bar',
+          faa: 'asdf'
+        }
+        $.ajax({
+          type: "POST",
+          url: "/db/",
+          data: JSON.stringify(envio),
+          success: function(){
+            alert("mola!")
+          }
+        });
+        window.history.replaceState("object or string", "Title", "db/"+id);
+      }
+
+    }
 
 
     /*
@@ -202,7 +210,7 @@ function takeDataInfo(numGraph){
 
 function makeGraphInfo(dash,selected,graph){
   var where= takeinfo.static
-  $.getJSON("../templates/json/"+where).success(function(data) {
+  $.getJSON("templates/json/"+where).success(function(data) {
   if(isNaN(graph)){
     numGraph+=1;
     graph=numGraph;
@@ -333,7 +341,7 @@ function takeDataAging(numGraph){
         colorbar=$("#actualMenu #birthColor").val()
       }
       var where= takeinfo.birth
-      $.getJSON("../templates/json/"+where).success(function(data) {
+      $.getJSON("templates/json/"+where).success(function(data) {
         var dato=parserDemograph(data)
         max=dato.length
         
@@ -358,10 +366,10 @@ function takeDataAging(numGraph){
       var whereaging=takeinfo.aging;
       var wherebirth=takeinfo.birth;
       $.when(
-        $.getJSON("../templates/json/"+whereaging).success(function(data) { 
+        $.getJSON("templates/json/"+whereaging).success(function(data) { 
             graphicAging = data;
         }),
-        $.getJSON("../templates/json/"+wherebirth).success(function(data) {
+        $.getJSON("templates/json/"+wherebirth).success(function(data) {
             graphicBirth = data;
         })
       ).then(function() {
@@ -478,10 +486,10 @@ function makeAutorsGraph(categoria,title){
       var whereaging=takeinfo.aging;
       var wherebirth=takeinfo.birth;
       $.when(
-        $.getJSON("../templates/json/"+whereaging).success(function(data) { 
+        $.getJSON("templates/json/"+whereaging).success(function(data) { 
             graphicAging = data;
         }),
-        $.getJSON("../templates/json/"+wherebirth).success(function(data) {
+        $.getJSON("templates/json/"+wherebirth).success(function(data) {
             graphicBirth = data;
         })
       ).then(function() {
@@ -511,7 +519,7 @@ function makeAutorsGraph(categoria,title){
         chart= new Highcharts.Chart(options);
       })
   }else{
-    var where= "../templates/json/"+title+".json"
+    var where= "templates/json/"+title+".json"
     $.getJSON(where).success(function(data){
         var series= parseLookInfo(from,to,data)
         numGraph+=1;
@@ -679,7 +687,7 @@ function deleteCreation(){
 //Creamos la gráfica correspondiente al tipo seleccionado
 function makeGraphSeries(dash,selected,from,to,graph){
   var where= takeinfo.evolutionary
-  $.getJSON('../templates/json/'+where).success(function(data){
+  $.getJSON('templates/json/'+where).success(function(data){
     var series= parserGraph(from,to,data,selected);
     if(isNaN(graph)){
       numGraph+=1;

@@ -1,4 +1,4 @@
 from django.contrib import admin
-from models import P
+from models import Plantilla
 # Register your models here.
-admin.site.register(P)
+admin.site.register(Plantilla)
