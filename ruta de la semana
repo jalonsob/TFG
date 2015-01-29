@@ -2,6 +2,7 @@
 -: sin hacer
 —-: mirado y sin hacer
 +: hecho
+++: extra/semimencionado hecho
 *: notas especiales
 
 bibliotecas de visualización de datos
@@ -100,5 +101,26 @@ Jueves 18 a las 10h
 	Intentar crear el draggable y el dropable de gridster
 	Empezar con el menú de guardado y del servidor
 +Reestructuración del código
+++Mover un widget de un gridster a otro
 
 Martes o Jueves de la siguiente semana
+
+—————————————
+
+Martes a las 11:30
+
+- Google drive explorar.
++ Servidor django para guardar las cosas
+- Probar a guardar en github
++ Guardar las métricas de cada gráfica
+
+—————————
+
+Hablar con Alicia Nieto en biblioteca
+las chicas de investigación Andrea y Gema Según se sube a la segunda planta el segundo despacho de la izquierda
+
++Todos los ficheros estáticos los meto en /, mira la hoja, cambia las urls
++cambiar el “..” del javascript
+-Crear todas las nuevas url de peticiones db
+
+Martes a las 10:00
