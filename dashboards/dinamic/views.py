@@ -16,12 +16,25 @@ def totalList(request):
 		d=json.loads(request.body)
 		T_Plantilla= Plantilla(n=d['N'],json=json.dumps(d['C']))
 		T_Plantilla.save()
+		return HttpResponse("Su dashboard ha sido creado")
+	elif request.method=='GET':
+		Plantillas = Plantilla.objects.all()
+		response=''
+		for x in Plantillas :
+			if response=='':
+				response = response+ str(x.n)
+			else:
+				response = response+","+str(x.n)
+		return HttpResponse(response)
 
+@csrf_exempt
 def loadall(request):
-	# asi es como cojo el contenido de lo que me piden
-	print request.body
-	# asi es como e responde
-	return HttpResponse("funciona el db/324")
-	# asi es como se saca todo
+	if request.method== 'PUT':
+		d=json.loads(request.body)
+		T_Plantilla= Plantilla.objects.get(n=d['N'])
+		T_Plantilla.json=json.dumps(d['C'])
+		T_Plantilla.save()
+		return HttpResponse("Plantilla guardada satisfactoriamente")
+		
 	
 	

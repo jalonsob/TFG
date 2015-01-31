@@ -31,6 +31,10 @@ $(document).ready(function() {
       })
     })
 
+  $("#pruebas").click(function(){
+    alert("hola")
+  })
+
 
   $("#save").click(function(){
 
@@ -72,8 +76,7 @@ $(document).ready(function() {
           }
         }
       }
-
-      if(document.URL.split("http://localhost:8000/")[1].length!=2){
+      if(document.URL.split("http://localhost:8000/#").length==2){
         var id= Math.floor((Math.random() * 1000000000000000) + 1)
         var envio={
           N: id,
@@ -87,28 +90,27 @@ $(document).ready(function() {
           type: "POST",
           url: "/db/",
           data: JSON.stringify(envio),
-          success: function(){
-            alert("mola!")
+          success: function(data){
+            alert(data)
           }
         });
-        window.history.replaceState("object or string", "Title", "db/"+id);
+        window.history.replaceState("object or string", "Title", id);
+      }else{
+        var envio={
+          N: document.URL.split("http://localhost:8000/")[1].split("#")[0],
+          C: finalObj
+        }
+        $.ajax({
+          type: "PUT",
+          url: "/db/"+document.URL.split("http://localhost:8000/")[1].split("#")[0].toString(),
+          data: JSON.stringify(envio),
+          success: function(data){
+            alert(data)
+          }
+        });
       }
 
     }
-
-
-    /*
-
-    Como hacer un post
-
-    $.ajax({
-      type: "POST",
-      url: "/saveall/",
-      data: "tonteria",
-      success: function(){
-        alert("mola!")
-      }
-    });*/
 
     /*
 
@@ -121,21 +123,6 @@ $(document).ready(function() {
     console.log(JSON.stringify(obj));
     console.log(JSON.parse(JSON.stringify(obj)));
     */
-
-    /*
-
-    
-
-    $.ajax({
-      type: "GET",
-      url: "/loadall/",
-      data: "tonteria",
-      success: function(data){
-        alert(data)
-      }
-    });
-  */
-
 
   })
 
