@@ -31,6 +31,122 @@ $(document).ready(function() {
       })
     })
 
+  if(document.URL.split("http://localhost:8000/")[1]!=''){
+    var N= document.URL.split("http://localhost:8000/")[1]
+    alert(N)
+    $.ajax({
+      type: "GET",
+      url: "/db/"+N,
+      data: N.toString(),
+      success: function(data){
+
+        Object.keys(JSON.parse(data)).forEach(function(element){
+          DashCreation()
+        })
+
+        Object.keys(JSON.parse(data)).forEach(function(element){
+
+          var dataJson=JSON.parse(data);
+
+          actualDash= parseInt(element.split("#dash"))
+
+          dataJson[element].forEach(function(x){
+            var graph=parseInt(x.graph);
+            var inDash= element.split("#")[1]
+            alert(graph)
+            var gridster = $("#"+inDash+" ul").gridster().data('gridster');
+            color=($("#"+inDash).css('background-color'))
+
+            if(numGraph<graph){
+              numGraph=graph
+            }
+
+            console.log("Obtengo el titulo, y de donde leo: "+x.title)
+
+
+            if(x.title.split(" ").length==2){
+              console.log("---TENGO QUE OBTENER 2 GETJSON, es de tipo edades--")
+              console.log("La gráfica es la numero: "+x.graph)
+              console.log("Sus categorias son: ")
+              x.series.forEach(function(y){
+                console.log("Name: "+y.name)
+                console.log("Type: "+y.type)
+
+              })
+            }else{
+
+              if(x.title==takeinfo.aging || x.title==takeinfo.birth){
+
+                console.log("Es de tipo edades, cuidado")
+
+              }else{
+
+                console.log("ES DE TIPO TIMES O INFO, ME DA IGUAL COMO SE CONFIGURE")
+                var options={
+                chart:{
+                    renderTo: x.graph,
+                      width: 100,
+                      height: 100
+                    },
+                    xAxis: {
+                      categories: []
+                    },
+                    title: {
+                        text: ""
+                    },
+                    series: []
+                }
+
+                var selected = [];
+
+                x.series.forEach(function(y){
+                  var objaux = {
+                    name: y.name,
+                    form: y.type,
+                  }
+                  selected.push(objaux)
+
+                })
+                console.log(selected)
+                if(x.title==takeinfo.evolutionary){
+                  alert("evolutionary")
+                  from=configuration.time.indexOf(x.xAxis[0])
+                  to=configuration.time.indexOf(x.xAxis[x.xAxis.length-1])
+                  console.log(to)
+                  console.log(from)
+                  if((to-from)<=12 && (to-from)>8){
+                    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 23, 22);
+
+                  }else if((to-from)<8){
+                    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 17, 12);
+
+
+                  }else{
+                    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 34, 22);
+
+                  }
+
+                  var chart= new Highcharts.Chart(options);
+                  makeGraphSeries(actualDash,selected,from,to,graph)
+
+                }else if(x.title==takeinfo.static){
+               
+                  gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 17, 12);
+                  var chart= new Highcharts.Chart(options);
+                  makeGraphInfo(actualDash,selected,graph)
+                
+
+                }
+              }
+            }
+            $(element).hide();
+            $("#settings"+actualDash).slideUp("slow");
+          })
+       })
+      }
+    });
+  }
+
   $("#pruebas").click(function(){
     alert("hola")
   })
@@ -68,7 +184,6 @@ $(document).ready(function() {
               var objaux2={
                 name: name,
                 type: type,
-                color: color
               }
               objaux.series.push(objaux2)
             })
@@ -112,42 +227,11 @@ $(document).ready(function() {
 
     }
 
-    /*
-
-    Como conseguir un json en string y al reves
-
-    var obj = {
-      name: 'myObj'
-    };
-
-    console.log(JSON.stringify(obj));
-    console.log(JSON.parse(JSON.stringify(obj)));
-    */
-
   })
 
 
   $("#addDash").click(function(){
-    numDash+=1;
-    var color=getRandomColor()
-    $(".container-fluid").append('<div id="settings'+(numDash)+'"class="panel-body" hidden><ul><button onclick="showTimeSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="showAgingSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="showInfoSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Info widget</button></ul></div><div id="dash'+(numDash)+'" class="gridster ready" style="background-color:'+color+'"><ul></ul></div> ')
-    $(".gridster ul").gridster({
-      widget_margins: [6, 6],
-      widget_base_dimensions: [10, 10],
-      serialize_params: function($w, wgd) { 
-          return { 
-                 id: $($w).attr('id'), 
-                 col: wgd.col, 
-                 row: wgd.row, 
-                 size_x: wgd.size_x, 
-                 size_y: wgd.size_y 
-          };
-      }
-    }).data('gridster');
-    $("#dashboards").append('<li onclick="showDash('+numDash+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollDash'+numDash+'"><i class="fa fa-fw fa-edit"></i> Dashboard '+numDash+' <i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollDash'+numDash+'" class="collapse"><li><a onclick="showSettings('+numDash+')" href="#">Add Graph</a></li><li><a onclick="deleteAllGraphs('+numDash+')" href="#">Delete all</a></li></ul></li>')
-    if(actualDash==0){
-      actualDash=1;
-    }
+    DashCreation()
   })
 
 });
@@ -714,7 +798,7 @@ function makeGraphSeries(dash,selected,from,to,graph){
                     height: 400
                 },
                 xAxis: {
-                  categories: data.date.slice(from,to)
+                  categories: data.date.slice(from,to+1)
                 },
                 title: {
                     text: where
@@ -729,7 +813,7 @@ function makeGraphSeries(dash,selected,from,to,graph){
               height: 185
           },
           xAxis: {
-            categories: data.date.slice(from,to)
+            categories: data.date.slice(from,to+1)
           },
           title: {
               text: where
@@ -744,7 +828,7 @@ function makeGraphSeries(dash,selected,from,to,graph){
               height: 400
           },
           xAxis: {
-            categories: data.date.slice(from,to)
+            categories: data.date.slice(from,to+1)
           },
           title: {
               text: where
@@ -768,7 +852,7 @@ function parserGraph(from,to,data,selected){
     var selection=[];
     var dataAux;
     selected.forEach(function(element){
-      dataAux=data[element.name].slice(from,to)
+      dataAux=data[element.name].slice(from,to+1)
       obj={
           type: element.form,
           name: element.name,
@@ -834,6 +918,8 @@ function showDash(dash){
     $("#settings"+actualDash).slideUp("slow");
     $("#actualMenu").remove();
     $("#dash"+dash).slideDown("slow");
+    $("#settings"+dash).slideDown("slow");
+
     actualDash=dash;
   }
 
@@ -937,3 +1023,26 @@ function getDataJson(path){
         );
         return data;
     };
+
+function DashCreation(){
+  numDash+=1;
+  var color=getRandomColor()
+  $(".container-fluid").append('<div id="settings'+(numDash)+'"class="panel-body" hidden><ul><button onclick="showTimeSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="showAgingSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="showInfoSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Info widget</button></ul></div><div id="dash'+(numDash)+'" class="gridster ready" style="background-color:'+color+'"><ul></ul></div> ')
+  $(".gridster ul").gridster({
+    widget_margins: [6, 6],
+    widget_base_dimensions: [10, 10],
+    serialize_params: function($w, wgd) { 
+        return { 
+               id: $($w).attr('id'), 
+               col: wgd.col, 
+               row: wgd.row, 
+               size_x: wgd.size_x, 
+               size_y: wgd.size_y 
+        };
+    }
+  }).data('gridster');
+  $("#dashboards").append('<li onclick="showDash('+numDash+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollDash'+numDash+'"><i class="fa fa-fw fa-edit"></i> Dashboard '+numDash+' <i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollDash'+numDash+'" class="collapse"><li><a onclick="showSettings('+numDash+')" href="#">Add Graph</a></li><li><a onclick="deleteAllGraphs('+numDash+')" href="#">Delete all</a></li></ul></li>')
+  if(actualDash==0){
+    actualDash=1;
+  }
+}

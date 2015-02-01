@@ -28,13 +28,17 @@ def totalList(request):
 		return HttpResponse(response)
 
 @csrf_exempt
-def loadall(request):
+def actualizeDash(request):
 	if request.method== 'PUT':
 		d=json.loads(request.body)
 		T_Plantilla= Plantilla.objects.get(n=d['N'])
 		T_Plantilla.json=json.dumps(d['C'])
 		T_Plantilla.save()
 		return HttpResponse("Plantilla guardada satisfactoriamente")
+	elif request.method== 'GET':
+		d = request.path.split("/db/")[1]
+		T_Plantilla= Plantilla.objects.get(n=d)
+		return HttpResponse(T_Plantilla.json)
 		
 	
 	
