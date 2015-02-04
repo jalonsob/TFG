@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <script src="js/jquery.js"></script>
+
+    <script src="js/dashboard.js"></script>
+        <!--Gridster-->
+    <script src="js/jquery.gridster.js"></script>
+
+
+    <!-- Bootstrap Core JavaScript -->
+    <script src="js/bootstrap.min.js"></script>
+
+    <!-- HIGTH CHARTS -->
+
+    <script src="Highcharts/js/highcharts.js"></script>
+    <script src="chartmaster/Chart.js"></script>
+    <script>
+    	var request=[];
+		$.getJSON("json/scm-static.json").success(function(data) {
+			
+            Object.keys(data).forEach(function(element){
+                request.push(element)
+            })
+			
+		});
+       console.log(request)
+		
+	</script>
+</head>
+<body>
+
+ 
+</body>
+</html>

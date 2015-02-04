@@ -1,12 +1,104 @@
 var actualDash=0;
 var numDash=0;
 var numGraph=0;
-
+var allInfo=[];
+var configuration={};
+var takeinfo={}
 $(document).ready(function() {
+
+    //En esta zona obtengo todas las keys de manera rápida nada más empezar el programa, de esta forma
+    //compruebo en un futuro si existen errores a la hora de obtenerlo y se que clase de grafica puedo pintar
+    //de paso me ahorro unos cuantos getjson del futuro cuando necesite los datos a pintar
+
+    $.getJSON("json/configurationfile.json").success(function(data){
+      var objaux;
+      Object.keys(data).forEach(function(element){
+          objaux={
+              from: element,
+              inside: data[element]
+          }
+          configuration[element]=data[element]
+      })
+    })
+
+    $.getJSON("json/referenceinfo.json").success(function(data){
+      var objaux;
+      Object.keys(data).forEach(function(element){
+          objaux={
+              from: element,
+              inside: data[element]
+          }
+          takeinfo[element]=data[element]
+      })
+    })
+
+    $.getJSON("json/scm-demographics-aging.json").success(function(data) {
+            var objaux={
+              from: "aging",
+              inside: []
+            }
+            Object.keys(data.persons).forEach(function(element){
+                objaux.inside.push(element)
+            })
+            allInfo.push(objaux)
+    }).error(function(){
+      var objaux={
+              from: "scm-demographics-aging.json",
+              inside: "error"
+            }
+            allInfo.push(objaux)
+    });
+    $.getJSON("json/scm-demographics-birth.json").success(function(data) {
+            var objaux={
+              from: "birth",
+              inside: []
+            }
+            Object.keys(data.persons).forEach(function(element){
+                objaux.inside.push(element)
+            })
+            allInfo.push(objaux)
+    }).error(function(){
+      var objaux={
+              from: "scm-demographics-birth.json",
+              inside: "error"
+            }
+            allInfo.push(objaux)
+    });
+
+
+  $("#save").click(function(){
+
+    
+   /* var gridster = $("#dash1 ul").gridster().data('gridster');
+    var gridata=gridster.serialize()
+    var content= $("#"+gridata[0].id)*/
+    numGraph=1
+    var chart = $('#1').highcharts();
+    console.log(chart.title.textStr)
+    chart.series.forEach(function(i, serie){
+      
+    })
+    
+  })
+
 
   $("#addDash").click(function(){
     numDash+=1;
-    $(".container-fluid").append('<div id="settings'+(numDash)+'"class="panel-body" hidden><ul><button onclick="showTimeSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="showAgingSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="showInfoSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Info widget</button></ul></div><div id="dash'+(numDash)+'" class="gridster"><ul></ul></div> ')
+    var color=getRandomColor()
+    $(".container-fluid").append('<div id="settings'+(numDash)+'"class="panel-body" hidden><ul><button onclick="showTimeSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="showAgingSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="showInfoSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Info widget</button></ul></div><div id="dash'+(numDash)+'" class="gridster ready" style="background-color:'+color+'"><ul></ul></div> ')
+    $(".gridster ul").gridster({
+      widget_margins: [6, 6],
+      widget_base_dimensions: [10, 10],
+      serialize_params: function($w, wgd) { 
+          return { 
+                 id: $($w).attr('id'), 
+                 col: wgd.col, 
+                 row: wgd.row, 
+                 size_x: wgd.size_x, 
+                 size_y: wgd.size_y 
+          };
+      }
+    }).data('gridster');
     $("#dashboards").append('<li onclick="showDash('+numDash+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollDash'+numDash+'"><i class="fa fa-fw fa-edit"></i> Dashboard '+numDash+' <i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollDash'+numDash+'" class="collapse"><li><a onclick="showSettings('+numDash+')" href="#">Add Graph</a></li><li><a onclick="deleteAllGraphs('+numDash+')" href="#">Delete all</a></li></ul></li>')
     if(actualDash==0){
       actualDash=1;
@@ -23,22 +115,22 @@ function showSettings(dash){
 
 //************************************** Crear una gráfica del tipo Info chart *************************//
 function showInfoSettings(dash){
-  var keys=getKeysJson('json/scm-static.json').filter(filterKeyURL)
-  $("#settings"+dash).append('<div id="actualMenu"></div>')
-  $("#actualMenu").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column">Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras  </p>');
-  keys.forEach(function(element){
-    $("#actualMenu").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
-  })
+    keys=configuration.static
+    $("#settings"+dash).append('<div id="actualMenu"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
+    $("#actualMenu").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column">Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras  </p>');
+    keys.forEach(function(element){
+      $("#actualMenu #list").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
+    })
 
-  $("#actualMenu").append('<button onclick="takeDataInfo()" type="button" class="btn btn-xs btn-default">Create</button>')
-  $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+    $("#actualMenu").append('<button onclick="takeDataInfo()" type="button" class="btn btn-xs btn-default">Create</button>')
+    $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+  
 }
 
 //funcion para recoger los datos para crear la grafica
 function takeDataInfo(numGraph){
   var forma=$("#actualMenu input[type='radio']:checked").attr("value");
   if(forma!=undefined){
-    var data=getDataJson('json/scm-static.json')//DE MOMENTO ME HACE FALTA HASTA QUE DEFINA DE DONDE LO SACO
     var selected = [];
     var forma=$("#actualMenu input[type='radio']:checked").attr("value");
     $("#actualMenu input[type='checkbox']:checked").each(function() {
@@ -49,7 +141,7 @@ function takeDataInfo(numGraph){
       selected.push(objaux);
     });
     if(selected.length!=0){
-      makeGraphInfo(actualDash,selected,"scm-static",numGraph)
+      makeGraphInfo(actualDash,selected,numGraph)
     }else{
       alert("¿Qué clase de gráfica pretende representar sin datos?")
     }
@@ -58,62 +150,72 @@ function takeDataInfo(numGraph){
   }
 }
 
-function makeGraphInfo(dash,selected,titl,graph){
+function makeGraphInfo(dash,selected,graph){
+  var where= takeinfo.static
+  $.getJSON("json/"+where).success(function(data) {
   if(isNaN(graph)){
     numGraph+=1;
     graph=numGraph;
     var inDash= "dash"+dash.toString()
     var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary"><div class="panel-heading"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 1, 1);
+    color=($("#dash"+dash).css('background-color'))
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 17, 12);
   }else{
     var chart = $('#'+graph).highcharts();
     chart.destroy()
   }
-  var data=getDataJson('json/scm-static.json')
-  var series= parserGraphInfo(data,selected);
-  var options={
-            chart:{
-                renderTo:numGraph.toString(),
-                width: 370,
-                height: 160
-            },
+    var serie= parserGraphInfo(selected,data);
+    console.log(serie)
+    var options={
+              chart:{
+                  renderTo:numGraph.toString(),
+                  width: 340,
+                  height: 180
+              },
 
-            xAxis: {
-              categories: ["Total"]
-            },
-            title: {
-                text: titl
-            },
-            series: series
-        }
-  var chart= new Highcharts.Chart(options);
-  $("#actualMenu").remove();
+              xAxis: {
+                categories: ["Total"]
+              },
+              title: {
+                  text: where
+              },
+              series: serie
+          }
+    var chart= new Highcharts.Chart(options);
+    $("#actualMenu").remove();
+  }).error(function(){
+    var inDash= "dash"+dash.toString()
+    var gridster = $("#"+inDash+" ul").gridster().data('gridster');
+    color=($("#dash"+dash).css('background-color'))
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div>No se ha podido cargar el json referente</div>', 10, 10);
+    $("#actualMenu").remove();
+  });
 
 }
 
-function parserGraphInfo(data,selected){
-    var selection=[];
-    var dataAux;
-    var arrayAux;
-    selected.forEach(function(element){
-      dataAux=data[element.name];
-      arrayAux=[dataAux]
-      obj={
-          type: element.form,
-          name: element.name,
-          data: arrayAux
-      }
-      selection.push(obj)
-    })
-    return selection;
+function parserGraphInfo(selected,data){
+  var selection=[];
+  selected.forEach(function(element){
+    dataAux=data[element.name];
+    arrayAux=[dataAux]
+    obj={
+      type: element.form,
+      name: element.name,
+      data: arrayAux
+    }
+    selection.push(obj)
+  })
+  
+  console.log(selection[0])
+  return selection
 }
 
 
 function settingsInfoGraph(numGraph){
   var chart = $('#'+numGraph).highcharts();
-  var keys=getKeysJson('json/'+chart.title.textStr+'.json').filter(filterKeyURL)
+  var keys=configuration.static
   var auxseries;
-  $("#settings"+actualDash).append('<div id="actualMenu"></div>')
+  $("#settings"+ actualDash).append('<div id="actualMenu"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
   if(chart.series[0].type=="column"){
     $("#actualMenu").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column" checked>Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras  </p>');
   }else{
@@ -121,9 +223,9 @@ function settingsInfoGraph(numGraph){
   }
   keys.forEach(function(element){
     if(existLabel(chart,element)){
-      $("#actualMenu").append('<p><input type="checkbox" value="'+element+'" checked> '+element+'</p>')
+      $("#actualMenu #list").append('<p><input type="checkbox" value="'+element+'" checked> '+element+'</p>')
     }else{
-      $("#actualMenu").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
+      $("#actualMenu #list").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
     }
   })
   $("#actualMenu").append('<button onclick="takeDataInfo('+numGraph+')" type="button" class="btn btn-xs btn-default">Create</button>')
@@ -146,91 +248,174 @@ function takeDataAging(numGraph){
   var series=[];
   var max=0;
   var title='';
-  if($("#aging").is(':checked')){
-    if($("#actualMenu #agingColor").val()==''){
-      colorbar=($("#actualMenu #agingColor").attr("placeholder"))
-    }else{
-      colorbar=$("#actualMenu #agingColor").val()
-    }
-    var data1=parserDemograph("json/scm-demographics-aging.json")
-    if(max<data1.length){
-      max=data1.length
-    }
-    var objaux={
-          type: "bar",
-          name: "aging",
-          data: data1,
-          color: colorbar
-    }
-    series.push(objaux)
-    title+="scm-demographics-aging"
+  if($("#aging").is(':checked') && $("#birth").is(":checkbox:not(:checked)")){
+      if($("#actualMenu #agingColor").val()==''){
+        colorbar=($("#actualMenu #agingColor").attr("placeholder"))
+      }else{
+        colorbar=$("#actualMenu #agingColor").val()
+      }
+      var where= takeinfo.aging
+      $.getJSON("json/"+where).success(function(data) {
+        var dato=parserDemograph(data)
+        max=dato.length
+        var objaux={
+              type: "bar",
+              name: "aging",
+              data: dato.reverse(),
+              color: colorbar
+        }
+        series.push(objaux)
+        title+=where.split(".")[0]
+        var axisx=createAxisx(max).reverse()
+        
+        makeGraphDemograph(actualDash,series,axisx,title,numGraph)
+      }).error(function(){
+        title=""
+        var axisx=""
+        makeGraphDemograph(actualDash,series,axisx,title,numGraph)
+
+      })
+   
+  }else if($("#birth").is(':checked') && $("#aging").is(":checkbox:not(:checked)")){
+     if($("#actualMenu #birthColor").val()==''){
+        colorbar=($("#actualMenu #birthColor").attr("placeholder"))
+      }else{
+        colorbar=$("#actualMenu #birthColor").val()
+      }
+      var where= takeinfo.birth
+      $.getJSON("json/"+where).success(function(data) {
+        var dato=parserDemograph(data)
+        max=dato.length
+        
+        var objaux={
+              type: "bar",
+              name: "birth",
+              data: dato.reverse(),
+              color: colorbar
+        }
+        series.push(objaux)
+        title+=where.split(".")[0]
+        var axisx=createAxisx(max).reverse()
+        makeGraphDemograph(actualDash,series,axisx,title,numGraph)
+      }).error(function(){
+        title=""
+        var axisx=""
+        makeGraphDemograph(actualDash,series,axisx,title,numGraph)
+
+      })
+  }else if ($("#birth").is(':checked') && $("#aging").is(':checked')){
+      var graphicAging, graphicBirth;
+      var whereaging=takeinfo.aging;
+      var wherebirth=takeinfo.birth;
+      $.when(
+        $.getJSON("json/"+whereaging).success(function(data) { 
+            graphicAging = data;
+        }),
+        $.getJSON("json/"+wherebirth).success(function(data) {
+            graphicBirth = data;
+        })
+      ).then(function() {
+        if(parserDemograph(graphicBirth).length>=parserDemograph(graphicAging).length){
+          max=parserDemograph(graphicBirth).length
+        }else{
+          max=parserDemograph(graphicAging).length
+        }
+
+        if($("#actualMenu #agingColor").val()==''){
+        colorbar=($("#actualMenu #agingColor").attr("placeholder"))
+        }else{
+          colorbar=$("#actualMenu #agingColor").val()
+        }
+        var dato=parserDemograph(graphicAging).reverse()
+        
+        var objaux={
+              type: "bar",
+              name: "aging",
+              data: dato,
+              color: colorbar
+        }
+        series.push(objaux)
+
+        if($("#actualMenu #birthColor").val()==''){
+        colorbar=($("#actualMenu #birthColor").attr("placeholder"))
+        }else{
+          colorbar=$("#actualMenu #birthColor").val()
+        }
+        var dato=parserDemograph(graphicBirth).reverse();
+        
+        var objaux={
+              type: "bar",
+              name: "birth",
+              data: dato,
+              color: colorbar
+        }
+        series.push(objaux)
+        title+=whereaging.split(".")[0]+" "+wherebirth.split(".")[0]
+        var axisx=createAxisx(max).reverse();
+        makeGraphDemograph(actualDash,series,axisx,title,numGraph)
+      }).error(function(){
+        title=""
+        var axisx=""
+        makeGraphDemograph(actualDash,series,axisx,title,numGraph)
+
+      })
+  }else{
+    alert("Para crear un tipo de gráfica de edades debe seleccionar una de las opciones anteriores")
   }
-  if($("#birth").is(':checked')){
-   if($("#actualMenu #birthColor").val()==''){
-      colorbar=($("#actualMenu #birthColor").attr("placeholder"))
-    }else{
-      colorbar=$("#actualMenu #birthColor").val()
-    }
-    var data2=parserDemograph("json/scm-demographics-birth.json")
-    if(max<data2.length){
-      max=data2.length
-    }
-    var objaux={
-          type: "bar",
-          name: "birth",
-          data: data2,
-          color: colorbar
-    }
-    series.push(objaux)
-    title+= " scm-demographics-birth"
-  }
-  var axisx=createAxisx(max)
-  makeGraphDemograph(actualDash,series,axisx,title,numGraph)
 }
 
 function makeGraphDemograph(dash,series,axis,titl,graph){
-  if(isNaN(graph)){
-    numGraph+=1;
-    graph=numGraph
+  if(series.length!=0){
+    if(isNaN(graph)){
+      numGraph+=1;
+      graph=numGraph
+      var inDash= "dash"+dash.toString()
+      color=($("#dash"+dash).css('background-color'))
+      var gridster = $("#"+inDash+" ul").gridster().data('gridster');
+      gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 23, 22);
+    }else{
+      var chart = $('#'+graph).highcharts();
+      chart.destroy()
+    }
+    var options={
+              chart:{
+                  renderTo:graph.toString(),
+                  width: 460,
+                  height: 395
+              },
+
+              xAxis: {
+                categories: axis
+              },
+
+              plotOptions: {
+                          series: {
+                              cursor: 'pointer',
+                              point: {
+                                  events: {
+                                      click: function () {
+                                        makeAutorsGraph(this.category,titl);
+                                        console.log(this)
+                                      }
+                                  }
+                              }
+                          }
+                      },
+             
+              title: {
+                  text: titl
+              },
+              series: series
+    }
+    chart= new Highcharts.Chart(options);
+    $("#actualMenu").remove();
+  }else{
     var inDash= "dash"+dash.toString()
     var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary"><div class="panel-heading"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 2, 2);
-  }else{
-    var chart = $('#'+graph).highcharts();
-    chart.destroy()
+    color=($("#dash"+dash).css('background-color'))
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div>No se ha podido cargar el json referente</div>', 10, 10);
+    $("#actualMenu").remove();
   }
-  var options={
-            chart:{
-                renderTo:graph.toString(),
-                width: 700,
-                height: 400
-            },
-
-            xAxis: {
-              categories: axis
-            },
-
-            plotOptions: {
-                        series: {
-                            cursor: 'pointer',
-                            point: {
-                                events: {
-                                    click: function () {
-                                      makeAutorsGraph(this.category,titl);
-                                      console.log(this)
-                                    }
-                                }
-                            }
-                        }
-                    },
-           
-            title: {
-                text: titl
-            },
-            series: series
-  }
-  chart= new Highcharts.Chart(options);
-  $("#actualMenu").remove();
 }
 
 function makeAutorsGraph(categoria,title){
@@ -242,8 +427,9 @@ function makeAutorsGraph(categoria,title){
   var series= parseLookInfo(from,to,title)
   numGraph+=1;
   var inDash= "dash"+actualDash.toString()
+  color=($("#dash"+actualDash).css('background-color'))
   var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-  gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary"><div class="panel-heading"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 2, 2);
+  gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 24);
 
   var options={
             chart:{
@@ -305,14 +491,13 @@ function parseLookInfo(from,to,who){
 
 function createAxisx(max){
   var result=[];
-  for (i = 0; i <= max; i++) {
+  for (i = 0; i < max; i++) {
     result[i]= (i*181)+"-"+((i+1)*181)
   }
   return result
 }
 
-function parserDemograph(path){
-  var data=getDataJson(path)
+function parserDemograph(data){
   var aux=0;
   var result=[];
 
@@ -350,33 +535,31 @@ function settingsDemoGraph(numGraph){
 //************************************** Crear una gráfica del tipo Time series chart *******************//
 //personalizacion de la gráfica desde 0
 function showTimeSettings(dash){
-  var keys=getKeysJson('json/scm-evolutionary.json').filter(filterKeyDate)
-  $("#settings"+dash).append('<div id="actualMenu"></div>')
-  keys.forEach(function(element){
-    $("#actualMenu").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas    <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>')
-  })
-  var data=getDataJson('json/scm-evolutionary.json')
-  $("#actualMenu").append('From')
-  $("#actualMenu").append('<select id="from" class="form-control">')
-  data.date.forEach(function(element){
-    $("#actualMenu #from").append('<option value="'+element+'">'+element+'</option>')
-  })
-  $("actualMenu").append('</select>')
-  $("#actualMenu").append('To')
-  $("#actualMenu").append('<select id="to" class="form-control">')
-  data.date.forEach(function(element){
-    $("#actualMenu #to").append('<option value="'+element+'">'+element+'</option>')
-  })
-  $("actualMenu").append('</select>')
-  $("#to").val(data.date[data.date.length-1])
-  $("#actualMenu").append('<button onclick="takeDataTime()" type="button" class="btn btn-xs btn-default">Create</button>')
-  $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
-
+    $("#settings"+dash).append('<div id="actualMenu"><div id="list" style="height: 200px; overflow-y: scroll;"></div></div>')
+    configuration.evolutionary.forEach(function(element){
+      $("#actualMenu #list").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas    <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>')
+    })
+    $("#actualMenu").append('From')
+    $("#actualMenu").append('<select id="from" class="form-control">')
+    configuration.time.forEach(function(element){
+      $("#actualMenu #from").append('<option value="'+element+'">'+element+'</option>')
+    })
+    $("actualMenu").append('</select>')
+    $("#actualMenu").append('To')
+    $("#actualMenu").append('<select id="to" class="form-control">')
+    configuration.time.forEach(function(element){
+      $("#actualMenu #to").append('<option value="'+element+'">'+element+'</option>')
+    })
+    $("actualMenu").append('</select>')
+    $("#to").val(configuration.time[configuration.time.length-1])
+    $("#actualMenu").append('<button onclick="takeDataTime()" type="button" class="btn btn-xs btn-default">Create</button>')
+    $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
 }
 
 //funcion para recoger los datos para crear la grafica
 function takeDataTime(numGraph){
-  var data=getDataJson('json/scm-evolutionary.json')//DE MOMENTO ME HACE FALTA HASTA QUE DEFINA DE DONDE LO SACO
+  //En esta zona obtengo los datos de forma sincrona, en este caso soy invulnerable a errores en la descarga
+  //del json por si el nombre esta mal introducido dado queya lo he comprobado al principio
   var selected = [];
   $("#actualMenu input[type='radio']:checked").each(function() {
     objaux={
@@ -387,50 +570,107 @@ function takeDataTime(numGraph){
   });
   var to=$("#to option:selected").text()
   var from=$("#from option:selected").text()
-  from=data.date.indexOf(from.toString())
-  to=data.date.indexOf(to.toString())
-  makeGraphSeries(actualDash,selected,from,to,"scm-evolutionary",numGraph)
+  from=configuration.time.indexOf(from.toString())
+  to=configuration.time.indexOf(to.toString())
+  makeGraphSeries(actualDash,selected,from,to,numGraph)
 
 }
 
 //funcion para cancelar la creacion de la grafica
 function deleteCreation(){
   $("#actualMenu").remove();
-  $("#settings"+actualDash).slideUp("slow");
 }
 
 //Creamos la gráfica correspondiente al tipo seleccionado
-function makeGraphSeries(dash,selected,from,to,titl,graph){
-  var data=getDataJson('json/scm-evolutionary.json')
-  var series= parserGraph(from,to,data,selected);
-  if(isNaN(graph)){
-    numGraph+=1;
-    graph=numGraph;
+function makeGraphSeries(dash,selected,from,to,graph){
+  var where= takeinfo.evolutionary
+  $.getJSON('json/'+where).success(function(data){
+    var series= parserGraph(from,to,data,selected);
+    if(isNaN(graph)){
+      numGraph+=1;
+      graph=numGraph;
+      var inDash= "dash"+dash.toString()
+      var gridster = $("#"+inDash+" ul").gridster().data('gridster');
+      color=($("#dash"+dash).css('background-color'))
+      if((to-from)<=12 && (to-from)>8){
+        gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 23, 22);
+      }else if((to-from)<8){
+        gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 17, 12);
+      }else{
+        gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 22);
+
+      }
+    }else{
+      var chart = $('#'+graph).highcharts();
+      chart.destroy()
+      if((to-from)<=12 && (to-from)>8){
+        $("#graph"+graph).attr("data-sizex",23)
+        $("#graph"+graph).attr("data-sizey",22)
+
+      }else if((to-from)<8){
+        $("#graph"+graph).attr("data-sizex",17)
+        $("#graph"+graph).attr("data-sizey",12)
+
+      }else{
+        $("#graph"+graph).attr("data-sizex",34)
+        $("#graph"+graph).attr("data-sizey",22)
+      }
+    } 
+    if((to-from)<=12 && (to-from)>8){
+      var options={
+                chart:{
+                    renderTo:graph.toString(),
+                    width: 400,
+                    height: 400
+                },
+                xAxis: {
+                  categories: data.date.slice(from,to)
+                },
+                title: {
+                    text: where
+                },
+                series: series
+            }
+    }else if((to-from)<8){
+      var options={
+          chart:{
+              renderTo:graph.toString(),
+              width: 340,
+              height: 185
+          },
+          xAxis: {
+            categories: data.date.slice(from,to)
+          },
+          title: {
+              text: where
+          },
+          series: series
+      }
+    }else{
+      var options={
+          chart:{
+              renderTo:graph.toString(),
+              width: 700,
+              height: 400
+          },
+          xAxis: {
+            categories: data.date.slice(from,to)
+          },
+          title: {
+              text: where
+          },
+          series: series
+      }
+    }
+    var chart= new Highcharts.Chart(options);
+    $("#actualMenu").remove();
+  }).error(function(){
+    $("#actualMenu").remove();
     var inDash= "dash"+dash.toString()
     var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary"><div class="panel-heading"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 2, 2);
-  }else{
-    var chart = $('#'+graph).highcharts();
-    chart.destroy()
-  }
-  var data=getDataJson('json/scm-evolutionary.json')
-  var series= parserGraph(from,to,data,selected);
-  var options={
-            chart:{
-                renderTo:graph.toString(),
-                width: 700,
-                height: 400
-            },
-            xAxis: {
-              categories: data.date.slice(from,to)
-            },
-            title: {
-                text: titl
-            },
-            series: series
-        }
-  var chart= new Highcharts.Chart(options);
-  $("#actualMenu").remove();
+    color=($("#dash"+dash).css('background-color'))
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div>Hubo un error al cargar el archivo de de la evolución</div>', 10, 10);
+  });
 }
 
 //funcion para interpretar los datos
@@ -451,8 +691,7 @@ function parserGraph(from,to,data,selected){
 
 function settingsTimeGraph(numGraph){
   var chart = $('#'+numGraph).highcharts();
-  var data=getDataJson('json/'+chart.title.textStr+'.json')
-  var keys=getKeysJson('json/'+chart.title.textStr+'.json').filter(filterKeyDate)
+  var keys=configuration.evolutionary
   var auxseries;
   $("#settings"+actualDash).append('<div id="actualMenu"></div>')
   keys.forEach(function(element){
@@ -469,25 +708,24 @@ function settingsTimeGraph(numGraph){
   })
   $("#actualMenu").append('From')
   $("#actualMenu").append('<select id="from" class="form-control">')
-  data.date.forEach(function(element){
+  configuration.time.forEach(function(element){
     $("#actualMenu #from").append('<option value="'+element+'">'+element+'</option>')
   })
   $("actualMenu").append('</select>')
   $("#actualMenu").append('To')
   $("#actualMenu").append('<select id="to" class="form-control">')
-  data.date.forEach(function(element){
+  configuration.time.forEach(function(element){
     $("#actualMenu #to").append('<option value="'+element+'">'+element+'</option>')
   })
   $("actualMenu").append('</select>')
 
   var position=chart.series[0].data.length-1;
-  var position2= data.date.indexOf(chart.series[0].data[position].category)
-  var month= data.date[position2+1]
+  var position2= configuration.time.indexOf(chart.series[0].data[position].category)
+  var month= configuration.time[position2+1]
 
   $("#from").val(chart.series[0].data[0].category)
-  $("#to").val(data.date[position2+1])
-
-  $("#actualMenu").append('<button onclick="takeDataTime('+numGraph+')" type="button" class="btn btn-xs btn-default">Create</button>')
+  $("#to").val(configuration.time[position2+1])
+  $("#actualMenu").append('<button onclick="takeDataTime('+numGraph+')" type="button" class="btn btn-xs btn-default">Redraw</button>')
   $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
 
 }
@@ -528,18 +766,37 @@ function deleteGraph(dash,num){
 
 //**********************************  FUNCIONES DE FILTRADO Y SELECCION DE DATOS ********************////
 //función que obtiene todas las keys de un json
-function getKeysJson(path){
-  var jsonfile = path;
-    var data = jQuery.parseJSON(
-        jQuery.ajax({
-            url: jsonfile, 
-            async: false,
-            dataType: 'json'
-        }).responseText
-    );
-    var keys=Object.keys(data)
-    return keys;
-};
+function getKeysJson(from){
+  var result;
+  allInfo.forEach(function(element){
+    if(from==element.from){
+      result=element.inside
+    }
+  })
+  return result;
+}
+
+//función que encuentra donde está situado un tipo de dato unico sin necesidad de descargarlo
+function findKey(key){
+  var result;
+  allInfo.forEach(function(element){
+    if(element.inside.indexOf(element)){
+      result=element.from
+    }
+  });
+  return result;
+}
+
+//funcion para obtener un dato de toda la info descargada
+function findInfo(path){
+  var result;
+    allInfo.forEach(function(element){
+    if(element.inside.indexOf(element)){
+      result=element;
+    }
+  });
+  return result
+}
 
 //función que filtra eliminando una key concreta para filtrar sin la fecha que es siempre igual
 function filterKeyDate(element){
@@ -550,7 +807,11 @@ function filterKeyURL(element){
   return element != "url";
 }
 
-//funcion para obtener todos los nombres de los elementos de un chart
+//funcion para obtener un color ramdon
+function getRandomColor() {
+    var colors= ["#EBA550","#95EB50","#5095EB","#745CDF","#DE5169","#9DE0DF","#E0E060"]
+    return colors[Math.floor(Math.random() * 7)]
+}
 
 //función para saber si un elemento está dentro e un chart
 function existLabel(chart,label){
