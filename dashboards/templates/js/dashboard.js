@@ -1,36 +1,43 @@
+//Jesús Alonso Barrionuevo. Grado en Ingeniería de las Tecnologías de la Telecomunicación
+
+//Eventos de estado:
+//-ErrorGraphInfo: Creación de un div de gráfica errónea
+
+//Variables
 var actualDash=0;
 var numDash=0;
 var numGraph=0;
-var allInfo= [];
 var configuration={};
 var takeinfo={}
+
 $(document).ready(function() {
 
-    //En esta zona obtengo todas las keys de manera rápida nada más empezar el programa, de esta forma
-    //compruebo en un futuro si existen errores a la hora de obtenerlo y se que clase de grafica puedo pintar
-    //de paso me ahorro unos cuantos getjson del futuro cuando necesite los datos a pintar
+    //Petición de las keys de configuracion
 
     $.getJSON("templates/json/configurationfile.json").success(function(data){
-      var objaux;
       Object.keys(data).forEach(function(element){
-          objaux={
-              from: element,
-              inside: data[element]
-          }
           configuration[element]=data[element]
       })
     })
+
+    //Petición de los ficheros de los que voy a tener que sacar los datos
+    //Cada key es un objeto que posee tres estados:
+    // --0: no lo tengo, --1: lo he pedido, --2: lo tengo
 
     $.getJSON("templates/json/referenceinfo.json").success(function(data){
       var objaux;
       Object.keys(data).forEach(function(element){
           objaux={
-              from: element,
+              saveData: '',
+              state: 0,
               inside: data[element]
           }
-          takeinfo[element]=data[element]
+          takeinfo[element]=objaux
       })
     })
+
+
+  //Zona de cargado de un fichero existente, se han cambaido urls, hay que modificar esto
 
   if(document.URL.split("http://localhost:8000/")[1]!=''){
     var N= document.URL.split("http://localhost:8000/")[1]
@@ -148,6 +155,8 @@ $(document).ready(function() {
     });
   }
 
+  //ZONA DE PRUEBAS
+
   $("#pruebas").click(function(){
     $("#evento").on("disparo",function(){
       alert(this.id)
@@ -158,6 +167,11 @@ $(document).ready(function() {
     $("*").trigger("disparo");
   })
 
+  $("#borra").click(function(){
+    $("#evento").off("disparo")
+  })
+
+  //Botonde guardado
 
   $("#save").click(function(){
 
@@ -198,7 +212,9 @@ $(document).ready(function() {
           }
         }
       }
-      if(document.URL.split("http://localhost:8000/#").length==2){
+
+      /*
+      if(document.URL.split("http://localhost:8000/").length==2){
         var id= Math.floor((Math.random() * 1000000000000000) + 1)
         var envio={
           N: id,
@@ -230,7 +246,7 @@ $(document).ready(function() {
             alert(data)
           }
         });
-      }
+      }*/
 
     }
 
@@ -256,15 +272,24 @@ function showSettings(dash){
 //--Esta función hay que modificarla con las futuras nuevas métricas y el menu desplegable
 function showInfoSettings(dash){
     keys=configuration.static
-    $("#settings"+dash).append('<div id="actualMenu"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
-    $("#actualMenu").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column">Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras  </p>');
-    keys.forEach(function(element){
-      $("#actualMenu #list").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
-    })
+    if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
+      $("#settings"+dash).append('<div id="actualMenu"></div>')
+      $("#actualMenu").append('<p>Los ficheros de configuración no han sido cargados con normalidad. Compruebe su conexión<p>');
+      $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Continue</button>')
 
-    $("#actualMenu").append('<button onclick="takeDataInfo()" type="button" class="btn btn-xs btn-default">Create</button>')
-    $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
-  
+    }else{
+      if($("#actualMenu")){
+        $("#actualMenu").remove();
+      }
+      $("#settings"+dash).append('<div id="actualMenu"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
+      $("#actualMenu").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column">Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras  </p>');
+      keys.forEach(function(element){
+        $("#actualMenu #list").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
+      })
+
+      $("#actualMenu").append('<button onclick="takeDataInfo()" type="button" class="btn btn-xs btn-default">Create</button>')
+      $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+    }
 }
 
 //funcion para recoger los datos para crear la grafica
@@ -290,49 +315,89 @@ function takeDataInfo(numGraph){
   }
 }
 
+
+//función que crea la gráfica en su conjunto tanto en error como en success
 function makeGraphInfo(dash,selected,graph){
-  var where= takeinfo.static
-  $.getJSON("templates/json/"+where).success(function(data) {
+
+  //si graph no está definido significa que creo una nueva gráfica
   if(isNaN(graph)){
     numGraph+=1;
     graph=numGraph;
     var inDash= "dash"+dash.toString()
     var gridster = $("#"+inDash+" ul").gridster().data('gridster');
     color=($("#dash"+dash).css('background-color'))
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 17, 12);
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 17, 12);
   }else{
+    //en otro caso cojo el chart ya creado y es el que uso para primero destruirlo y luego crearlo de nuevo
     var chart = $('#'+graph).highcharts();
     chart.destroy()
   }
-    var serie= parserGraphInfo(selected,data);
-    console.log(serie)
-    var options={
-              chart:{
-                  renderTo:numGraph.toString(),
-                  width: 340,
-                  height: 180
-              },
 
-              xAxis: {
-                categories: ["Total"]
-              },
-              title: {
-                  text: where
-              },
-              series: serie
-          }
-    var chart= new Highcharts.Chart(options);
-    $("#actualMenu").remove();
-  }).error(function(){
-    var inDash= "dash"+dash.toString()
-    var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-    color=($("#dash"+dash).css('background-color'))
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div>No se ha podido cargar el json referente</div>', 10, 10);
-    $("#actualMenu").remove();
-  });
+  //Destruyo el actual menú de seleccion
+  $("#actualMenu").remove();
 
+  //En caso positivo lo dibujo
+  $("#"+graph).on("DrawInfo",function(event,trigger,data){
+    var serie= parserGraphInfo(selected,data)
+    drawGraphInfo(graph,serie,takeinfo.static.inside)
+  })
+
+  //En caso negativo dibujo un widget roto
+  $("#"+graph).on("ErrorGraphInfo",function(){
+    drawErrorWidget(this.id)
+  })
+
+  //si no tengo los datos entonces los solicito
+  if(takeinfo.static.state==0){
+
+    //actualizo mi estado a en proceso
+    takeinfo.static.state=1;
+
+    $.getJSON("templates/json/"+takeinfo.static.inside).success(function(data) {
+
+        //parseo los datos
+        var serie= parserGraphInfo(selected,data);
+        //actualizo mi estado a terminado
+        takeinfo.static.saveData=data
+        takeinfo.static.state=2;
+
+        //y llamo a pintar grafica de tipo info
+        drawGraphInfo(graph,serie,takeinfo.static.inside)
+        $("*").trigger("DrawInfo",["DrawInfo",data])
+      }).error(function(){
+        //En caso de error levanto el evento de gráfica mal pintada
+        $("*").trigger("ErrorGraphInfo")
+        takeinfo.static.static=0;
+
+    });
+  }else if(takeinfo.static.state==2){
+    //Si lo tengo en caché lo dibujo directamente
+    var serie= parserGraphInfo(selected,takeinfo.static.saveData);
+    drawGraphInfo(graph,serie,takeinfo.static.inside)
+  }
 }
 
+//función que dibuja una gráfica de tipo Info
+function drawGraphInfo(id,serie,title){
+  var options={
+      chart:{
+          renderTo:id.toString(),
+          width: 340,
+          height: 180
+      },
+
+      xAxis: {
+        categories: ["Total"]
+      },
+      title: {
+          text: title
+      },
+      series: serie
+  }
+  var chart= new Highcharts.Chart(options);
+}
+
+//Masajea los datos conforme a los seleccionados para que estos formen un series para pintar
 function parserGraphInfo(selected,data){
   var selection=[];
   selected.forEach(function(element){
@@ -346,11 +411,12 @@ function parserGraphInfo(selected,data){
     selection.push(obj)
   })
   
-  console.log(selection[0])
   return selection
 }
 
 
+//función que obtiene las series utilizadas en un determinado chart, y en base a lo obtenido en el fichero
+//de configuración nos permite redibujar la gráfica con unos nuevos valores
 function settingsInfoGraph(numGraph){
   var chart = $('#'+numGraph).highcharts();
   var keys=configuration.static
@@ -372,7 +438,9 @@ function settingsInfoGraph(numGraph){
   $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
 }
 
+//*******************************************************************************************************//
 //************************************** Crear una gráfica del tipo Aging chart *************************//
+//*******************************************************************************************************//
 
 function showAgingSettings(dash){
   $("#settings"+dash).append('<div id="actualMenu"></div>')
@@ -1035,6 +1103,15 @@ function getDataJson(path){
         return data;
     };
 
+//función que dibuja un widget sin gráfica y erróneo
+function drawErrorWidget(graph){
+  $("#graph"+graph+" #settingsButton").remove()
+  $("#graph"+graph).attr("data-sizex",10)
+  $("#graph"+graph).attr("data-sizey",10)
+  $("#"+graph).append("Error al cargar los datos requeridos")
+}
+
+//función que crea un nuevo dashboard
 function DashCreation(){
   numDash+=1;
   var color=getRandomColor()
@@ -1052,7 +1129,7 @@ function DashCreation(){
         };
     }
   }).data('gridster');
-  $("#dashboards").append('<li onclick="showDash('+numDash+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollDash'+numDash+'"><i class="fa fa-fw fa-edit"></i> Dashboard '+numDash+' <i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollDash'+numDash+'" class="collapse"><li><a onclick="showSettings('+numDash+')" href="#">Add Graph</a></li><li><a onclick="deleteAllGraphs('+numDash+')" href="#">Delete all</a></li></ul></li>')
+  $("#dashboards").append('<li onclick="showDash('+numDash+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollDash'+numDash+'"><i class="fa fa-fw fa-edit"></i> Dashboard '+numDash+' <i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollDash'+numDash+'" class="collapse"><li><a onclick="showSettings('+numDash+')" href="javascript:void(0)">Add Graph</a></li><li><a onclick="deleteAllGraphs('+numDash+')" href="javascript:void(0)">Delete all</a></li></ul></li>')
   if(actualDash==0){
     actualDash=1;
   }
