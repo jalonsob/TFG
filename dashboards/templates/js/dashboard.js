@@ -1,10 +1,11 @@
 var actualDash=0;
 var numDash=0;
 var numGraph=0;
-var allInfo=[];
+var allInfo= [];
 var configuration={};
 var takeinfo={}
 $(document).ready(function() {
+
     //En esta zona obtengo todas las keys de manera rápida nada más empezar el programa, de esta forma
     //compruebo en un futuro si existen errores a la hora de obtenerlo y se que clase de grafica puedo pintar
     //de paso me ahorro unos cuantos getjson del futuro cuando necesite los datos a pintar
@@ -148,7 +149,13 @@ $(document).ready(function() {
   }
 
   $("#pruebas").click(function(){
-    alert("hola")
+    $("#evento").on("disparo",function(){
+      alert(this.id)
+    })
+  })
+
+  $("#suma").click(function(){
+    $("*").trigger("disparo");
   })
 
 
@@ -241,8 +248,12 @@ function showSettings(dash){
   $("#settings"+dash).slideDown();
 
 }
-
+//******************************************************************************************************//
 //************************************** Crear una gráfica del tipo Info chart *************************//
+//******************************************************************************************************//
+
+//función que crea un actual menu y lo rellena con las métricas de INFO
+//--Esta función hay que modificarla con las futuras nuevas métricas y el menu desplegable
 function showInfoSettings(dash){
     keys=configuration.static
     $("#settings"+dash).append('<div id="actualMenu"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
