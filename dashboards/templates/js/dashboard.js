@@ -2,6 +2,11 @@
 
 //Eventos de estado:
 //-ErrorGraphInfo: Creación de un div de gráfica errónea
+//-ErrorGraphTimes: Creación de un div de gráfica errónea
+//*Nota: los eventos de error tiran de la misma funcion pero es necesario que sean distintos
+//-DrawInfo: Creación de una gráfica de tipo Info
+//-DrawTimes: Creación de una gráfica de tipo Times
+
 
 //Variables
 var actualDash=0;
@@ -14,146 +19,138 @@ $(document).ready(function() {
 
     //Petición de las keys de configuracion
 
-    $.getJSON("templates/json/configurationfile.json").success(function(data){
-      Object.keys(data).forEach(function(element){
-          configuration[element]=data[element]
-      })
-    })
-
-    //Petición de los ficheros de los que voy a tener que sacar los datos
-    //Cada key es un objeto que posee tres estados:
-    // --0: no lo tengo, --1: lo he pedido, --2: lo tengo
-
-    $.getJSON("templates/json/referenceinfo.json").success(function(data){
-      var objaux;
-      Object.keys(data).forEach(function(element){
-          objaux={
-              saveData: '',
-              state: 0,
-              inside: data[element]
-          }
-          takeinfo[element]=objaux
-      })
-    })
-
-
-  //Zona de cargado de un fichero existente, se han cambaido urls, hay que modificar esto
-
-  if(document.URL.split("http://localhost:8000/")[1]!=''){
-    var N= document.URL.split("http://localhost:8000/")[1]
-    alert(N)
-    $.ajax({
-      type: "GET",
-      url: "/db/"+N,
-      data: N.toString(),
-      success: function(data){
-
-        Object.keys(JSON.parse(data)).forEach(function(element){
-          DashCreation()
+    $.when(
+      $.getJSON("templates/json/configurationfile.json").success(function(data){
+        Object.keys(data).forEach(function(element){
+            configuration[element]=data[element]
         })
+      }),
 
-        Object.keys(JSON.parse(data)).forEach(function(element){
+      //Petición de los ficheros de los que voy a tener que sacar los datos
+      //Cada key es un objeto que posee tres estados:
+      // --0: no lo tengo, --1: lo he pedido, --2: lo tengo
 
-          var dataJson=JSON.parse(data);
-
-          actualDash= parseInt(element.split("#dash"))
-
-          dataJson[element].forEach(function(x){
-            var graph=parseInt(x.graph);
-            var inDash= element.split("#")[1]
-            alert(graph)
-            var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-            color=($("#"+inDash).css('background-color'))
-
-            if(numGraph<graph){
-              numGraph=graph
+      $.getJSON("templates/json/referenceinfo.json").success(function(data){
+        var objaux;
+        Object.keys(data).forEach(function(element){
+            objaux={
+                saveData: '',
+                state: 0,
+                inside: data[element]
             }
+            takeinfo[element]=objaux
+        })
+      })
+    ).then(function(){
 
-            console.log("Obtengo el titulo, y de donde leo: "+x.title)
+      //Zona de cargado de un fichero existente, antes de comenzar compruebo que me han metido una id
+      //de una plantilla de dashboard
 
+      if(document.URL.split("http://localhost:8000/")[1]!=''){
+        var N= document.URL.split("http://localhost:8000/")[1]
 
-            if(x.title.split(" ").length==2){
-              console.log("---TENGO QUE OBTENER 2 GETJSON, es de tipo edades--")
-              console.log("La gráfica es la numero: "+x.graph)
-              console.log("Sus categorias son: ")
-              x.series.forEach(function(y){
-                console.log("Name: "+y.name)
-                console.log("Type: "+y.type)
+        //Realizo una peticion al servidor OJO HAY QUE PARSEAR LA RESPUESTA ESTO HAY QUE CAMBIARLO
+        $.ajax({
+          type: "GET",
+          url: "/db/"+N,
+          data: N.toString(),
+          success: function(data){
 
-              })
-            }else{
+            console.log(data)
+            //Antes de empezar creo todos los dashboards para evitarme problemas de dibujar
+            Object.keys(JSON.parse(data)).forEach(function(element){
+              DashCreation()
+            })
 
-              if(x.title==takeinfo.aging || x.title==takeinfo.birth){
+            //empiezo a pasar por cada dashboard y dentro de este empiezo a dibujar sus graficas
+            Object.keys(JSON.parse(data)).forEach(function(element){
 
-                console.log("Es de tipo edades, cuidado")
+              var dataJson=JSON.parse(data);
 
-              }else{
+              actualDash= parseInt(element.split("#dash")[1])
 
-                console.log("ES DE TIPO TIMES O INFO, ME DA IGUAL COMO SE CONFIGURE")
-                var options={
-                chart:{
-                    renderTo: x.graph,
-                      width: 100,
-                      height: 100
-                    },
-                    xAxis: {
-                      categories: []
-                    },
-                    title: {
-                        text: ""
-                    },
-                    series: []
+              dataJson[element].forEach(function(x){
+                var graph=parseInt(x.graph);
+                var inDash= element.split("#")[1]
+                var gridster = $("#"+inDash+" ul").gridster().data('gridster');
+                color=($("#"+inDash).css('background-color'))
+
+                if(numGraph<graph){
+                  numGraph=graph
                 }
 
-                var selected = [];
+                console.log("Obtengo el titulo, y de donde leo: "+x.title)
 
-                x.series.forEach(function(y){
-                  var objaux = {
-                    name: y.name,
-                    form: y.type,
-                  }
-                  selected.push(objaux)
 
-                })
-                console.log(selected)
-                if(x.title==takeinfo.evolutionary){
-                  alert("evolutionary")
-                  from=configuration.time.indexOf(x.xAxis[0])
-                  to=configuration.time.indexOf(x.xAxis[x.xAxis.length-1])
-                  console.log(to)
-                  console.log(from)
-                  if((to-from)<=12 && (to-from)>8){
-                    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 23, 22);
+                if(x.title.split(" ").length==2){
+                  console.log("---TENGO QUE OBTENER 2 GETJSON, es de tipo edades--")
+                  console.log("La gráfica es la numero: "+x.graph)
+                  console.log("Sus categorias son: ")
+                  x.series.forEach(function(y){
+                    console.log("Name: "+y.name)
+                    console.log("Type: "+y.type)
 
-                  }else if((to-from)<8){
-                    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 17, 12);
+                  })
+                }else{
 
+                  if(x.title==takeinfo.aging || x.title==takeinfo.birth){
+
+                    console.log("Es de tipo edades, cuidado")
 
                   }else{
-                    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 34, 22);
 
+                    var options={
+                    chart:{
+                        renderTo: x.graph,
+                          width: 100,
+                          height: 100
+                        },
+                        xAxis: {
+                          categories: []
+                        },
+                        title: {
+                            text: ""
+                        },
+                        series: []
+                    }
+
+                    var selected = [];
+
+                    x.series.forEach(function(y){
+                      var objaux = {
+                        name: y.name,
+                        form: y.type,
+                      }
+                      selected.push(objaux)
+
+                    })
+                    if(x.title==takeinfo.evolutionary.inside){
+
+                      from=configuration.time.indexOf(x.xAxis[0])
+                      to=configuration.time.indexOf(x.xAxis[x.xAxis.length-1])
+                      
+                      remakeGraphSeries(actualDash,selected,from,to,graph)
+
+                    }else if(x.title==takeinfo.static.inside){
+
+                      gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 17, 12);
+                      var chart= new Highcharts.Chart(options);
+                      makeGraphInfo(actualDash,selected,graph)
+                    
+                    }
                   }
-
-                  var chart= new Highcharts.Chart(options);
-                  makeGraphSeries(actualDash,selected,from,to,graph)
-
-                }else if(x.title==takeinfo.static){
-               
-                  gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 17, 12);
-                  var chart= new Highcharts.Chart(options);
-                  makeGraphInfo(actualDash,selected,graph)
-                
-
                 }
-              }
-            }
-            $(element).hide();
-            $("#settings"+actualDash).slideUp("slow");
-          })
-       })
+                $(element).hide();
+                $("#settings"+actualDash).slideUp("slow");
+              })
+
+            })
+            actualDash=0;
+          }
+        });
       }
-    });
-  }
+    })
+  
 
   //ZONA DE PRUEBAS
 
@@ -171,21 +168,27 @@ $(document).ready(function() {
     $("#evento").off("disparo")
   })
 
-  //Botonde guardado
-
+  //Boton de guardado
   $("#save").click(function(){
 
     var finalObj={}
  
+    //Antes de empezar compruebo que al menos existe 1 dashboard del que guardar algo
     if(numDash>0){
       
       for (i=1; i<=numDash;i++){
-       
+       //paseándome dashboard por dashboard
         if($("#dash"+i+" ul")){
+
+          //creo un objeto único para cada uno con id la misma que la de su div
           finalObj["#dash"+i]=[]
           var gridster = $("#dash"+i+" ul").gridster().data('gridster');
+          //obtengo y serializo el gridster que tiene en su interior para conseguir acceder a todas sus graficas
           var gridata=gridster.serialize()
+
           for(j=0; j<gridata.length; j++){
+
+            //consigo el chart de cada una y creo un nuevo objeto con las caracteristicas de objaux
             content= $("#"+gridata[j].id)
             var chart = $("#"+content.selector.split("#graph")[1]).highcharts()
             var objaux={
@@ -194,6 +197,8 @@ $(document).ready(function() {
               title: chart.title.textStr,
               series: []
             }
+
+            //dentro de objaux relleno las opciones de series
             chart.series.forEach(function(serie){
               var name= serie.name
               var type= serie.options.type
@@ -208,13 +213,17 @@ $(document).ready(function() {
               }
               objaux.series.push(objaux2)
             })
+
+            //y finalmente lo añado al objeto final donde queda un objeto de indices cada dashboard,
+            //de cada indice de propiedad un array con las propiedades de cada una de las gráficas para 
+            //pintarlas
             finalObj["#dash"+i].push(objaux)
           }
         }
       }
 
-      /*
-      if(document.URL.split("http://localhost:8000/").length==2){
+      //Para guardar comprobamos que no nos encontramos ya en un dashboard guardado
+      if(document.URL.split("http://localhost:8000/")[1]==""){
         var id= Math.floor((Math.random() * 1000000000000000) + 1)
         var envio={
           N: id,
@@ -224,6 +233,7 @@ $(document).ready(function() {
           foo: 'bar',
           faa: 'asdf'
         }
+        //y creamos uno nuevo con un post al recurso /db/
         $.ajax({
           type: "POST",
           url: "/db/",
@@ -234,19 +244,20 @@ $(document).ready(function() {
         });
         window.history.replaceState("object or string", "Title", id);
       }else{
+        //en otro caso se realiza un put al recurso /db/<integer>
         var envio={
-          N: document.URL.split("http://localhost:8000/")[1].split("#")[0],
+          N: document.URL.split("http://localhost:8000/")[1],
           C: finalObj
         }
         $.ajax({
           type: "PUT",
-          url: "/db/"+document.URL.split("http://localhost:8000/")[1].split("#")[0].toString(),
+          url: "/db/"+document.URL.split("http://localhost:8000/")[1].toString(),
           data: JSON.stringify(envio),
           success: function(data){
             alert(data)
           }
         });
-      }*/
+      }
 
     }
 
@@ -326,7 +337,7 @@ function makeGraphInfo(dash,selected,graph){
     var inDash= "dash"+dash.toString()
     var gridster = $("#"+inDash+" ul").gridster().data('gridster');
     color=($("#dash"+dash).css('background-color'))
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 17, 12);
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 17, 12);
   }else{
     //en otro caso cojo el chart ya creado y es el que uso para primero destruirlo y luego crearlo de nuevo
     var chart = $('#'+graph).highcharts();
@@ -340,11 +351,13 @@ function makeGraphInfo(dash,selected,graph){
   $("#"+graph).on("DrawInfo",function(event,trigger,data){
     var serie= parserGraphInfo(selected,data)
     drawGraphInfo(graph,serie,takeinfo.static.inside)
+    $("#"+this.id).off()
   })
 
   //En caso negativo dibujo un widget roto
   $("#"+graph).on("ErrorGraphInfo",function(){
     drawErrorWidget(this.id)
+    $("#"+this.id).off()
   })
 
   //si no tengo los datos entonces los solicito
@@ -785,8 +798,11 @@ function settingsDemoGraph(numGraph){
   $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
 }
 
+//*******************************************************************************************************//
 //************************************** Crear una gráfica del tipo Time series chart *******************//
-//personalizacion de la gráfica desde 0
+//*******************************************************************************************************//
+
+//función que a partir del fichero de configuración es capaz de enseñarnos las métricas que podemos dibujar
 function showTimeSettings(dash){
     $("#settings"+dash).append('<div id="actualMenu"><div id="list" style="height: 200px; overflow-y: scroll;"></div></div>')
     configuration.evolutionary.forEach(function(element){
@@ -812,7 +828,7 @@ function showTimeSettings(dash){
 //funcion para recoger los datos para crear la grafica
 function takeDataTime(numGraph){
   //En esta zona obtengo los datos de forma sincrona, en este caso soy invulnerable a errores en la descarga
-  //del json por si el nombre esta mal introducido dado queya lo he comprobado al principio
+  //del json por si el nombre esta mal introducido dado que ya lo he comprobado al principio
   var selected = [];
   $("#actualMenu input[type='radio']:checked").each(function() {
     objaux={
@@ -823,8 +839,10 @@ function takeDataTime(numGraph){
   });
   var to=$("#to option:selected").text()
   var from=$("#from option:selected").text()
+  //con los datos ya seleccionados miramos el rango que van a tener los datos
   from=configuration.time.indexOf(from.toString())
   to=configuration.time.indexOf(to.toString())
+  //y mandamos fabricar la gráfica con los datos que tengamos en el json que descarguemos
   makeGraphSeries(actualDash,selected,from,to,numGraph)
 
 }
@@ -834,100 +852,213 @@ function deleteCreation(){
   $("#actualMenu").remove();
 }
 
-//Creamos la gráfica correspondiente al tipo seleccionado
+//Creamos la gráfica correspondiente al tipo seleccionado, tiene los mismos parámetros que las funciones
+//anteriores pero en este caso necesitamos saber el rango de dibujo
 function makeGraphSeries(dash,selected,from,to,graph){
-  var where= takeinfo.evolutionary
-  $.getJSON('templates/json/'+where).success(function(data){
-    var series= parserGraph(from,to,data,selected);
-    if(isNaN(graph)){
-      numGraph+=1;
-      graph=numGraph;
-      var inDash= "dash"+dash.toString()
-      var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-      color=($("#dash"+dash).css('background-color'))
-      if((to-from)<=12 && (to-from)>8){
-        gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 23, 22);
-      }else if((to-from)<8){
-        gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 17, 12);
-      }else{
-        gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 22);
+  
+  // Creamos un div estandar de forma que cuando dibujemos nuestra gráfica cambiamos el tamaño para mejorar 
+  //el rendimiento del gridster
 
-      }
-    }else{
-      var chart = $('#'+graph).highcharts();
-      chart.destroy()
-      if((to-from)<=12 && (to-from)>8){
-        $("#graph"+graph).attr("data-sizex",23)
-        $("#graph"+graph).attr("data-sizey",22)
+  //si no lo está tengo un problema con github, así que borramos desde 0 y la volvemos a crear
+  if(!isNaN(graph)){
+      deleteGraph(dash,graph)
+  }
+  
+  //si graph no está definido significa que creo una nueva gráfica
 
-      }else if((to-from)<8){
-        $("#graph"+graph).attr("data-sizex",17)
-        $("#graph"+graph).attr("data-sizey",12)
+  numGraph+=1;
+  graph=numGraph;
+  var inDash= "dash"+dash.toString()
+  var gridster = $("#"+inDash+" ul").gridster().data('gridster');
+  color=($("#dash"+dash).css('background-color'))
+  if((to-from)<=12 && (to-from)>8){
 
-      }else{
-        $("#graph"+graph).attr("data-sizex",34)
-        $("#graph"+graph).attr("data-sizey",22)
-      }
-    } 
-    if((to-from)<=12 && (to-from)>8){
-      var options={
-                chart:{
-                    renderTo:graph.toString(),
-                    width: 400,
-                    height: 400
-                },
-                xAxis: {
-                  categories: data.date.slice(from,to+1)
-                },
-                title: {
-                    text: where
-                },
-                series: series
-            }
-    }else if((to-from)<8){
-      var options={
-          chart:{
-              renderTo:graph.toString(),
-              width: 340,
-              height: 185
-          },
-          xAxis: {
-            categories: data.date.slice(from,to+1)
-          },
-          title: {
-              text: where
-          },
-          series: series
-      }
-    }else{
-      var options={
-          chart:{
-              renderTo:graph.toString(),
-              width: 700,
-              height: 400
-          },
-          xAxis: {
-            categories: data.date.slice(from,to+1)
-          },
-          title: {
-              text: where
-          },
-          series: series
-      }
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 23, 22);
+
+  }else if((to-from)<8){
+
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 17, 12);
+
+
+  }else{
+
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 22);
+
+  }
+  
+
+  //Destruyo el actual menú de seleccion
+  $("#actualMenu").remove();
+
+  //En caso positivo lo dibujo
+  $("#"+graph).on("DrawTimes",function(event,trigger,data){
+    var serie= parserGraphTime(from,to,data,selected);
+    var x= parserGraphTimeX(data,from,to)
+    drawGraphTimes(graph,serie,takeinfo.evolutionary.inside,from,to,x)
+    $("#"+this.id).off()
+  })
+
+  //En caso negativo dibujo un widget roto
+  $("#"+graph).on("ErrorGraphTimes",function(){
+    drawErrorWidget(this.id)
+    $("#"+this.id).off()
+  })
+
+  //si no lo tengo hago una petición al servidor para poder tenerlo
+  if(takeinfo.evolutionary.state==0){
+    takeinfo.evolutionary.state==1;
+    //en el caso de que lo consiga dibujo la gráfica y activo el disparador de evento para el times
+    $.getJSON('templates/json/'+takeinfo.evolutionary.inside).success(function(data){
+
+      //actualizo mi estado a terminado
+      takeinfo.evolutionary.saveData=data
+      takeinfo.evolutionary.state=2;
+
+      //y llamo a pintar grafica de tipo info
+      $("*").trigger("DrawTimes",["DrawTimes",data])
+     
+    }).error(function(){
+      //En caso de error levanto el evento de gráfica mal pintada
+      $("*").trigger("ErrorGraphTimes")
+      takeinfo.static.static=0;
+    });
+  }else if(takeinfo.evolutionary.state==2){
+    //Si lo tengo en caché lo dibujo directamente
+    var serie= parserGraphTime(from,to,takeinfo.evolutionary.saveData,selected);
+    var x= parserGraphTimeX(takeinfo.evolutionary.saveData,from,to)
+    drawGraphTimes(graph,serie,takeinfo.evolutionary.inside,from,to,x)
+  }
+}
+
+function remakeGraphSeries(dash,selected,from,to,graph){
+  // Creamos un div estandar de forma que cuando dibujemos nuestra gráfica cambiamos el tamaño para mejorar 
+  //el rendimiento del gridster
+  if(numGraph<graph){
+    numGraph=graph
+  }
+  var inDash= "dash"+dash.toString()
+  var gridster = $("#"+inDash+" ul").gridster().data('gridster');
+  color=($("#dash"+dash).css('background-color'))
+  if((to-from)<=12 && (to-from)>8){
+
+    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 23, 22);
+
+  }else if((to-from)<8){
+
+    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 17, 12);
+
+
+  }else{
+
+    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 34, 22);
+
+  }
+  
+  //En caso positivo lo dibujo
+  $("#"+graph).on("DrawTimes",function(event,trigger,data){
+    var serie= parserGraphTime(from,to,data,selected);
+    var x= parserGraphTimeX(data,from,to)
+    drawGraphTimes(graph,serie,takeinfo.evolutionary.inside,from,to,x)
+    $("#"+this.id).off()
+  })
+
+  //En caso negativo dibujo un widget roto
+  $("#"+graph).on("ErrorGraphTimes",function(){
+    drawErrorWidget(this.id)
+    $("#"+this.id).off()
+  })
+
+  //si no lo tengo hago una petición al servidor para poder tenerlo
+  if(takeinfo.evolutionary.state==0){
+    takeinfo.evolutionary.state==1;
+    //en el caso de que lo consiga dibujo la gráfica y activo el disparador de evento para el times
+    $.getJSON('templates/json/'+takeinfo.evolutionary.inside).success(function(data){
+
+      //actualizo mi estado a terminado
+      takeinfo.evolutionary.saveData=data
+      takeinfo.evolutionary.state=2;
+
+      //y llamo a pintar grafica de tipo info
+      $("*").trigger("DrawTimes",["DrawTimes",data])
+     
+    }).error(function(){
+      //En caso de error levanto el evento de gráfica mal pintada
+      $("*").trigger("ErrorGraphTimes")
+      takeinfo.evolutionary.static=0;
+    });
+  }else if(takeinfo.evolutionary.state==2){
+    //Si lo tengo en caché lo dibujo directamente
+    var serie= parserGraphTime(from,to,takeinfo.evolutionary.saveData,selected);
+    var x= parserGraphTimeX(takeinfo.evolutionary.saveData,from,to)
+    drawGraphTimes(graph,serie,takeinfo.evolutionary.inside,from,to,x)
+  }
+}
+
+//función para dibujar una gráfica de tipo Times con el tamaño
+//que corresponde
+function drawGraphTimes(graph,serie,title,from,to,xAxis){
+
+  var chart = $('#'+graph).highcharts();
+
+  if((to-from)<=12 && (to-from)>8){
+    var options={
+      chart:{
+          renderTo:graph.toString(),
+          width: 400,
+          height: 400
+      },
+      xAxis: {
+        categories: xAxis
+      },
+      title: {
+          text: title
+      },
+      series: serie
     }
-    var chart= new Highcharts.Chart(options);
-    $("#actualMenu").remove();
-  }).error(function(){
-    $("#actualMenu").remove();
-    var inDash= "dash"+dash.toString()
-    var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-    color=($("#dash"+dash).css('background-color'))
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div>Hubo un error al cargar el archivo de de la evolución</div>', 10, 10);
-  });
+
+  }else if((to-from)<8){
+    var options={
+      chart:{
+          renderTo:graph.toString(),
+          width: 340,
+          height: 185
+      },
+      xAxis: {
+        categories: xAxis
+      },
+      title: {
+          text: title
+      },
+      series: serie
+    }
+
+  }else{
+    var options={
+      chart:{
+          renderTo:graph.toString(),
+          width: 700,
+          height: 400
+      },
+      xAxis: {
+        categories: xAxis
+      },
+      title: {
+          text: title
+      },
+      series: serie
+    }
+  }
+  var chart= new Highcharts.Chart(options);
+
+}
+
+//funcion para interpretar las X en tiempo
+function parserGraphTimeX(data,from,to){
+  return data.date.slice(from,to+1)
 }
 
 //funcion para interpretar los datos
-function parserGraph(from,to,data,selected){
+function parserGraphTime(from,to,data,selected){
     var selection=[];
     var dataAux;
     selected.forEach(function(element){
@@ -1013,8 +1144,7 @@ function deleteAllGraphs(dash){
 
 //funcion para eliminar una grafica concreta
 function deleteGraph(dash,num){
-  var inDash= dash.id
-  var gridster = $("#"+inDash+" ul").gridster().data('gridster');
+  var gridster = $("#dash"+dash+" ul").gridster().data('gridster');
   gridster.remove_widget("#graph"+num)
 
 }
@@ -1134,3 +1264,4 @@ function DashCreation(){
     actualDash=1;
   }
 }
+
