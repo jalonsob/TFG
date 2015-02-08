@@ -49,10 +49,8 @@ $(document).ready(function() {
 
         //Zona de cargado de un fichero existente, antes de comenzar compruebo que me han metido una id
         //de una plantilla de dashboard
-  
+      console.log(takeinfo)
       if(document.URL.split("http://localhost:8000/")[1]!=''){
-
-        console.log(((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)))
 
           var N= document.URL.split("http://localhost:8000/")[1]
 
@@ -86,67 +84,68 @@ $(document).ready(function() {
                     numGraph=graph
                   }
 
-                  console.log("Obtengo el titulo, y de donde leo: "+x.title)
 
+                  var options={
+                    chart:{
+                      renderTo: x.graph,
+                        width: 100,
+                        height: 100
+                      },
+                      xAxis: {
+                        categories: []
+                      },
+                      title: {
+                          text: ""
+                      },
+                      series: []
+                  }
 
-                  if(x.title.split(" ").length==2){
-                    console.log("---TENGO QUE OBTENER 2 GETJSON, es de tipo edades--")
-                    console.log("La gráfica es la numero: "+x.graph)
-                    console.log("Sus categorias son: ")
+                  if(x.title==takeinfo.aging.inside.split(".")[0] || x.title==takeinfo.birth.inside.split(".")[0] || x.title.split(" ").length==2){
+
+                    var toDraw=[]
+
                     x.series.forEach(function(y){
-                      console.log("Name: "+y.name)
-                      console.log("Type: "+y.type)
+                      var objaux={
+                        forma: y.name,
+                        color: getRandomColor()
+                      }
+                      toDraw.push(objaux)
 
                     })
+
+                    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 23, 22);
+                    var chart= new Highcharts.Chart(options);
+
+                    makeGraphAges(actualDash,graph,toDraw)                      
+                    
                   }else{
 
-                    if(x.title==takeinfo.aging || x.title==takeinfo.birth){
+                    var selected = [];
 
-                      console.log("Es de tipo edades, cuidado")
-
-                    }else{
-
-                      var options={
-                      chart:{
-                          renderTo: x.graph,
-                            width: 100,
-                            height: 100
-                          },
-                          xAxis: {
-                            categories: []
-                          },
-                          title: {
-                              text: ""
-                          },
-                          series: []
+                    x.series.forEach(function(y){
+                      var objaux = {
+                        name: y.name,
+                        form: y.type,
                       }
+                      selected.push(objaux)
 
-                      var selected = [];
+                    })
+                    if(x.title==takeinfo.evolutionary.inside){
 
-                      x.series.forEach(function(y){
-                        var objaux = {
-                          name: y.name,
-                          form: y.type,
-                        }
-                        selected.push(objaux)
-
-                      })
-                      if(x.title==takeinfo.evolutionary.inside){
-
-                        from=configuration.time.indexOf(x.xAxis[0])
-                        to=configuration.time.indexOf(x.xAxis[x.xAxis.length-1])
-                        
-                        remakeGraphSeries(actualDash,selected,from,to,graph)
-
-                      }else if(x.title==takeinfo.static.inside){
-
-                        gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 17, 12);
-                        var chart= new Highcharts.Chart(options);
-                        makeGraphInfo(actualDash,selected,graph)
+                      from=configuration.time.indexOf(x.xAxis[0])
+                      to=configuration.time.indexOf(x.xAxis[x.xAxis.length-1])
                       
-                      }
+                      remakeGraphSeries(actualDash,selected,from,to,graph)
+
+                    }else if(x.title==takeinfo.static.inside){
+
+                      gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 17, 12);
+                      var chart= new Highcharts.Chart(options);
+                      makeGraphInfo(actualDash,selected,graph)
+                    
                     }
                   }
+                  
                   $(element).hide();
                   $("#settings"+actualDash).slideUp("slow");
                 })
@@ -628,7 +627,7 @@ function makeGraphAges(dash,graph,toDraw){
       
       var objaux={
             type: "bar",
-            name: "aging",
+            name: toDraw[0].forma,
             data: dato,
             color: toDraw[0].color
       }
@@ -638,7 +637,7 @@ function makeGraphAges(dash,graph,toDraw){
       
       var objaux={
             type: "bar",
-            name: "aging",
+            name: toDraw[1].forma,
             data: dato,
             color: toDraw[1].color
       }
@@ -695,13 +694,13 @@ function makeGraphAges(dash,graph,toDraw){
       //Si ya lo tenemos todo nos limitamos a dibujar como hacemos arriba
       var series=[]
 
-      if(parserDemograph(toDraw[0].save).length>=parserDemograph(toDraw[1].save).length){
-        max=parserDemograph(toDraw[0].save).length
+      if(parserDemograph(takeinfo[toDraw[0].forma].saveData).length>=parserDemograph(takeinfo[toDraw[1].forma].saveData).length){
+        max=parserDemograph(takeinfo[toDraw[0].forma].saveData).length
       }else{
-        max=parserDemograph(toDraw[1].save).length
+        max=parserDemograph(takeinfo[toDraw[1].forma].saveData).length
       }
 
-      var dato=parserDemograph(toDraw[0].save).reverse()
+      var dato=parserDemograph(takeinfo[toDraw[0].forma].saveData).reverse()
       
       var objaux={
             type: "bar",
@@ -711,7 +710,7 @@ function makeGraphAges(dash,graph,toDraw){
       }
       series.push(objaux)
 
-      var dato=parserDemograph(toDraw[1].save).reverse()
+      var dato=parserDemograph(takeinfo[toDraw[1].forma].saveData).reverse()
       
       var objaux={
             type: "bar",
@@ -806,6 +805,8 @@ function makeAutorsGraph(categoria,title){
                   series: parserAutorsData(series)
         }
         chart= new Highcharts.Chart(options);
+      }).fail(function(){
+        console.log("aun tengo que crear esto")
       })
   }else{
     var where= "templates/json/"+title+".json"
