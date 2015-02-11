@@ -20,6 +20,7 @@
 
     <!-- Custom CSS -->
     <link href="../templates/css/sb-admin.css" rel="stylesheet">
+    <link href="../templates/css/custom.css" rel="stylesheet">
 
     <!-- Morris Charts CSS -->
     <link href="../templates/css/plugins/morris.css" rel="stylesheet">
@@ -41,6 +42,7 @@
         <!--Gridster-->
     <script src="../templates/js/jquery.gridster.js"></script>
 
+    <script src="../templates/js/jquery-ui.js"></script>
 
     <!-- Bootstrap Core JavaScript -->
     <script src="../templates/js/bootstrap.min.js"></script>
@@ -50,6 +52,12 @@
     <script src="../templates/Highcharts/js/highcharts.js"></script>
     <script src="../templates/chartmaster/Chart.js"></script>
 
+    <script>
+        $(function() {
+          $( "#making" ).draggable();
+          $( "#making" ).hide();
+        });
+    </script>
 </head>
 
 <body>
@@ -60,11 +68,6 @@
         <nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
             <!-- Top Menu Items -->
             <ul class="nav navbar-right top-nav">
-                <li><a id="pruebas" href="javascript:void(0)">Coloca el evento</a></li>
-                <li><a id="suma" href="javascript:void(0)">Lanzalo</a></li>
-                <li><a id="evento" href="javascript:void(0)">Esto no es nada</a></li>
-                <li><a id="borra" href="javascript:void(0)">Borra el evento</a></li>
-
 
                 <li><a id="save" href="javascript:void(0)">Save</a></li>
                 <li>
@@ -80,7 +83,16 @@
             </div>
             <!-- /.navbar-collapse -->
         </nav>
-
+        <div id="making">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Maker menu</h3>
+                </div>
+                <div id="conten" class="panel-body">
+                    
+                </div>
+            </div>
+        </div>
         <div id="page-wrapper">
 
             <div class="container-fluid">
@@ -93,7 +105,7 @@
 
     </div>
     <!-- /#wrapper -->
-
+    
 </body>
 
 </html>

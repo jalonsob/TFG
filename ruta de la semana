@@ -127,22 +127,26 @@ Martes a las 10:00
 
 ——————————————
 
--Reajustar el codigo
++Reajustar el codigo
 +Aprender a sincronizar eventos en divs
--Sincronizar la creación de varias gráficas y crear ya la caché con los 3 estados
++Sincronizar la creación de varias gráficas y crear ya la caché con los 3 estados
 
 Martes a las 9:30
 
 
 ——————————————
 
--Reestructurar el getjson (tema de crear antes los dashboards)
--cambiar lo de las urls para que sea para cualquiera (luego me ha dicho que estaba bien así pero bueno)
--panel se muestra solo cuando se clicle
+++Reestructurar el getjson (tema de crear antes los dashboards)
+	*No se puede hacer, contradice el pedido de clickar y reproducir
++cambiar lo de las urls para que sea para cualquiera
++panel se muestra solo cuando se clicle
++comprobar que me llega un numero en la url
+	*No se puede, python recrea que obligatoriamente debe ser un numero u otra cosa
+	-Arreglar esto con python
 -panel por defecto
 -Mirar el aplanamiento de gráficas y el objeto de cada panel y gráfica
 -Mirar el arrastrar gráficas
--Escribir ciclo 3 y recordarlo
+++Escribir ciclo 3 y recordarlo
 -Mirar Heroku
 
 Martes 17 a las 14:00

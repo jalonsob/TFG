@@ -18,6 +18,7 @@ var numDash=0;
 var numGraph=0;
 var configuration={};
 var takeinfo={}
+var dashConfiguration={}
 
 $(document).ready(function() {
 
@@ -49,10 +50,9 @@ $(document).ready(function() {
 
         //Zona de cargado de un fichero existente, antes de comenzar compruebo que me han metido una id
         //de una plantilla de dashboard
-      console.log(takeinfo)
-      if(document.URL.split("http://localhost:8000/")[1]!=''){
+      if(document.URL.split("/")[document.URL.split("/").length-1]!=''){
 
-          var N= document.URL.split("http://localhost:8000/")[1]
+          var N= document.URL.split("/")[document.URL.split("/").length-1]
 
           //Realizo una peticion al servidor OJO HAY QUE PARSEAR LA RESPUESTA ESTO HAY QUE CAMBIARLO
           $.ajax({
@@ -61,97 +61,95 @@ $(document).ready(function() {
             data: N.toString(),
             success: function(data){
 
-              console.log(data)
+              dashConfiguration=JSON.parse(data);
+
               //Antes de empezar creo todos los dashboards para evitarme problemas de dibujar
-              Object.keys(JSON.parse(data)).forEach(function(element){
+              Object.keys(dashConfiguration).forEach(function(element){
                 DashCreation()
               })
 
-              //empiezo a pasar por cada dashboard y dentro de este empiezo a dibujar sus graficas
-              Object.keys(JSON.parse(data)).forEach(function(element){
+              
+              //Para guardar como mínimo debo tener 1 dashboard, dash1 va a existir, esto significa
+              //que al menos puedo intentar pintarlo, y solo pinto este y lo muestro
+              //Cada dashboard se pinta cuando se desea ver
+    
+              dashConfiguration["#dash1"].forEach(function(x){
 
-                var dataJson=JSON.parse(data);
+                var graph=parseInt(x.graph);
+                var inDash= "dash1"
+                var gridster = $("#"+inDash+" ul").gridster().data('gridster');
+                color=($("#"+inDash).css('background-color'))
 
-                actualDash= parseInt(element.split("#dash")[1])
-
-                dataJson[element].forEach(function(x){
-                  var graph=parseInt(x.graph);
-                  var inDash= element.split("#")[1]
-                  var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-                  color=($("#"+inDash).css('background-color'))
-
-                  if(numGraph<graph){
-                    numGraph=graph
-                  }
+                if(numGraph<graph){
+                  numGraph=graph
+                }
 
 
-                  var options={
-                    chart:{
-                      renderTo: x.graph,
-                        width: 100,
-                        height: 100
-                      },
-                      xAxis: {
-                        categories: []
-                      },
-                      title: {
-                          text: ""
-                      },
-                      series: []
-                  }
+                var options={
+                  chart:{
+                    renderTo: x.graph,
+                      width: 100,
+                      height: 100
+                    },
+                    xAxis: {
+                      categories: []
+                    },
+                    title: {
+                        text: ""
+                    },
+                    series: []
+                }
 
-                  if(x.title==takeinfo.aging.inside.split(".")[0] || x.title==takeinfo.birth.inside.split(".")[0] || x.title.split(" ").length==2){
+                if(x.title==takeinfo.aging.inside.split(".")[0] || x.title==takeinfo.birth.inside.split(".")[0] || x.title.split(" ").length==2){
 
-                    var toDraw=[]
+                  var toDraw=[]
 
-                    x.series.forEach(function(y){
-                      var objaux={
-                        forma: y.name,
-                        color: getRandomColor()
-                      }
-                      toDraw.push(objaux)
-
-                    })
-
-                    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 23, 22);
-                    var chart= new Highcharts.Chart(options);
-
-                    makeGraphAges(actualDash,graph,toDraw)                      
-                    
-                  }else{
-
-                    var selected = [];
-
-                    x.series.forEach(function(y){
-                      var objaux = {
-                        name: y.name,
-                        form: y.type,
-                      }
-                      selected.push(objaux)
-
-                    })
-                    if(x.title==takeinfo.evolutionary.inside){
-
-                      from=configuration.time.indexOf(x.xAxis[0])
-                      to=configuration.time.indexOf(x.xAxis[x.xAxis.length-1])
-                      
-                      remakeGraphSeries(actualDash,selected,from,to,graph)
-
-                    }else if(x.title==takeinfo.static.inside){
-
-                      gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 17, 12);
-                      var chart= new Highcharts.Chart(options);
-                      makeGraphInfo(actualDash,selected,graph)
-                    
+                  x.series.forEach(function(y){
+                    var objaux={
+                      forma: y.name,
+                      color: getRandomColor()
                     }
-                  }
-                  
-                  $(element).hide();
-                  $("#settings"+actualDash).slideUp("slow");
-                })
+                    toDraw.push(objaux)
 
+                  })
+
+                  gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 23, 22);
+                  var chart= new Highcharts.Chart(options);
+
+                  makeGraphAges(actualDash,graph,toDraw)                      
+                  
+                }else{
+
+                  var selected = [];
+
+                  x.series.forEach(function(y){
+                    var objaux = {
+                      name: y.name,
+                      form: y.type,
+                    }
+                    selected.push(objaux)
+
+                  })
+                  if(x.title==takeinfo.evolutionary.inside){
+
+                    from=configuration.time.indexOf(x.xAxis[0])
+                    to=configuration.time.indexOf(x.xAxis[x.xAxis.length-1])
+                    
+                    remakeGraphSeries(actualDash,selected,from,to,graph)
+
+                  }else if(x.title==takeinfo.static.inside){
+
+                    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 17, 12);
+                    var chart= new Highcharts.Chart(options);
+                    makeGraphInfo(actualDash,selected,graph)
+                  
+                  }
+                }
               })
-              actualDash=0;
+              actualDash= 1
+              dashConfiguration["#dash1"]=[]
+              $("#dash1").slideDown("slow");
+              $("#settings1").slideDown("slow");
             }
           });
       }
@@ -161,20 +159,6 @@ $(document).ready(function() {
   
 
   //ZONA DE PRUEBAS
-
-  $("#pruebas").click(function(){
-    $("#evento").on("disparo",function(){
-      alert(this.id)
-    })
-  })
-
-  $("#suma").click(function(){
-    $("*").trigger("disparo");
-  })
-
-  $("#borra").click(function(){
-    $("#evento").off("disparo")
-  })
 
   //Boton de guardado
   $("#save").click(function(){
@@ -231,7 +215,7 @@ $(document).ready(function() {
       }
 
       //Para guardar comprobamos que no nos encontramos ya en un dashboard guardado
-      if(document.URL.split("http://localhost:8000/")[1]==""){
+      if(document.URL.split("/")[document.URL.split("/").length-1]==""){
         var id= Math.floor((Math.random() * 1000000000000000) + 1)
         var envio={
           N: id,
@@ -254,12 +238,12 @@ $(document).ready(function() {
       }else{
         //en otro caso se realiza un put al recurso /db/<integer>
         var envio={
-          N: document.URL.split("http://localhost:8000/")[1],
+          N: document.URL.split("/")[document.URL.split("/").length-1],
           C: finalObj
         }
         $.ajax({
           type: "PUT",
-          url: "/db/"+document.URL.split("http://localhost:8000/")[1].toString(),
+          url: "/db/"+document.URL.split("/")[document.URL.split("/").length-1].toString(),
           data: JSON.stringify(envio),
           success: function(data){
             alert(data)
@@ -291,8 +275,10 @@ function showSettings(dash){
 //--Esta función hay que modificarla con las futuras nuevas métricas y el menu desplegable
 function showInfoSettings(dash){
     keys=configuration.static
+    $("#settings"+dash).slideUp("slow");
+    $("#making").slideDown("slow")
     if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
-      $("#settings"+dash).append('<div id="actualMenu"></div>')
+      $("#conten").append('<div id="actualMenu"></div>')
       $("#actualMenu").append('<p>Los ficheros de configuración no han sido cargados con normalidad. Compruebe su conexión<p>');
       $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Continue</button>')
 
@@ -300,7 +286,7 @@ function showInfoSettings(dash){
       if($("#actualMenu")){
         $("#actualMenu").remove();
       }
-      $("#settings"+dash).append('<div id="actualMenu"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
+      $("#conten").append('<div id="actualMenu"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
       $("#actualMenu").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column">Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras  </p>');
       keys.forEach(function(element){
         $("#actualMenu #list").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
@@ -345,7 +331,7 @@ function makeGraphInfo(dash,selected,graph){
     var inDash= "dash"+dash.toString()
     var gridster = $("#"+inDash+" ul").gridster().data('gridster');
     color=($("#dash"+dash).css('background-color'))
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 17, 12);
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 12, 8);
   }else{
     //en otro caso cojo el chart ya creado y es el que uso para primero destruirlo y luego crearlo de nuevo
     var chart = $('#'+graph).highcharts();
@@ -354,7 +340,7 @@ function makeGraphInfo(dash,selected,graph){
 
   //Destruyo el actual menú de seleccion
   $("#actualMenu").remove();
-
+  $("#making").slideUp("slow")
   //En caso positivo lo dibujo
   $("#"+graph).on("DrawInfo",function(event,trigger,data){
     var serie= parserGraphInfo(selected,data)
@@ -399,8 +385,8 @@ function drawGraphInfo(id,serie,title){
   var options={
       chart:{
           renderTo:id.toString(),
-          width: 340,
-          height: 180
+          width: 350,
+          height: 177
       },
 
       xAxis: {
@@ -438,7 +424,13 @@ function settingsInfoGraph(numGraph){
   var chart = $('#'+numGraph).highcharts();
   var keys=configuration.static
   var auxseries;
-  $("#settings"+ actualDash).append('<div id="actualMenu"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
+  $("#making").slideDown("slow")
+
+  if($("#actualMenu")){
+    $("#actualMenu").remove();
+  }
+
+  $("#conten").append('<div id="actualMenu"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
   if(chart.series[0].type=="column"){
     $("#actualMenu").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column" checked>Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras  </p>');
   }else{
@@ -461,12 +453,17 @@ function settingsInfoGraph(numGraph){
 
 //Enseñamos las opciones si estan todos los archivos correctos
 function showAgingSettings(dash){
+  $("#settings"+dash).slideUp("slow");
+  $("#making").slideDown("slow")
   if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
-      $("#settings"+dash).append('<div id="actualMenu"></div>')
+      $("#conten").append('<div id="actualMenu"></div>')
       $("#actualMenu").append('<p>Los ficheros de configuración no han sido cargados con normalidad. Compruebe su conexión<p>');
       $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Continue</button>')
   }else{
-    $("#settings"+dash).append('<div id="actualMenu"></div>')
+    if($("#actualMenu")){
+      $("#actualMenu").remove();
+    }
+    $("#conten").append('<div id="actualMenu"></div>')
     $("#actualMenu").append('<p><div class="form-group"><label><input id="aging" type="checkbox" value="aging">Aging</label><input placeholder="#4D8FB8" id="agingColor" class="form-control"></div></p>')
     $("#actualMenu").append('<p><div class="form-group"><label><input id="birth" type="checkbox" value="birth">Birth</label><input placeholder="#081923" id="birthColor" class="form-control"></div></p>')
     $("#actualMenu").append('<button onclick="takeDataDemo()" type="button" class="btn btn-xs btn-default">Create</button>')
@@ -526,7 +523,7 @@ function makeGraphAges(dash,graph,toDraw){
     var inDash= "dash"+dash.toString()
     color=($("#dash"+dash).css('background-color'))
     var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 23, 22);
+    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 16, 15);
   }else{
     var chart = $('#'+graph).highcharts();
     chart.destroy()
@@ -535,7 +532,7 @@ function makeGraphAges(dash,graph,toDraw){
   //Destruyo el actual menú de seleccion
   $("#actualMenu").remove();
 
-
+  $("#making").slideUp("slow")
   //Si toDraw es solo 1 hemos elegido un único dato, en otro caso debemos hacer referencia a todos los
   //seleccionados
   if(toDraw.length==1){
@@ -931,12 +928,17 @@ function settingsDemoGraph(numGraph){
 
 //función que a partir del fichero de configuración es capaz de enseñarnos las métricas que podemos dibujar
 function showTimeSettings(dash){
+  $("#settings"+dash).slideUp("slow");
+  $("#making").slideDown("slow")
   if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
-    $("#settings"+dash).append('<div id="actualMenu"></div>')
+    $("#conten").append('<div id="actualMenu"></div>')
     $("#actualMenu").append('<p>Los ficheros de configuración no han sido cargados con normalidad. Compruebe su conexión<p>');
     $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Continue</button>')
   }else{
-    $("#settings"+dash).append('<div id="actualMenu"><div id="list" style="height: 200px; overflow-y: scroll;"></div></div>')
+    if($("#actualMenu")){
+        $("#actualMenu").remove();
+    }
+    $("#conten").append('<div id="actualMenu"><div id="list" style="height: 200px; overflow-y: scroll;"></div></div>')
     configuration.evolutionary.forEach(function(element){
       $("#actualMenu #list").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas    <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>')
     })
@@ -983,6 +985,7 @@ function takeDataTime(numGraph){
 //funcion para cancelar la creacion de la grafica
 function deleteCreation(){
   $("#actualMenu").remove();
+  $("#making").slideUp("slow")
 }
 
 //Creamos la gráfica correspondiente al tipo seleccionado, tiene los mismos parámetros que las funciones
@@ -1004,24 +1007,25 @@ function makeGraphSeries(dash,selected,from,to,graph){
   var inDash= "dash"+dash.toString()
   var gridster = $("#"+inDash+" ul").gridster().data('gridster');
   color=($("#dash"+dash).css('background-color'))
-  if((to-from)<=12 && (to-from)>8){
+  if((to-from)<=12 && (to-from)>=8){
 
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 23, 22);
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 15, 12);
 
   }else if((to-from)<8){
 
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 17, 12);
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 12, 8);
 
 
   }else{
 
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 22);
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 13);
 
   }
   
 
   //Destruyo el actual menú de seleccion
   $("#actualMenu").remove();
+  $("#making").slideUp("slow")
 
   //En caso positivo lo dibujo
   $("#"+graph).on("DrawTimes",function(event,trigger,data){
@@ -1072,18 +1076,18 @@ function remakeGraphSeries(dash,selected,from,to,graph){
   var inDash= "dash"+dash.toString()
   var gridster = $("#"+inDash+" ul").gridster().data('gridster');
   color=($("#dash"+dash).css('background-color'))
-  if((to-from)<=12 && (to-from)>8){
+  if((to-from)<=12 && (to-from)>=8){
 
-    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 23, 22);
+    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 15, 12);
 
   }else if((to-from)<8){
 
-    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 17, 12);
+    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 12, 8);
 
 
   }else{
 
-    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 34, 22);
+    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 34, 13);
 
   }
   
@@ -1137,8 +1141,8 @@ function drawGraphTimes(graph,serie,title,from,to,xAxis){
     var options={
       chart:{
           renderTo:graph.toString(),
-          width: 400,
-          height: 400
+          width: 430,
+          height: 307
       },
       xAxis: {
         categories: xAxis
@@ -1154,7 +1158,7 @@ function drawGraphTimes(graph,serie,title,from,to,xAxis){
       chart:{
           renderTo:graph.toString(),
           width: 340,
-          height: 185
+          height: 177
       },
       xAxis: {
         categories: xAxis
@@ -1169,8 +1173,8 @@ function drawGraphTimes(graph,serie,title,from,to,xAxis){
     var options={
       chart:{
           renderTo:graph.toString(),
-          width: 700,
-          height: 400
+          width: 1050,
+          height: 337
       },
       xAxis: {
         categories: xAxis
@@ -1178,7 +1182,8 @@ function drawGraphTimes(graph,serie,title,from,to,xAxis){
       title: {
           text: title
       },
-      series: serie
+      series: serie,
+      
     }
   }
   var chart= new Highcharts.Chart(options);
@@ -1257,13 +1262,88 @@ function resetRatios(element1,element2){
 //funcion para mostrar el dash en el que estamos trabajando
 function showDash(dash){
   if(actualDash!=dash){
+    //cortamos el anterior y mostramos el nuevo
     $("#dash"+actualDash).slideUp("slow");
     $("#settings"+actualDash).slideUp("slow");
     $("#actualMenu").remove();
     $("#dash"+dash).slideDown("slow");
-    $("#settings"+dash).slideDown("slow");
 
     actualDash=dash;
+
+    dashConfiguration["#dash"+dash].forEach(function(x){
+
+      var graph=parseInt(x.graph);
+      var inDash= "dash"+dash
+      var gridster = $("#"+inDash+" ul").gridster().data('gridster');
+      color=($("#"+inDash).css('background-color'))
+
+      if(numGraph<graph){
+        numGraph=graph
+      }
+
+
+      var options={
+        chart:{
+          renderTo: x.graph,
+            width: 100,
+            height: 100
+          },
+          xAxis: {
+            categories: []
+          },
+          title: {
+              text: ""
+          },
+          series: []
+      }
+
+      if(x.title==takeinfo.aging.inside.split(".")[0] || x.title==takeinfo.birth.inside.split(".")[0] || x.title.split(" ").length==2){
+
+        var toDraw=[]
+
+        x.series.forEach(function(y){
+          var objaux={
+            forma: y.name,
+            color: getRandomColor()
+          }
+          toDraw.push(objaux)
+
+        })
+
+        gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 23, 22);
+        var chart= new Highcharts.Chart(options);
+
+        makeGraphAges(actualDash,graph,toDraw)                      
+        
+      }else{
+
+        var selected = [];
+
+        x.series.forEach(function(y){
+          var objaux = {
+            name: y.name,
+            form: y.type,
+          }
+          selected.push(objaux)
+
+        })
+        if(x.title==takeinfo.evolutionary.inside){
+
+          from=configuration.time.indexOf(x.xAxis[0])
+          to=configuration.time.indexOf(x.xAxis[x.xAxis.length-1])
+          
+          remakeGraphSeries(actualDash,selected,from,to,graph)
+
+        }else if(x.title==takeinfo.static.inside){
+
+          gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 17, 12);
+          var chart= new Highcharts.Chart(options);
+          makeGraphInfo(actualDash,selected,graph)
+        
+        }
+      }
+    })
+    dashConfiguration["#dash"+dash]=[]
   }
 
 }
@@ -1347,7 +1427,7 @@ function DashCreation(){
   $(".container-fluid").append('<div id="settings'+(numDash)+'"class="panel-body" hidden><ul><button onclick="showTimeSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="showAgingSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="showInfoSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Info widget</button></ul></div><div id="dash'+(numDash)+'" class="gridster ready" style="background-color:'+color+'"><ul></ul></div> ')
   $(".gridster ul").gridster({
     widget_margins: [6, 6],
-    widget_base_dimensions: [10, 10],
+    widget_base_dimensions: [20, 20],
     serialize_params: function($w, wgd) { 
         return { 
                id: $($w).attr('id'), 
@@ -1358,7 +1438,7 @@ function DashCreation(){
         };
     }
   }).data('gridster');
-  $("#dashboards").append('<li onclick="showDash('+numDash+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollDash'+numDash+'"><i class="fa fa-fw fa-edit"></i> Dashboard '+numDash+' <i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollDash'+numDash+'" class="collapse"><li><a onclick="showSettings('+numDash+')" href="javascript:void(0)">Add Graph</a></li><li><a onclick="deleteAllGraphs('+numDash+')" href="javascript:void(0)">Delete all</a></li></ul></li>')
+  $("#dashboards").append('<li onclick="showDash('+numDash+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollDash'+numDash+'"><i class="fa fa-fw fa-edit"></i> Panel '+numDash+' <i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollDash'+numDash+'" class="collapse"><li><a onclick="showSettings('+numDash+')" href="javascript:void(0)">Add Graph</a></li><li><a onclick="deleteAllGraphs('+numDash+')" href="javascript:void(0)">Delete all</a></li></ul></li>')
   if(actualDash==0){
     actualDash=1;
   }
