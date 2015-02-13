@@ -81,7 +81,33 @@ $(document).ready(function() {
             }
           });
       }else{
-        console.log("inicia descarga de dashboard por defecto")
+
+        //en otro caso solicito la descarga del fichero por defecto
+        $.ajax({
+            type: "GET",
+            url: "/db/0",
+            data: 0,
+            success: function(data){
+
+              dashConfiguration=JSON.parse(data);
+
+              //Antes de empezar creo todos los dashboards para evitarme problemas de dibujar
+              Object.keys(dashConfiguration).forEach(function(element){
+                DashCreation()
+              })
+
+              
+              //Para guardar como mínimo debo tener 1 dashboard, dash1 va a existir, esto significa
+              //que al menos puedo intentar pintarlo, y solo pinto este y lo muestro
+              //Cada dashboard se pinta cuando se desea ver
+    
+              makeDashboardContent(1)
+              numGraphActual(dashConfiguration)
+              actualDash= 1
+              dashConfiguration["#dash1"]=[]
+              $("#dash1").slideDown("slow");
+            }
+          });
       }
     }).fail(function(){
       alert("Los archivos de configuración no se han cargado correctamente. Sus gráficas no pueden ser reproducidas")
