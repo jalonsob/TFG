@@ -145,8 +145,16 @@ Martes a las 9:30
 	-Arreglar esto con python
 ++Ids no repetidas
 +panel por defecto
--Mirar el aplanamiento de gráficas y el objeto de cada panel y gráfica
++Ajustar panel de autores al nuevo tipo de modelo
+++Mirar pardear las gráficas de otro modo para no guardar el xAxis
+	*No caí en su momento pero cuando recreo una gráfica de edades no uso el xAxis
+	que guardo, simplemente lo guardo para evitar saturar el código (no añadir mas 		ifs). Es decir, si los json de edades se ampliaran las gráficas se ampliarían con 
+	estos.
++Mirar el aplanamiento de gráficas y el objeto de cada panel y gráfica
+	*Aún así no entiendo bien el tema de tratar a una gráfica como objeto
+	cuando ya lo es. Una simple función sí sería posible.
 -Mirar el arrastrar gráficas
+-Gif de cargado
 ++Escribir ciclo 3 y recordarlo
 -Mirar Heroku
 

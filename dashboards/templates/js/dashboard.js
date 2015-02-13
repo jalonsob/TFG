@@ -613,7 +613,7 @@ function makeGraphAges(dash,graph,toDraw){
       }
       series.push(objaux)
 
-      var title=takeinfo[toDraw[0].forma].inside.split(".")[0]+" "+takeinfo[toDraw[0].forma].inside.split(".")[1]
+      var title=takeinfo[toDraw[0].forma].inside.split(".")[0]+" "+takeinfo[toDraw[1].forma].inside.split(".")[0]
       var axisx=createAxisx(max).reverse();
       console.log(series)
       drawDemograph(series,axisx,title,graph)
@@ -719,7 +719,6 @@ function drawDemograph(series,axisx,title,graph){
                         events: {
                             click: function () {
                               makeAutorsGraph(this.category,title);
-                              console.log(this)
                             }
                         }
                     }
@@ -740,84 +739,137 @@ function makeAutorsGraph(categoria,title){
   var from= parseInt(aux[0])
   var to= parseInt(aux[1])
   if(jsons.length==2){
-      var graphicAging, graphicBirth;
-      var whereaging=takeinfo.aging;
-      var wherebirth=takeinfo.birth;
-      $.when(
-        $.getJSON("templates/json/"+whereaging).success(function(data) { 
-            graphicAging = data;
-        }),
-        $.getJSON("templates/json/"+wherebirth).success(function(data) {
-            graphicBirth = data;
-        })
-      ).then(function() {
-        var series= parseLookInfo(from,to,graphicAging)
-        series=parseLookInfo(from,to,graphicBirth,series)
-        numGraph+=1;
-        var inDash= "dash"+actualDash.toString()
-        color=($("#dash"+actualDash).css('background-color'))
-        var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-        gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 24);
+    var graphicAging, graphicBirth;
+    var whereaging=takeinfo.aging;
+    var wherebirth=takeinfo.birth;
+    
+    graphicAging=takeinfo[jsons[0].split("-")[2]].saveData
+    graphicBirth=takeinfo[jsons[1].split("-")[2]].saveData
+    var series= parseLookInfo(from,to,graphicAging)
+    series=parseLookInfo(from,to,graphicBirth,series)
+    series=parserAutorsData(series)
 
-        var options={
-                  chart:{
-                      renderTo:numGraph.toString(),
-                      width: 700,
-                      height: 400
-                  },
+    numGraph+=1;
+    var inDash= "dash"+actualDash.toString()
+    color=($("#dash"+actualDash).css('background-color'))
+    var gridster = $("#"+inDash+" ul").gridster().data('gridster');
+    var title="Usuarios entre "+from+"-"+to+" de "+title
 
-                  xAxis: {
-                    categories: ["Age"]
-                  },
-                  title: {
-                      text: "Usuarios entre "+from+"-"+to+" de "+title
-                  },
-                  series: parserAutorsData(series)
-        }
-        chart= new Highcharts.Chart(options);
-      }).fail(function(){
-        console.log("aun tengo que crear esto")
-      })
+
+    if((series.length)<=12 && (series.length)>=8){
+
+      gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 15, 12);
+
+    }else if((series.length)<8){
+
+      gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 12, 8);
+
+    }else{
+
+      gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 13);
+
+    }
+
+    drawAutorsGraph(numGraph,series)
+  
   }else{
-    var where= "templates/json/"+title+".json"
-    $.getJSON(where).success(function(data){
-        var series= parseLookInfo(from,to,data)
-        numGraph+=1;
-        var inDash= "dash"+actualDash.toString()
-        color=($("#dash"+actualDash).css('background-color'))
-        var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-        gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 24);
+    data=takeinfo[title.split("-")[2]].saveData
+    var series= parseLookInfo(from,to,data)
+    numGraph+=1;
+    var inDash= "dash"+actualDash.toString()
+    color=($("#dash"+actualDash).css('background-color'))
+    var gridster = $("#"+inDash+" ul").gridster().data('gridster');
+    series=parserAutorsData(series)
+    var title="Usuarios entre "+from+"-"+to+" de "+title
 
-        var options={
-                  chart:{
-                      renderTo:numGraph.toString(),
-                      width: 700,
-                      height: 400
-                  },
 
-                  xAxis: {
-                    categories: ["Age"]
-                  },
-                  title: {
-                      text: "Usuarios entre "+from+"-"+to+" de "+title
-                  },
-                  series: parserAutorsData(series)
-        }
-        chart= new Highcharts.Chart(options);
-      }).error(function(){
-        numGraph+=1;
-        var inDash= "dash"+actualDash.toString()
-        color=($("#dash"+actualDash).css('background-color'))
-        var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-        gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div> Hubo un error para descargar el json correspondiente</div>', 10, 10);
+    if((series.length)<=12 && (series.length)>=8){
 
-      })
+      gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 15, 12);
+
+    }else if((series.length)<8){
+
+      gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 12, 8);
+
+    }else{
+
+      gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 13);
+
+    }
+
+    drawAutorsGraph(numGraph,series)
+  
   }
+}
+
+
+//funcion para dibujar la grafica de autores de manera que sea mas facil
+//y agradable a la vista el representarla
+function drawAutorsGraph(id,serie,title){
+
+  if((serie.length)<=12 && (serie.length)>=8){
+
+    var options={
+      chart:{
+          renderTo: id.toString(),
+          width: 430,
+          height: 307
+      },
+
+      xAxis: {
+        categories: ["Age"]
+      },
+      title: {
+          text: title
+      },
+      series: serie
+    }
+
+  }else if((serie.length)<8){
+
+    var options={
+      chart:{
+          renderTo: id.toString(),
+          width: 340,
+          height: 177
+      },
+
+      xAxis: {
+        categories: ["Age"]
+      },
+      title: {
+          text: title
+      },
+      series: serie
+    }
+
+  }else{
+
+    var options={
+      chart:{
+          renderTo:numGraph.toString(),
+          width: 1050,
+          height: 337
+      },
+
+      xAxis: {
+        categories: ["Age"]
+      },
+      title: {
+          text: title
+      },
+      series: serie
+    }
+
+  }
+
+  chart= new Highcharts.Chart(options);
+
 }
 
 function parserAutorsData(series){
   var result=[];
-  for(i=0;i<=series.dato.length;i++){
+  for(i=0;i<series.dato.length;i++){
     objaux={
           type: "column",
           name: series.xAxis[i],
@@ -852,6 +904,7 @@ function parseLookInfo(from,to,data,aux){
   return result
 }
 
+//función que crea las categorias de una gráfica de edades
 function createAxisx(max){
   var result=[];
   for (i = 0; i < max; i++) {
@@ -860,6 +913,7 @@ function createAxisx(max){
   return result
 }
 
+//función que me clasifica las edades
 function parserDemograph(data){
   var aux=0;
   var result=[];
