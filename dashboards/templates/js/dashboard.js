@@ -73,85 +73,15 @@ $(document).ready(function() {
               //que al menos puedo intentar pintarlo, y solo pinto este y lo muestro
               //Cada dashboard se pinta cuando se desea ver
     
-              dashConfiguration["#dash1"].forEach(function(x){
-
-                var graph=parseInt(x.graph);
-                var inDash= "dash1"
-                var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-                color=($("#"+inDash).css('background-color'))
-
-                if(numGraph<graph){
-                  numGraph=graph
-                }
-
-
-                var options={
-                  chart:{
-                    renderTo: x.graph,
-                      width: 100,
-                      height: 100
-                    },
-                    xAxis: {
-                      categories: []
-                    },
-                    title: {
-                        text: ""
-                    },
-                    series: []
-                }
-
-                if(x.title==takeinfo.aging.inside.split(".")[0] || x.title==takeinfo.birth.inside.split(".")[0] || x.title.split(" ").length==2){
-
-                  var toDraw=[]
-
-                  x.series.forEach(function(y){
-                    var objaux={
-                      forma: y.name,
-                      color: getRandomColor()
-                    }
-                    toDraw.push(objaux)
-
-                  })
-
-                  gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 23, 22);
-                  var chart= new Highcharts.Chart(options);
-
-                  makeGraphAges(actualDash,graph,toDraw)                      
-                  
-                }else{
-
-                  var selected = [];
-
-                  x.series.forEach(function(y){
-                    var objaux = {
-                      name: y.name,
-                      form: y.type,
-                    }
-                    selected.push(objaux)
-
-                  })
-                  if(x.title==takeinfo.evolutionary.inside){
-
-                    from=configuration.time.indexOf(x.xAxis[0])
-                    to=configuration.time.indexOf(x.xAxis[x.xAxis.length-1])
-                    
-                    remakeGraphSeries(actualDash,selected,from,to,graph)
-
-                  }else if(x.title==takeinfo.static.inside){
-
-                    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 17, 12);
-                    var chart= new Highcharts.Chart(options);
-                    makeGraphInfo(actualDash,selected,graph)
-                  
-                  }
-                }
-              })
+              makeDashboardContent(1)
+              numGraphActual(dashConfiguration)
               actualDash= 1
               dashConfiguration["#dash1"]=[]
               $("#dash1").slideDown("slow");
-              $("#settings1").slideDown("slow");
             }
           });
+      }else{
+        console.log("inicia descarga de dashboard por defecto")
       }
     }).fail(function(){
       alert("Los archivos de configuración no se han cargado correctamente. Sus gráficas no pueden ser reproducidas")
@@ -216,25 +146,42 @@ $(document).ready(function() {
 
       //Para guardar comprobamos que no nos encontramos ya en un dashboard guardado
       if(document.URL.split("/")[document.URL.split("/").length-1]==""){
-        var id= Math.floor((Math.random() * 1000000000000000) + 1)
-        var envio={
-          N: id,
-          C: finalObj
-        }
-        var data = {
-          foo: 'bar',
-          faa: 'asdf'
-        }
-        //y creamos uno nuevo con un post al recurso /db/
+
         $.ajax({
-          type: "POST",
+          type: "GET",
           url: "/db/",
-          data: JSON.stringify(envio),
           success: function(data){
-            alert(data)
+            var idList= data.split(",")
+            if(idList.length==1000000000000000){
+              alert("Lo sentimos el servidor está lleno.")
+            }else{
+
+              var id= Math.floor((Math.random() * 1000000000000000) + 1)
+              
+              while((idList.indexOf(id)!=-1) && id!=0000000000000000){
+                id= Math.floor((Math.random() * 1000000000000000) + 1)
+              }
+
+              var envio={
+                N: id,
+                C: finalObj
+              }
+
+              //y creamos uno nuevo con un post al recurso /db/
+              $.ajax({
+                type: "POST",
+                url: "/db/",
+                data: JSON.stringify(envio),
+                success: function(data){
+                  alert(data)
+                }
+              });
+
+              window.history.replaceState("object or string", "Title", id);
+            }
           }
         });
-        window.history.replaceState("object or string", "Title", id);
+
       }else{
         //en otro caso se realiza un put al recurso /db/<integer>
         var envio={
@@ -905,7 +852,14 @@ function parserDemograph(data){
 function settingsDemoGraph(numGraph){
   var chart = $('#'+numGraph).highcharts();
   var auxseries;
-  $("#settings"+actualDash).append('<div id="actualMenu"></div>')
+
+  $("#making").slideDown("slow")
+
+  if($("#actualMenu")){
+    $("#actualMenu").remove();
+  }
+
+  $("#conten").append('<div id="actualMenu"></div>')
   if(existLabel(chart,"aging")){
     auxseries=getSeriesbyName(chart,"aging");
     $("#actualMenu").append('<p><div class="form-group"><label><input id="aging" type="checkbox" value="aging" checked>Aging</label><input placeholder="'+auxseries.color+'" id="agingColor" class="form-control"></div></p>')
@@ -1137,7 +1091,7 @@ function drawGraphTimes(graph,serie,title,from,to,xAxis){
 
   var chart = $('#'+graph).highcharts();
 
-  if((to-from)<=12 && (to-from)>8){
+  if((to-from)<=12 && (to-from)>=8){
     var options={
       chart:{
           renderTo:graph.toString(),
@@ -1215,7 +1169,13 @@ function settingsTimeGraph(numGraph){
   var chart = $('#'+numGraph).highcharts();
   var keys=configuration.evolutionary
   var auxseries;
-  $("#settings"+actualDash).append('<div id="actualMenu"></div>')
+  $("#making").slideDown("slow")
+
+  if($("#actualMenu")){
+    $("#actualMenu").remove();
+  }
+  $("#conten").append('<div id="actualMenu"></div>')
+
   keys.forEach(function(element){
     if(existLabel(chart,element)){
       auxseries=getSeriesbyName(chart,element);
@@ -1269,18 +1229,37 @@ function showDash(dash){
     $("#dash"+dash).slideDown("slow");
 
     actualDash=dash;
+    makeDashboardContent(dash)
+  }
 
-    dashConfiguration["#dash"+dash].forEach(function(x){
+}
+
+//función que a partir del json de configuración mira cual es el numero
+//actual de gráfica
+function numGraphActual(dashConfiguration){
+
+  Object.keys(dashConfiguration).forEach(function(element){
+    
+    dashConfiguration[element].forEach(function(graph){
+      if(numGraph < graph.graph){
+        numGraph= graph.graph
+      }
+    })
+
+  })
+
+}
+
+//función que dado un dashboard indicado a partir de la configuración descargada
+//lo dibuja con todo su contenido
+function makeDashboardContent(dash){
+
+  dashConfiguration["#dash"+dash].forEach(function(x){
 
       var graph=parseInt(x.graph);
       var inDash= "dash"+dash
       var gridster = $("#"+inDash+" ul").gridster().data('gridster');
       color=($("#"+inDash).css('background-color'))
-
-      if(numGraph<graph){
-        numGraph=graph
-      }
-
 
       var options={
         chart:{
@@ -1336,16 +1315,14 @@ function showDash(dash){
 
         }else if(x.title==takeinfo.static.inside){
 
-          gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+inDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 17, 12);
+          gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 12, 8);
           var chart= new Highcharts.Chart(options);
           makeGraphInfo(actualDash,selected,graph)
         
         }
       }
     })
-    dashConfiguration["#dash"+dash]=[]
-  }
-
+  dashConfiguration["#dash"+dash]=[]
 }
 
 //funcion para eliminar todas las graficas del dash de donde estamos trabajando
@@ -1363,17 +1340,6 @@ function deleteGraph(dash,num){
 }
 
 //**********************************  FUNCIONES DE FILTRADO Y SELECCION DE DATOS ********************////
-
-//funcion para obtener un dato de toda la info descargada
-function findInfo(path){
-  var result;
-    allInfo.forEach(function(element){
-    if(element.inside.indexOf(element)){
-      result=element;
-    }
-  });
-  return result
-}
 
 //función que filtra eliminando una key concreta para filtrar sin la fecha que es siempre igual
 function filterKeyDate(element){

@@ -16,7 +16,7 @@ def totalList(request):
 		d=json.loads(request.body)
 		T_Plantilla= Plantilla(n=d['N'],json=json.dumps(d['C']))
 		T_Plantilla.save()
-		return HttpResponse("Su dashboard ha sido creado")
+		return HttpResponse("Su dashboard ha sido creado. No olvide guardar la url personal de su entorno de trabajo.")
 	elif request.method=='GET':
 		Plantillas = Plantilla.objects.all()
 		response=''
@@ -40,5 +40,6 @@ def actualizeDash(request):
 		T_Plantilla= Plantilla.objects.get(n=d)
 		return HttpResponse(T_Plantilla.json)
 		
-	
+def defaultDash(request):
+	print "hola"
 	
