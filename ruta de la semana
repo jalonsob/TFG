@@ -154,7 +154,11 @@ Martes a las 9:30
 	*Aún así no entiendo bien el tema de tratar a una gráfica como objeto
 	cuando ya lo es. Una simple función sí sería posible.
 +Mirar pedir en formato json
--Mirar el arrastrar gráficas
+—-Mirar el arrastrar gráficas:
+	*Se ha mirado y de momento no se puede. La razón es que debería parsear la gráfica
+	antes de continuar a pasarla a otro sitio, es decir, debería crearla de nuevo.
+	Copiar y pegar el html no es suficiente. La cuestión está ahora en cómo hacer
+	el aplanamiento
 +Gif de cargado
 ++Escribir ciclo 3 y recordarlo
 -Mirar Heroku
