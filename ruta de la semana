@@ -142,7 +142,7 @@ Martes a las 9:30
 +panel se muestra solo cuando se clicle
 +comprobar que me llega un numero en la url
 	*No se puede, python recrea que obligatoriamente debe ser un numero u otra cosa
-	-Arreglar esto con python
+	-Arreglar esto con python si es necesario
 ++Ids no repetidas
 +panel por defecto
 +Ajustar panel de autores al nuevo tipo de modelo
@@ -153,8 +153,9 @@ Martes a las 9:30
 +Mirar el aplanamiento de gráficas y el objeto de cada panel y gráfica
 	*Aún así no entiendo bien el tema de tratar a una gráfica como objeto
 	cuando ya lo es. Una simple función sí sería posible.
++Mirar pedir en formato json
 -Mirar el arrastrar gráficas
--Gif de cargado
++Gif de cargado
 ++Escribir ciclo 3 y recordarlo
 -Mirar Heroku
 

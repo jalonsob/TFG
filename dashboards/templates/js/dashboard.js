@@ -59,10 +59,10 @@ $(document).ready(function() {
             type: "GET",
             url: "/db/"+N,
             data: N.toString(),
+            dataType: "json",
             success: function(data){
 
-              dashConfiguration=JSON.parse(data);
-
+              dashConfiguration=data;
               //Antes de empezar creo todos los dashboards para evitarme problemas de dibujar
               Object.keys(dashConfiguration).forEach(function(element){
                 DashCreation()
@@ -73,10 +73,9 @@ $(document).ready(function() {
               //que al menos puedo intentar pintarlo, y solo pinto este y lo muestro
               //Cada dashboard se pinta cuando se desea ver
     
-              makeDashboardContent(1)
               numGraphActual(dashConfiguration)
+              makeDashboardContent(1)
               actualDash= 1
-              dashConfiguration["#dash1"]=[]
               $("#dash1").slideDown("slow");
             }
           });
@@ -87,12 +86,13 @@ $(document).ready(function() {
             type: "GET",
             url: "/db/0",
             data: 0,
+            dataType: "json",
             success: function(data){
 
-              dashConfiguration=JSON.parse(data);
+              dashConfiguration=data;
 
               //Antes de empezar creo todos los dashboards para evitarme problemas de dibujar
-              Object.keys(dashConfiguration).forEach(function(element){
+              Object.keys(data).forEach(function(element){
                 DashCreation()
               })
 
@@ -100,11 +100,10 @@ $(document).ready(function() {
               //Para guardar como mínimo debo tener 1 dashboard, dash1 va a existir, esto significa
               //que al menos puedo intentar pintarlo, y solo pinto este y lo muestro
               //Cada dashboard se pinta cuando se desea ver
-    
-              makeDashboardContent(1)
               numGraphActual(dashConfiguration)
+              makeDashboardContent(1)
               actualDash= 1
-              dashConfiguration["#dash1"]=[]
+              
               $("#dash1").slideDown("slow");
             }
           });
@@ -304,7 +303,7 @@ function makeGraphInfo(dash,selected,graph){
     var inDash= "dash"+dash.toString()
     var gridster = $("#"+inDash+" ul").gridster().data('gridster');
     color=($("#dash"+dash).css('background-color'))
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 12, 8);
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"><img id="load'+graph+'" src="/templates/images/cargando.gif" height="42" width="42"> </div></div>', 12, 8);
   }else{
     //en otro caso cojo el chart ya creado y es el que uso para primero destruirlo y luego crearlo de nuevo
     var chart = $('#'+graph).highcharts();
@@ -355,6 +354,9 @@ function makeGraphInfo(dash,selected,graph){
 
 //función que dibuja una gráfica de tipo Info
 function drawGraphInfo(id,serie,title){
+
+  $("#load"+id).remove()
+
   var options={
       chart:{
           renderTo:id.toString(),
@@ -1043,16 +1045,16 @@ function makeGraphSeries(dash,selected,from,to,graph){
   color=($("#dash"+dash).css('background-color'))
   if((to-from)<=12 && (to-from)>=8){
 
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 15, 12);
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> <img id="load'+numGraph+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>', 15, 12);
 
   }else if((to-from)<8){
 
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 12, 8);
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"><img id="load'+numGraph+'" src="/templates/images/cargando.gif" height="42" width="42"> </div></div>', 12, 8);
 
 
   }else{
 
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 13);
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> <img id="load'+numGraph+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>', 34, 13);
 
   }
   
@@ -1112,16 +1114,16 @@ function remakeGraphSeries(dash,selected,from,to,graph){
   color=($("#dash"+dash).css('background-color'))
   if((to-from)<=12 && (to-from)>=8){
 
-    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 15, 12);
+    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> <img id="load'+graph+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>', 15, 12);
 
   }else if((to-from)<8){
 
-    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 12, 8);
+    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> <img id="load'+graph+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>', 12, 8);
 
 
   }else{
 
-    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 34, 13);
+    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> <img id="load'+graph+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>', 34, 13);
 
   }
   
@@ -1168,6 +1170,8 @@ function remakeGraphSeries(dash,selected,from,to,graph){
 //función para dibujar una gráfica de tipo Times con el tamaño
 //que corresponde
 function drawGraphTimes(graph,serie,title,from,to,xAxis){
+
+  $("#load"+graph).remove()
 
   var chart = $('#'+graph).highcharts();
 
@@ -1317,12 +1321,15 @@ function showDash(dash){
 //función que a partir del json de configuración mira cual es el numero
 //actual de gráfica
 function numGraphActual(dashConfiguration){
-
+  console.log("aqui")
   Object.keys(dashConfiguration).forEach(function(element){
-    
+    console.log(element)
+    console.log(dashConfiguration[element])
     dashConfiguration[element].forEach(function(graph){
+      console.log(graph)
       if(numGraph < graph.graph){
         numGraph= graph.graph
+        console.log(graph.graph)
       }
     })
 
