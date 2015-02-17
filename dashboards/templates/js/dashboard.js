@@ -1,15 +1,15 @@
-//Jesús Alonso Barrionuevo. Grado en Ingeniería de las Tecnologías de la Telecomunicación
+//Jesús Alonso Barrionuevo. Degree in Engineering Technologies Telecommunications
 
-//Eventos de estado:
-//-ErrorGraphInfo: Creación de un div de gráfica errónea
-//-ErrorGraphTimes: Creación de un div de gráfica errónea
-//-ErrorGraphAges: Creación de un div de gráfica errónea
-//-ErrorGraphAgesD: Creación de un div de gráfica errónea
-//*Nota: los eventos de error tiran de la misma funcion pero es necesario que sean distintos
-//-DrawInfo: Creación de una gráfica de tipo Info
-//-DrawTimes: Creación de una gráfica de tipo Times
-//-DrawAges: Creación de una gráfica de tipo Ages
-//-DrawAgesD: Creación de una gráfica de tipo Ages con dos JSON
+//Events of state:
+//-ErrorGraphInfo: Creation of div of error
+//-ErrorGraphTimes: Creation of div of error
+//-ErrorGraphAges: Creation of div of error
+//-ErrorGraphAgesD: Creation of div of error
+//*Nota: Events of error uses the same function to create an error div
+//-DrawInfo: Creation of a graph of type Info
+//-DrawTimes: Creation of a graph of type Time
+//-DrawAges: Creation of a graph of type Age
+//-DrawAgesD: Creation of a graph of type Ages that uses two jsons
 
 
 //Variables
@@ -22,7 +22,7 @@ var dashConfiguration={}
 
 $(document).ready(function() {
 
-    //Petición de las keys de configuracion
+    //Request of configuration keys
 
     $.when(
       $.getJSON("templates/json/configurationfile.json").success(function(data){
@@ -31,9 +31,9 @@ $(document).ready(function() {
         })
       }),
 
-      //Petición de los ficheros de los que voy a tener que sacar los datos
-      //Cada key es un objeto que posee tres estados:
-      // --0: no lo tengo, --1: lo he pedido, --2: lo tengo
+      //Request of files of configuration to know where to read our data
+      //Each kind of data has three states:
+      // --0: not, --1: in demand, --2: is there
 
       $.getJSON("templates/json/referenceinfo.json").success(function(data){
         var objaux;
@@ -48,13 +48,12 @@ $(document).ready(function() {
       })
     ).done(function(){
 
-        //Zona de cargado de un fichero existente, antes de comenzar compruebo que me han metido una id
-        //de una plantilla de dashboard
+      //Zone of loading of a json configuration of a determinate personalized dashboard
       if(document.URL.split("/")[document.URL.split("/").length-1]!=''){
 
           var N= document.URL.split("/")[document.URL.split("/").length-1]
 
-          //Realizo una peticion al servidor OJO HAY QUE PARSEAR LA RESPUESTA ESTO HAY QUE CAMBIARLO
+          //We make a request to our server for the personalized json
           $.ajax({
             type: "GET",
             url: "/db/"+N,
@@ -63,15 +62,14 @@ $(document).ready(function() {
             success: function(data){
 
               dashConfiguration=data;
-              //Antes de empezar creo todos los dashboards para evitarme problemas de dibujar
+              //Before to begin we make the dashboards to put in each of them their widgets
               Object.keys(dashConfiguration).forEach(function(element){
                 DashCreation()
               })
 
               
-              //Para guardar como mínimo debo tener 1 dashboard, dash1 va a existir, esto significa
-              //que al menos puedo intentar pintarlo, y solo pinto este y lo muestro
-              //Cada dashboard se pinta cuando se desea ver
+              //To make a save we have to have a panel as minimum.
+              //That means that we can try to draw a panel if we have one.
     
               numGraphActual(dashConfiguration)
               makeDashboardContent(1)
@@ -113,9 +111,8 @@ $(document).ready(function() {
     })
   
 
-  //ZONA DE PRUEBAS
 
-  //Boton de guardado
+  //Save button
   $("#save").click(function(){
 
     var finalObj={}
@@ -187,7 +184,7 @@ $(document).ready(function() {
                 id= Math.floor((Math.random() * 1000000000000000) + 1)
               }
 
-              var envio={
+              var send={
                 N: id,
                 C: finalObj
               }
@@ -196,7 +193,7 @@ $(document).ready(function() {
               $.ajax({
                 type: "POST",
                 url: "/db/",
-                data: JSON.stringify(envio),
+                data: JSON.stringify(send),
                 success: function(data){
                   alert(data)
                 }
@@ -209,14 +206,14 @@ $(document).ready(function() {
 
       }else{
         //en otro caso se realiza un put al recurso /db/<integer>
-        var envio={
+        var send={
           N: document.URL.split("/")[document.URL.split("/").length-1],
           C: finalObj
         }
         $.ajax({
           type: "PUT",
           url: "/db/"+document.URL.split("/")[document.URL.split("/").length-1].toString(),
-          data: JSON.stringify(envio),
+          data: JSON.stringify(send),
           success: function(data){
             alert(data)
           }
@@ -271,14 +268,14 @@ function showInfoSettings(dash){
 
 //funcion para recoger los datos para crear la grafica
 function takeDataInfo(numGraph){
-  var forma=$("#actualMenu input[type='radio']:checked").attr("value");
-  if(forma!=undefined){
+  var form=$("#actualMenu input[type='radio']:checked").attr("value");
+  if(form!=undefined){
     var selected = [];
-    var forma=$("#actualMenu input[type='radio']:checked").attr("value");
+    var form=$("#actualMenu input[type='radio']:checked").attr("value");
     $("#actualMenu input[type='checkbox']:checked").each(function() {
       objaux={
         name:$(this).attr('value'),
-        form: forma
+        form: form
       }
       selected.push(objaux);
     });
@@ -461,7 +458,7 @@ function takeDataDemo(graph){
       colorbar=$("#actualMenu #agingColor").val()
     }
     var objaux={
-      forma: "aging",
+      form: "aging",
       color: colorbar
     }
     toDraw.push(objaux)
@@ -474,7 +471,7 @@ function takeDataDemo(graph){
       colorbar=$("#actualMenu #birthColor").val()
     }
     var objaux={
-      forma: "birth",
+      form: "birth",
       color: colorbar
     }
     toDraw.push(objaux)
@@ -522,12 +519,12 @@ function makeGraphAges(dash,graph,toDraw){
       max=dato.length
       var objaux={
             type: "bar",
-            name: toDraw[0].forma,
+            name: toDraw[0].form,
             data: dato.reverse(),
             color: toDraw[0].color
       }
       series.push(objaux)
-      title+=takeinfo[toDraw[0].forma].inside.split(".")[0]
+      title+=takeinfo[toDraw[0].form].inside.split(".")[0]
 
       var axisx=createAxisx(max).reverse()
 
@@ -570,12 +567,12 @@ function makeGraphAges(dash,graph,toDraw){
       max=dato.length
       var objaux={
             type: "bar",
-            name: toDraw[0].forma,
+            name: toDraw[0].form,
             data: dato.reverse(),
             color: toDraw[0].color
       }
       series.push(objaux)
-      title+=takeinfo[toDraw[0].forma].inside.split(".")[0]
+      title+=takeinfo[toDraw[0].form].inside.split(".")[0]
 
       var axisx=createAxisx(max).reverse()
       //Si ya lo tenemos parseamos los datos y dibujamos
@@ -599,7 +596,7 @@ function makeGraphAges(dash,graph,toDraw){
       
       var objaux={
             type: "bar",
-            name: toDraw[0].forma,
+            name: toDraw[0].form,
             data: dato,
             color: toDraw[0].color
       }
@@ -609,13 +606,13 @@ function makeGraphAges(dash,graph,toDraw){
       
       var objaux={
             type: "bar",
-            name: toDraw[1].forma,
+            name: toDraw[1].form,
             data: dato,
             color: toDraw[1].color
       }
       series.push(objaux)
 
-      var title=takeinfo[toDraw[0].forma].inside.split(".")[0]+" "+takeinfo[toDraw[1].forma].inside.split(".")[0]
+      var title=takeinfo[toDraw[0].form].inside.split(".")[0]+" "+takeinfo[toDraw[1].form].inside.split(".")[0]
       var axisx=createAxisx(max).reverse();
       console.log(series)
       drawDemograph(series,axisx,title,graph)
@@ -630,13 +627,13 @@ function makeGraphAges(dash,graph,toDraw){
 
     //Si cualquiera de los dos widgets falla debo hacer un allamada, lo mismo da que se haga a dos cosas
     //si la que ya he pedido funcionó volverá a hacerlo
-    if((takeinfo[toDraw[0].forma].state==0) || (takeinfo[toDraw[1].forma].state==0)){
+    if((takeinfo[toDraw[0].form].state==0) || (takeinfo[toDraw[1].form].state==0)){
       //establezco pautas de partes con jquery y coloco mi estado a "pedido"
-      takeinfo[toDraw[0].forma].state=1
-      takeinfo[toDraw[1].forma].state=1
+      takeinfo[toDraw[0].form].state=1
+      takeinfo[toDraw[1].form].state=1
 
       $.when(
-        $.getJSON("templates/json/"+takeinfo[toDraw[0].forma].inside).success(function(data) { 
+        $.getJSON("templates/json/"+takeinfo[toDraw[0].form].inside).success(function(data) { 
             toDraw[0].save = data;
         }),
         $.getJSON("templates/json/"+takeinfo[toDraw[1].forma].inside).success(function(data) {
@@ -644,35 +641,35 @@ function makeGraphAges(dash,graph,toDraw){
         })
       ).done(function() {
         //si lo hemos conseguido actualizamos nuestros datos
-        takeinfo[toDraw[0].forma].state=2
-        takeinfo[toDraw[0].forma].saveData=toDraw[0].save
+        takeinfo[toDraw[0].form].state=2
+        takeinfo[toDraw[0].form].saveData=toDraw[0].save
 
-        takeinfo[toDraw[1].forma].state=2
-        takeinfo[toDraw[1].forma].saveData=toDraw[1].save
+        takeinfo[toDraw[1].form].state=2
+        takeinfo[toDraw[1].form].saveData=toDraw[1].save
 
         $("*").trigger("DrawAgesD",["DrawAgesD",data])
 
       }).fail(function(){
         //en caso de equivocarnos no nos olvidemos de colocar todo a 0
-        takeinfo[toDraw[0].forma].state=0
-        takeinfo[toDraw[1].forma].state=0
+        takeinfo[toDraw[0].form].state=0
+        takeinfo[toDraw[1].form].state=0
 
         $("*").trigger("ErrorGraphAgesD")
 
       })
 
-    }else if((takeinfo[toDraw[0].forma].state==2) && (takeinfo[toDraw[1].forma].state==2)){
+    }else if((takeinfo[toDraw[0].form].state==2) && (takeinfo[toDraw[1].form].state==2)){
 
       //Si ya lo tenemos todo nos limitamos a dibujar como hacemos arriba
       var series=[]
 
-      if(parserDemograph(takeinfo[toDraw[0].forma].saveData).length>=parserDemograph(takeinfo[toDraw[1].forma].saveData).length){
-        max=parserDemograph(takeinfo[toDraw[0].forma].saveData).length
+      if(parserDemograph(takeinfo[toDraw[0].form].saveData).length>=parserDemograph(takeinfo[toDraw[1].form].saveData).length){
+        max=parserDemograph(takeinfo[toDraw[0].form].saveData).length
       }else{
-        max=parserDemograph(takeinfo[toDraw[1].forma].saveData).length
+        max=parserDemograph(takeinfo[toDraw[1].form].saveData).length
       }
 
-      var dato=parserDemograph(takeinfo[toDraw[0].forma].saveData).reverse()
+      var dato=parserDemograph(takeinfo[toDraw[0].form].saveData).reverse()
       
       var objaux={
             type: "bar",
@@ -682,7 +679,7 @@ function makeGraphAges(dash,graph,toDraw){
       }
       series.push(objaux)
 
-      var dato=parserDemograph(takeinfo[toDraw[1].forma].saveData).reverse()
+      var dato=parserDemograph(takeinfo[toDraw[1].form].saveData).reverse()
       
       var objaux={
             type: "bar",
@@ -692,7 +689,7 @@ function makeGraphAges(dash,graph,toDraw){
       }
       series.push(objaux)
 
-      var title=takeinfo[toDraw[0].forma].inside.split(".")[0]+" "+takeinfo[toDraw[0].forma].inside.split(".")[1]
+      var title=takeinfo[toDraw[0].form].inside.split(".")[0]+" "+takeinfo[toDraw[0].form].inside.split(".")[1]
       var axisx=createAxisx(max).reverse();
       console.log(series)
       drawDemograph(series,axisx,title,graph)
@@ -1054,7 +1051,7 @@ function makeGraphSeries(dash,selected,from,to,graph){
 
   }else{
 
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> <img id="load'+numGraph+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>', 34, 13);
+    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> <img id="load'+numGraph+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>', 31, 13);
 
   }
   
@@ -1123,7 +1120,7 @@ function remakeGraphSeries(dash,selected,from,to,graph){
 
   }else{
 
-    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> <img id="load'+graph+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>', 34, 13);
+    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> <img id="load'+graph+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>', 31, 13);
 
   }
   
@@ -1211,7 +1208,7 @@ function drawGraphTimes(graph,serie,title,from,to,xAxis){
     var options={
       chart:{
           renderTo:graph.toString(),
-          width: 1050,
+          width: 900,
           height: 337
       },
       xAxis: {
@@ -1321,15 +1318,13 @@ function showDash(dash){
 //función que a partir del json de configuración mira cual es el numero
 //actual de gráfica
 function numGraphActual(dashConfiguration){
-  console.log("aqui")
   Object.keys(dashConfiguration).forEach(function(element){
-    console.log(element)
-    console.log(dashConfiguration[element])
+
     dashConfiguration[element].forEach(function(graph){
-      console.log(graph)
+
       if(numGraph < graph.graph){
         numGraph= graph.graph
-        console.log(graph.graph)
+
       }
     })
 
