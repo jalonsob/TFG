@@ -13,15 +13,22 @@
 
 
 //Variables
-var actualDash=0;
-var numDash=0;
+
+//variables to count widgets and panels
+var actualPanel=0;
+var numPanel=0;
 var numGraph=0;
+//variables to get the configuration from a dashboard
+var dashConfiguration={};
+//configuration of files where we will read
 var configuration={};
-var takeinfo={}
-var dashConfiguration={}
+var takeinfo={};
+//Caché that has all widgets
+var dashToSave={};
+var widgets=[]
+
 
 $(document).ready(function() {
-
     //Request of configuration keys
 /*
     $.when(
@@ -224,16 +231,15 @@ $(document).ready(function() {
 
   })
 */
-
   $("#addDash").click(function(){
     DashCreation()
   })
 
 });
 
-//Mostramos las opciones de creación de tipos de gráficas
-function showSettings(dash){
-  $("#settings"+dash).slideDown();
+//Function to show the settings to create new widgets
+function showSettings(panel){
+  $("#settings"+panel).slideDown();
 
 }
 
@@ -420,7 +426,7 @@ function settingsInfoGraph(numGraph){
   $("#actualMenu").append('<button onclick="takeDataInfo('+numGraph+')" type="button" class="btn btn-xs btn-default">Create</button>')
   $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
 }
-
+*/
 //*******************************************************************************************************//
 //************************************** Crear una gráfica del tipo Aging chart *************************//
 //*******************************************************************************************************//
@@ -956,7 +962,7 @@ function settingsDemoGraph(numGraph){
   $("#actualMenu").append('<button onclick="takeDataDemo('+numGraph+')" type="button" class="btn btn-xs btn-default">Redraw</button>')
   $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
 }
-
+*/
 //*******************************************************************************************************//
 //************************************** Crear una gráfica del tipo Time series chart *******************//
 //*******************************************************************************************************//
@@ -1299,23 +1305,9 @@ function resetRatios(element1,element2){
   element1.checked=false;
   element2.checked=false;
 }
-
+*/
 //************************************************ FUNCIONES DE MOVIMIENTOS DEL DASH Y DEMÁS************
-
-//funcion para mostrar el dash en el que estamos trabajando
-function showDash(dash){
-  if(actualDash!=dash){
-    //cortamos el anterior y mostramos el nuevo
-    $("#dash"+actualDash).slideUp("slow");
-    $("#settings"+actualDash).slideUp("slow");
-    $("#actualMenu").remove();
-    $("#dash"+dash).slideDown("slow");
-
-    actualDash=dash;
-    makeDashboardContent(dash)
-  }
-
-}
+/*
 
 //función que a partir del json de configuración mira cual es el numero
 //actual de gráfica
@@ -1408,9 +1400,9 @@ function makeDashboardContent(dash){
     })
   dashConfiguration["#dash"+dash]=[]
 }
-
+*/
 //**********************************  FUNCIONES DE FILTRADO Y SELECCION DE DATOS ********************////
-
+/*
 //función que filtra eliminando una key concreta para filtrar sin la fecha que es siempre igual
 function filterKeyDate(element){
   return element != "date";
@@ -1418,12 +1410,6 @@ function filterKeyDate(element){
 
 function filterKeyURL(element){
   return element != "url";
-}
-
-//funcion para obtener un color ramdon
-function getRandomColor() {
-    var colors= ["#EBA550","#95EB50","#5095EB","#745CDF","#DE5169","#9DE0DF","#E0E060"]
-    return colors[Math.floor(Math.random() * 7)]
 }
 
 //función para saber si un elemento está dentro e un chart
@@ -1455,12 +1441,35 @@ function drawErrorWidget(graph){
   $("#graph"+graph).attr("data-sizey",10)
   $("#"+graph).append("Error al cargar los datos requeridos")
 }
+*/
 
-//función que crea un nuevo dashboard
+//Function to show a panel and its settings of creation of graphs
+function showPanel(panel){
+  if(actualPanel!=panel){
+    //We hide the previous panel and we show the new
+    $("#dash"+actualPanel).slideUp("slow");
+    $("#settings"+actualPanel).slideUp("slow");
+    $("#actualMenu").remove();
+    $("#dash"+panel).slideDown("slow");
+
+    actualDash=panel;
+    //makeDashboardContent(panel)
+  }
+
+}
+
+//Function get a random color from a list
+function getRandomColor() {
+    var colors= ["#25A2E1","#AED4E8","#4FBDFF","#79ACCC","#67B0E3"]
+    return colors[Math.floor(Math.random() * 5)]
+}
+
+//Function to create a new panel
 function DashCreation(){
-  numDash+=1;
+  numPanel+=1;
+  dashToSave["#panel"+numPanel]=[]
   var color=getRandomColor()
-  $(".container-fluid").append('<div id="settings'+(numDash)+'"class="panel-body" hidden><ul><button onclick="showTimeSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="showAgingSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="showInfoSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Info widget</button></ul></div><div id="panel'+(numDash)+'" class="gridster ready" style="background-color:'+color+'"><ul></ul></div> ')
+  $(".container-fluid").append('<div id="settings'+(numPanel)+'"class="panel-body" hidden><ul><button onclick="showTimeSettings('+numPanel+')" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="showAgingSettings('+numPanel+')" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="showInfoSettings('+numPanel+')" type="button" class="btn btn-xs btn-default">Info widget</button></ul></div><div id="panel'+(numPanel)+'" class="gridster ready" style="background-color:'+color+'"><ul></ul></div> ')
   $(".gridster ul").gridster({
     widget_margins: [6, 6],
     widget_base_dimensions: [20, 20],
@@ -1474,9 +1483,9 @@ function DashCreation(){
         };
     }
   }).data('gridster');
-  $("#dashboards").append('<li onclick="showDash('+numDash+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollDash'+numDash+'"><i class="fa fa-fw fa-edit"></i> Panel '+numDash+' <i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollDash'+numDash+'" class="collapse"><li><a onclick="showSettings('+numDash+')" href="javascript:void(0)">Add Graph</a></li><li><a onclick="deleteAllGraphs('+numDash+')" href="javascript:void(0)">Delete all</a></li></ul></li>')
-  if(actualDash==0){
-    actualDash=1;
+  $("#panels").append('<li onclick="showPanel('+numPanel+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollPanel'+numPanel+'"><i class="fa fa-fw fa-edit"></i> Panel '+numPanel+' <i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollPanel'+numPanel+'" class="collapse"><li><a onclick="showSettings('+numPanel+')" href="javascript:void(0)">Add Graph</a></li><li><a onclick="deleteAllGraphs('+numPanel+')" href="javascript:void(0)">Delete all</a></li></ul></li>')
+  if(actualPanel==0){
+    actualPanel=1;
   }
 }
 
