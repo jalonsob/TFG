@@ -23,7 +23,7 @@ var dashConfiguration={}
 $(document).ready(function() {
 
     //Request of configuration keys
-
+/*
     $.when(
       $.getJSON("templates/json/configurationfile.json").success(function(data){
         Object.keys(data).forEach(function(element){
@@ -223,7 +223,7 @@ $(document).ready(function() {
     }
 
   })
-
+*/
 
   $("#addDash").click(function(){
     DashCreation()
@@ -236,10 +236,12 @@ function showSettings(dash){
   $("#settings"+dash).slideDown();
 
 }
+
 //******************************************************************************************************//
 //************************************** Crear una gráfica del tipo Info chart *************************//
 //******************************************************************************************************//
 
+/*
 //función que crea un actual menu y lo rellena con las métricas de INFO
 //--Esta función hay que modificarla con las futuras nuevas métricas y el menu desplegable
 function showInfoSettings(dash){
@@ -422,7 +424,7 @@ function settingsInfoGraph(numGraph){
 //*******************************************************************************************************//
 //************************************** Crear una gráfica del tipo Aging chart *************************//
 //*******************************************************************************************************//
-
+/*
 //Enseñamos las opciones si estan todos los archivos correctos
 function showAgingSettings(dash){
   $("#settings"+dash).slideUp("slow");
@@ -958,7 +960,7 @@ function settingsDemoGraph(numGraph){
 //*******************************************************************************************************//
 //************************************** Crear una gráfica del tipo Time series chart *******************//
 //*******************************************************************************************************//
-
+/*
 //función que a partir del fichero de configuración es capaz de enseñarnos las métricas que podemos dibujar
 function showTimeSettings(dash){
   $("#settings"+dash).slideUp("slow");
@@ -1407,20 +1409,6 @@ function makeDashboardContent(dash){
   dashConfiguration["#dash"+dash]=[]
 }
 
-//funcion para eliminar todas las graficas del dash de donde estamos trabajando
-function deleteAllGraphs(dash){
-  var inDash= "dash"+dash.toString()
-  var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-  gridster.remove_all_widgets();
-}
-
-//funcion para eliminar una grafica concreta
-function deleteGraph(dash,num){
-  var gridster = $("#dash"+dash+" ul").gridster().data('gridster');
-  gridster.remove_widget("#graph"+num)
-
-}
-
 //**********************************  FUNCIONES DE FILTRADO Y SELECCION DE DATOS ********************////
 
 //función que filtra eliminando una key concreta para filtrar sin la fecha que es siempre igual
@@ -1472,7 +1460,7 @@ function drawErrorWidget(graph){
 function DashCreation(){
   numDash+=1;
   var color=getRandomColor()
-  $(".container-fluid").append('<div id="settings'+(numDash)+'"class="panel-body" hidden><ul><button onclick="showTimeSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="showAgingSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="showInfoSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Info widget</button></ul></div><div id="dash'+(numDash)+'" class="gridster ready" style="background-color:'+color+'"><ul></ul></div> ')
+  $(".container-fluid").append('<div id="settings'+(numDash)+'"class="panel-body" hidden><ul><button onclick="showTimeSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="showAgingSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="showInfoSettings('+numDash+')" type="button" class="btn btn-xs btn-default">Info widget</button></ul></div><div id="panel'+(numDash)+'" class="gridster ready" style="background-color:'+color+'"><ul></ul></div> ')
   $(".gridster ul").gridster({
     widget_margins: [6, 6],
     widget_base_dimensions: [20, 20],
