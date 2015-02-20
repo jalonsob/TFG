@@ -30,7 +30,7 @@ var widgets=[]
 
 $(document).ready(function() {
     //Request of configuration keys
-/*
+
     $.when(
       $.getJSON("templates/json/configurationfile.json").success(function(data){
         Object.keys(data).forEach(function(element){
@@ -85,7 +85,7 @@ $(document).ready(function() {
             }
           });
       }else{
-
+        /*
         //en otro caso solicito la descarga del fichero por defecto
         $.ajax({
             type: "GET",
@@ -112,12 +112,14 @@ $(document).ready(function() {
               $("#dash1").slideDown("slow");
             }
           });
+        */
       }
+
     }).fail(function(){
       alert("Los archivos de configuración no se han cargado correctamente. Sus gráficas no pueden ser reproducidas")
     })
   
-
+/*
 
   //Save button
   $("#save").click(function(){
@@ -247,118 +249,137 @@ function showSettings(panel){
 //************************************** Crear una gráfica del tipo Info chart *************************//
 //******************************************************************************************************//
 
-/*
-//función que crea un actual menu y lo rellena con las métricas de INFO
+
+//This function creates the configuration menu to draw an INFO graph. In the menu will be the metrics to select what we want to draw.
 //--Esta función hay que modificarla con las futuras nuevas métricas y el menu desplegable
-function showInfoSettings(dash){
+function showInfoSettings(panel){
     keys=configuration.static
-    $("#settings"+dash).slideUp("slow");
+    $("#settings"+panel).slideUp("slow");
     $("#making").slideDown("slow")
     if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
-      $("#conten").append('<div id="actualMenu"></div>')
-      $("#actualMenu").append('<p>Los ficheros de configuración no han sido cargados con normalidad. Compruebe su conexión<p>');
-      $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Continue</button>')
+      $("#conten").append('<div id="currentMenu"></div>')
+      $("#currentMenu").append('<p>Los ficheros de configuración no han sido cargados con normalidad. Compruebe su conexión<p>');
+      $("#currentMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Continue</button>')
 
     }else{
-      if($("#actualMenu")){
-        $("#actualMenu").remove();
+      if($("#currentMenu")){
+        $("#currentMenu").remove();
       }
-      $("#conten").append('<div id="actualMenu"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
-      $("#actualMenu").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column">Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras  </p>');
+      $("#conten").append('<div id="currentMenu"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
+      $("#currentMenu").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column">Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras  </p>');
       keys.forEach(function(element){
-        $("#actualMenu #list").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
+        $("#currentMenu #list").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
       })
-
-      $("#actualMenu").append('<button onclick="takeDataInfo()" type="button" class="btn btn-xs btn-default">Create</button>')
-      $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+      $("#currentMenu").append('<p>Título</p><p><input placeholder="'+takeinfo.static.inside+'" id="title" class="form-control"></div></p>')
+      $("#currentMenu").append('<button onclick="takeDataInfo()" type="button" class="btn btn-xs btn-default">Create</button>')
+      $("#currentMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
     }
 }
 
-//funcion para recoger los datos para crear la grafica
+//Function to get the selected options to create the graph
 function takeDataInfo(numGraph){
-  var form=$("#actualMenu input[type='radio']:checked").attr("value");
+  var form=$("#currentMenu input[type='radio']:checked").attr("value");
   if(form!=undefined){
+    //Taking selected metrics 
     var selected = [];
-    var form=$("#actualMenu input[type='radio']:checked").attr("value");
-    $("#actualMenu input[type='checkbox']:checked").each(function() {
+    var form=$("#currentMenu input[type='radio']:checked").attr("value");
+    $("#currentMenu input[type='checkbox']:checked").each(function() {
       objaux={
         name:$(this).attr('value'),
-        form: form
+        type: form
       }
       selected.push(objaux);
     });
-    if(selected.length!=0){
-      makeGraphInfo(actualDash,selected,numGraph)
+    if($("#currentMenu #title").val()==''){
+      var title=($("#currentMenu #title").attr("placeholder"))
     }else{
-      alert("¿Qué clase de gráfica pretende representar sin datos?")
+      var title=$("#currentMenu #title").val()
+    }
+    //taking jsons
+    var jsons= [takeinfo.static.inside]
+    //taking background color
+    var color=($("#panel"+actualPanel).css('background-color'))
+
+    if(selected.length!=0){
+      makeGraphInfo(actualPanel,selected,title,jsons,color,numGraph)
+    }else{
+      alert("We can not represent a graph without data")
     }
   }else{
-    alert("Es indispensable que seleccione un tipo de forma a representar")
+    alert("We need that you select a style to represent the data")
   }
 }
 
 
-//función que crea la gráfica en su conjunto tanto en error como en success
-function makeGraphInfo(dash,selected,graph){
+//This function tries to take the real data to draw an actualized graph. 
+//In case of error, it calls other function to transform the final result in an error widget.
+function makeGraphInfo(panel,selected,title,jsons,color,graph){
 
-  //si graph no está definido significa que creo una nueva gráfica
+  //If the variable graph is undefined we have to create a new graph. 
+  //In other case we have to change the variables of an existing graph.
   if(isNaN(graph)){
     numGraph+=1;
     graph=numGraph;
-    var inDash= "dash"+dash.toString()
-    var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-    color=($("#dash"+dash).css('background-color'))
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsInfoGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"><img id="load'+graph+'" src="/templates/images/cargando.gif" height="42" width="42"> </div></div>', 12, 8);
+    var gridster = $("#panel"+panel+" ul").gridster().data('gridster');
+    var chart= new HighInfo(graph,color,panel,title,selected,jsons)
+    gridster.add_widget(chart.square, chart.x, chart.y);
+    widgets.push(chart)
+    dashToSave["#panel"+panel].push(chart.flatten())
   }else{
-    //en otro caso cojo el chart ya creado y es el que uso para primero destruirlo y luego crearlo de nuevo
+    //In other case i take the created chart, i destroy it, and then i build it again
     var chart = $('#'+graph).highcharts();
     chart.destroy()
+    var wid=GetWidget(graph)
+    wid.series=selected
+    var flatten=GetElementFromDash(panel,graph)
+
   }
 
-  //Destruyo el actual menú de seleccion
-  $("#actualMenu").remove();
+  //I destroy the current menu
+  $("#currentMenu").remove();
   $("#making").slideUp("slow")
-  //En caso positivo lo dibujo
+
+  //In the right way i will draw the graph
   $("#"+graph).on("DrawInfo",function(event,trigger,data){
-    var serie= parserGraphInfo(selected,data)
-    drawGraphInfo(graph,serie,takeinfo.static.inside)
+    var serie= parserGraphInfoHigh(selected,data)
+    drawGraphInfoHigh(graph,serie,title)
     $("#"+this.id).off()
   })
 
-  //En caso negativo dibujo un widget roto
+  //In the wrong way i will draw an error widget
   $("#"+graph).on("ErrorGraphInfo",function(){
     drawErrorWidget(this.id)
     $("#"+this.id).off()
   })
 
-  //si no tengo los datos entonces los solicito
+  //If we haven't the data in cache we will request them
   if(takeinfo.static.state==0){
 
-    //actualizo mi estado a en proceso
+    //We actualise the state of data
     takeinfo.static.state=1;
 
-    $.getJSON("templates/json/"+takeinfo.static.inside).success(function(data) {
+    $.getJSON(takeinfo.static.inside).success(function(data) {
 
-        //actualizo mi estado a terminado
+        //The request is on course
         takeinfo.static.saveData=data
         takeinfo.static.state=2;
 
         $("*").trigger("DrawInfo",["DrawInfo",data])
       }).error(function(){
-        //En caso de error levanto el evento de gráfica mal pintada
+        //In case of error we will throw the error event
         $("*").trigger("ErrorGraphInfo")
         takeinfo.static.static=0;
 
     });
   }else if(takeinfo.static.state==2){
-    //Si lo tengo en caché lo dibujo directamente
-    var serie= parserGraphInfo(selected,takeinfo.static.saveData);
-    drawGraphInfo(graph,serie,takeinfo.static.inside)
+    //If we have the data in caché we will use it
+    var serie= parserGraphInfoHigh(selected,takeinfo.static.saveData);
+    drawGraphInfoHigh(graph,serie,title)
   }
 }
 
-//función que dibuja una gráfica de tipo Info
-function drawGraphInfo(id,serie,title){
+//Function that draws a graph of kind Info in highcharts
+function drawGraphInfoHigh(id,serie,title){
 
   $("#load"+id).remove()
 
@@ -380,14 +401,14 @@ function drawGraphInfo(id,serie,title){
   var chart= new Highcharts.Chart(options);
 }
 
-//Masajea los datos conforme a los seleccionados para que estos formen un series para pintar
-function parserGraphInfo(selected,data){
+//it massages the info to draw a graph in highchart
+function parserGraphInfoHigh(selected,data){
   var selection=[];
   selected.forEach(function(element){
     dataAux=data[element.name];
     arrayAux=[dataAux]
     obj={
-      type: element.form,
+      type: element.type,
       name: element.name,
       data: arrayAux
     }
@@ -398,35 +419,40 @@ function parserGraphInfo(selected,data){
 }
 
 
-//función que obtiene las series utilizadas en un determinado chart, y en base a lo obtenido en el fichero
-//de configuración nos permite redibujar la gráfica con unos nuevos valores
+//This function shows a new menu with the metrics of a specific graph created selected
+//It leaves to draw an existing graph with new metrics
 function settingsInfoGraph(numGraph){
   var chart = $('#'+numGraph).highcharts();
-  var keys=configuration.static
-  var auxseries;
-  $("#making").slideDown("slow")
+  if(chart!=undefined){
+    var keys=configuration.static
+    var auxseries;
+    $("#making").slideDown("slow")
 
-  if($("#actualMenu")){
-    $("#actualMenu").remove();
-  }
-
-  $("#conten").append('<div id="actualMenu"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
-  if(chart.series[0].type=="column"){
-    $("#actualMenu").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column" checked>Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras  </p>');
-  }else{
-    $("#actualMenu").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column">Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar" checked>Barras  </p>');
-  }
-  keys.forEach(function(element){
-    if(existLabel(chart,element)){
-      $("#actualMenu #list").append('<p><input type="checkbox" value="'+element+'" checked> '+element+'</p>')
-    }else{
-      $("#actualMenu #list").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
+    if($("#currentMenu")){
+      $("#currentMenu").remove();
     }
-  })
-  $("#actualMenu").append('<button onclick="takeDataInfo('+numGraph+')" type="button" class="btn btn-xs btn-default">Create</button>')
-  $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+
+    $("#conten").append('<div id="currentMenu"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
+    if(chart.series[0].type=="column"){
+      $("#currentMenu").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column" checked>Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras  </p>');
+    }else{
+      $("#currentMenu").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column">Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar" checked>Barras  </p>');
+    }
+    keys.forEach(function(element){
+      if(existLabelHigh(chart,element)){
+        $("#currentMenu #list").append('<p><input type="checkbox" value="'+element+'" checked> '+element+'</p>')
+      }else{
+        $("#currentMenu #list").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
+      }
+    })
+    $("#currentMenu").append('<p>Título</p><p><input placeholder="'+chart.title.textStr+'" id="title" class="form-control"></div></p>')
+    $("#currentMenu").append('<button onclick="takeDataInfo('+numGraph+')" type="button" class="btn btn-xs btn-default">Create</button>')
+    $("#currentMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+  }else{
+    alert("This graph does not exist or has errors")
+  }
 }
-*/
+
 //*******************************************************************************************************//
 //************************************** Crear una gráfica del tipo Aging chart *************************//
 //*******************************************************************************************************//
@@ -966,7 +992,7 @@ function settingsDemoGraph(numGraph){
 //*******************************************************************************************************//
 //************************************** Crear una gráfica del tipo Time series chart *******************//
 //*******************************************************************************************************//
-/*
+
 //función que a partir del fichero de configuración es capaz de enseñarnos las métricas que podemos dibujar
 function showTimeSettings(dash){
   $("#settings"+dash).slideUp("slow");
@@ -1000,7 +1026,7 @@ function showTimeSettings(dash){
     $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
   }
 }
-
+/*
 //funcion para recoger los datos para crear la grafica
 function takeDataTime(numGraph){
   //En esta zona obtengo los datos de forma sincrona, en este caso soy invulnerable a errores en la descarga
@@ -1021,12 +1047,6 @@ function takeDataTime(numGraph){
   //y mandamos fabricar la gráfica con los datos que tengamos en el json que descarguemos
   makeGraphSeries(actualDash,selected,from,to,numGraph)
 
-}
-
-//funcion para cancelar la creacion de la grafica
-function deleteCreation(){
-  $("#actualMenu").remove();
-  $("#making").slideUp("slow")
 }
 
 //Creamos la gráfica correspondiente al tipo seleccionado, tiene los mismos parámetros que las funciones
@@ -1402,18 +1422,34 @@ function makeDashboardContent(dash){
 }
 */
 //**********************************  FUNCIONES DE FILTRADO Y SELECCION DE DATOS ********************////
-/*
-//función que filtra eliminando una key concreta para filtrar sin la fecha que es siempre igual
-function filterKeyDate(element){
-  return element != "date";
+
+
+//With this function we get an object widget from caché 
+function GetElementFromDash(panel,id){
+  var result;
+  dashToSave["#panel"+numPanel].forEach(function(element){
+    if(element.id=id){
+      result=element
+      return false
+    }
+  })
+  return result
 }
 
-function filterKeyURL(element){
-  return element != "url";
+//With this function we get an object widget from caché
+function GetWidget(id){
+  var result;
+  widgets.forEach(function(element){
+    if(element.id==id){
+      result=element;
+      return false;
+    }
+  })
+  return result;
 }
 
-//función para saber si un elemento está dentro e un chart
-function existLabel(chart,label){
+//Function that leave us to know if an element is selected in a highchart
+function existLabelHigh(chart,label){
   var result=false;
   chart.series.forEach(function (element){
     if(element.name==label){
@@ -1423,34 +1459,32 @@ function existLabel(chart,label){
   return result;
 }
 
-//función para obtener una serie y sus opciones por el nombre
-function getSeriesbyName(chart,label){
-  var result='';
-  chart.series.forEach(function (element){
-    if(element.name==label){
-      result=element;
-    }
-  })
-  return result;
-}
-
-//función que dibuja un widget sin gráfica y erróneo
+//Transforms a widget in an error widget.
 function drawErrorWidget(graph){
   $("#graph"+graph+" #settingsButton").remove()
-  $("#graph"+graph).attr("data-sizex",10)
-  $("#graph"+graph).attr("data-sizey",10)
+  $("#graph"+graph).attr("data-sizex",5)
+  $("#graph"+graph).attr("data-sizey",5)
+  $("#load"+graph).remove()
   $("#"+graph).append("Error al cargar los datos requeridos")
 }
-*/
+
+
+//Function that cancels the creation of a widget
+function deleteCreation(){
+  $("#actualMenu").remove();
+  $("#making").slideUp("slow")
+}
+
 
 //Function to show a panel and its settings of creation of graphs
 function showPanel(panel){
   if(actualPanel!=panel){
     //We hide the previous panel and we show the new
-    $("#dash"+actualPanel).slideUp("slow");
+    $("#panel"+actualPanel).slideUp("slow");
     $("#settings"+actualPanel).slideUp("slow");
+    $("#making").slideUp("slow")
     $("#actualMenu").remove();
-    $("#dash"+panel).slideDown("slow");
+    $("#panel"+panel).slideDown("slow");
 
     actualDash=panel;
     //makeDashboardContent(panel)

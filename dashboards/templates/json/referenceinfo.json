@@ -1,9 +1,9 @@
 {
-	"static":"scm-static.json",
+	"static":"templates/json/scm-static.json",
 	
-	"evolutionary": "scm-evolutionary.json",
+	"evolutionary": "templates/json/scm-evolutionary.json",
 
-	"aging": "scm-demographics-aging.json",
+	"aging": "templates/json/scm-demographics-aging.json",
 
-	"birth": "scm-demographics-birth.json"
+	"birth": "templates/json/scm-demographics-birth.json"
 }
