@@ -296,7 +296,7 @@ function takeDataInfo(numGraph){
       var title=$("#currentMenu #title").val()
     }
     //taking jsons
-    var jsons= [takeinfo.static.inside]
+    var jsons= takeinfo.static.inside
     //taking background color
     var color=($("#panel"+actualPanel).css('background-color'))
 
@@ -332,7 +332,7 @@ function makeGraphInfo(panel,selected,title,jsons,color,graph){
     var wid=GetWidget(graph)
     wid.series=selected
     var flatten=GetElementFromDash(panel,graph)
-
+    flatten.series=selected;
   }
 
   //I destroy the current menu
@@ -357,10 +357,10 @@ function makeGraphInfo(panel,selected,title,jsons,color,graph){
 
     //We actualise the state of data
     takeinfo.static.state=1;
+    //The request is on course
 
     $.getJSON(takeinfo.static.inside).success(function(data) {
 
-        //The request is on course
         takeinfo.static.saveData=data
         takeinfo.static.state=2;
 
@@ -445,7 +445,7 @@ function settingsInfoGraph(numGraph){
         $("#currentMenu #list").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
       }
     })
-    $("#currentMenu").append('<p>Título</p><p><input placeholder="'+chart.title.textStr+'" id="title" class="form-control"></div></p>')
+    $("#currentMenu").append('<p>Title</p><p><input placeholder="'+chart.title.textStr+'" id="title" class="form-control"></div></p>')
     $("#currentMenu").append('<button onclick="takeDataInfo('+numGraph+')" type="button" class="btn btn-xs btn-default">Create</button>')
     $("#currentMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
   }else{
@@ -993,46 +993,47 @@ function settingsDemoGraph(numGraph){
 //************************************** Crear una gráfica del tipo Time series chart *******************//
 //*******************************************************************************************************//
 
-//función que a partir del fichero de configuración es capaz de enseñarnos las métricas que podemos dibujar
+//This function creates the configuration menu to draw an Time graph. In the menu will be the metrics to select what we want to draw.
 function showTimeSettings(dash){
   $("#settings"+dash).slideUp("slow");
   $("#making").slideDown("slow")
   if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
-    $("#conten").append('<div id="actualMenu"></div>')
-    $("#actualMenu").append('<p>Los ficheros de configuración no han sido cargados con normalidad. Compruebe su conexión<p>');
-    $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Continue</button>')
+    $("#conten").append('<div id="currentMenu"></div>')
+    $("#currentMenu").append('<p>Los ficheros de configuración no han sido cargados con normalidad. Compruebe su conexión<p>');
+    $("#currentMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Continue</button>')
   }else{
-    if($("#actualMenu")){
-        $("#actualMenu").remove();
+    if($("#currentMenu")){
+        $("#currentMenu").remove();
     }
-    $("#conten").append('<div id="actualMenu"><div id="list" style="height: 200px; overflow-y: scroll;"></div></div>')
+    $("#conten").append('<div id="currentMenu"><div id="list" style="height: 200px; overflow-y: scroll;"></div></div>')
     configuration.evolutionary.forEach(function(element){
-      $("#actualMenu #list").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas    <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>')
+      $("#currentMenu #list").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas    <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>')
     })
-    $("#actualMenu").append('From')
-    $("#actualMenu").append('<select id="from" class="form-control">')
+    $("#currentMenu").append('From')
+    $("#currentMenu").append('<select id="from" class="form-control">')
     configuration.time.forEach(function(element){
-      $("#actualMenu #from").append('<option value="'+element+'">'+element+'</option>')
+      $("#currentMenu #from").append('<option value="'+element+'">'+element+'</option>')
     })
-    $("actualMenu").append('</select>')
-    $("#actualMenu").append('To')
-    $("#actualMenu").append('<select id="to" class="form-control">')
+    $("currentMenu").append('</select>')
+    $("#currentMenu").append('To')
+    $("#currentMenu").append('<select id="to" class="form-control">')
     configuration.time.forEach(function(element){
-      $("#actualMenu #to").append('<option value="'+element+'">'+element+'</option>')
+      $("#currentMenu #to").append('<option value="'+element+'">'+element+'</option>')
     })
-    $("actualMenu").append('</select>')
+    $("#currentMenu").append('</select>')
     $("#to").val(configuration.time[configuration.time.length-1])
-    $("#actualMenu").append('<button onclick="takeDataTime()" type="button" class="btn btn-xs btn-default">Create</button>')
-    $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+    $("#currentMenu").append('<p>Title</p><p><input placeholder="'+takeinfo.evolutionary.inside+'" id="title" class="form-control"></div></p>')
+    $("#currentMenu").append('<button onclick="takeDataTime()" type="button" class="btn btn-xs btn-default">Create</button>')
+    $("#currentMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
   }
 }
-/*
-//funcion para recoger los datos para crear la grafica
+
+//Function to get the selected options to create the graph
 function takeDataTime(numGraph){
-  //En esta zona obtengo los datos de forma sincrona, en este caso soy invulnerable a errores en la descarga
-  //del json por si el nombre esta mal introducido dado que ya lo he comprobado al principio
+
+  //Taking selected metrics 
   var selected = [];
-  $("#actualMenu input[type='radio']:checked").each(function() {
+  $("#currentMenu input[type='radio']:checked").each(function() {
     objaux={
       name:$(this).attr('name'),
       form: $(this).attr('value')
@@ -1041,90 +1042,111 @@ function takeDataTime(numGraph){
   });
   var to=$("#to option:selected").text()
   var from=$("#from option:selected").text()
-  //con los datos ya seleccionados miramos el rango que van a tener los datos
-  from=configuration.time.indexOf(from.toString())
-  to=configuration.time.indexOf(to.toString())
-  //y mandamos fabricar la gráfica con los datos que tengamos en el json que descarguemos
-  makeGraphSeries(actualDash,selected,from,to,numGraph)
+
+  if($("#currentMenu #title").val()==''){
+    var title=($("#currentMenu #title").attr("placeholder"))
+  }else{
+    var title=$("#currentMenu #title").val()
+  }
+  //taking jsons
+  var jsons= takeinfo.evolutionary.inside
+  //taking background color
+  var color=($("#panel"+actualPanel).css('background-color'))
+
+  var size= configuration.time.indexOf(to.toString()) - configuration.time.indexOf(from.toString())
+
+  if(selected.length!=0){
+
+    makeGraphSeries(actualPanel,selected,from,to,size,jsons,color,title,numGraph)
+  }else{
+    alert("We can not represent a graph without data")
+  }
 
 }
 
-//Creamos la gráfica correspondiente al tipo seleccionado, tiene los mismos parámetros que las funciones
-//anteriores pero en este caso necesitamos saber el rango de dibujo
-function makeGraphSeries(dash,selected,from,to,graph){
-  
-  // Creamos un div estandar de forma que cuando dibujemos nuestra gráfica cambiamos el tamaño para mejorar 
-  //el rendimiento del gridster
+//This function tries to take the real data to draw an actualized graph. 
+//In case of error, it calls other function to transform the final result in an error widget.
+//In case of "times graph" in highchart we have a problem to remove the old graph and put the new 
+//graph with the original id because the function to remove in this library is too slow and makes 
+//an error. So this function remove the old graph and creates a new widget with a new  id and a new actualized graph.
+function makeGraphSeries(panel,selected,from,to,size,jsons,color,title,graph){
 
-  //si no lo está tengo un problema con github, así que borramos desde 0 y la volvemos a crear
+  //If the variable graph is undefined we have to create a new graph. 
+  //In other case we have to change the variables of an existing graph.
   if(!isNaN(graph)){
-      deleteGraph(dash,graph)
-  }
-  
-  //si graph no está definido significa que creo una nueva gráfica
+    deleteWidget(panel,graph);
+    var chart=GetWidget(graph);
+    var flatten=GetElementFromDash(panel,graph);
 
-  numGraph+=1;
-  graph=numGraph;
-  var inDash= "dash"+dash.toString()
-  var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-  color=($("#dash"+dash).css('background-color'))
-  if((to-from)<=12 && (to-from)>=8){
+    numGraph+=1;
+    graph=numGraph;
 
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> <img id="load'+numGraph+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>', 15, 12);
-
-  }else if((to-from)<8){
-
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"><img id="load'+numGraph+'" src="/templates/images/cargando.gif" height="42" width="42"> </div></div>', 12, 8);
-
-
+    chart.series=selected;
+    chart.changeId(graph);
+    chart.changeSize(size);
+    chart.from=from;
+    chart.to=to;
+    console.log(chart)
+    flatten.series=selected;
+    flatten.id=graph;
+    flatten.from=from;
+    flatten.to=to;
   }else{
-
-    gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button id="deleteButton" onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button id="settingsButton" onclick="settingsTimeGraph('+numGraph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+numGraph+'" class="panel-body"> <img id="load'+numGraph+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>', 31, 13);
+    numGraph+=1;
+    graph=numGraph;
+    var chart= new HighTimes(graph,color,panel,from,to,size,title,selected,jsons)
+    widgets.push(chart)
+    dashToSave["#panel"+panel].push(chart.flatten())
 
   }
   
+  var gridster = $("#panel"+panel+" ul").gridster().data('gridster');
 
-  //Destruyo el actual menú de seleccion
+  gridster.add_widget(chart.square, chart.x, chart.y);
+
+
+  //I destroy the current menu
   $("#actualMenu").remove();
   $("#making").slideUp("slow")
 
-  //En caso positivo lo dibujo
+  //In the right way i will draw the graph
   $("#"+graph).on("DrawTimes",function(event,trigger,data){
-    var serie= parserGraphTime(from,to,data,selected);
-    var x= parserGraphTimeX(data,from,to)
-    drawGraphTimes(graph,serie,takeinfo.evolutionary.inside,from,to,x)
+    var serie= parserGraphTime(configuration.time.indexOf(from.toString()),configuration.time.indexOf(to.toString()),data,selected);
+    var x= parserGraphTimeX(data,configuration.time.indexOf(from.toString()),configuration.time.indexOf(to.toString()))
+    drawGraphTimes(graph,serie,title,size,x)
     $("#"+this.id).off()
   })
 
-  //En caso negativo dibujo un widget roto
+  //In the wrong way i will draw an error widget
   $("#"+graph).on("ErrorGraphTimes",function(){
     drawErrorWidget(this.id)
     $("#"+this.id).off()
   })
 
-  //si no lo tengo hago una petición al servidor para poder tenerlo
+  //If we haven't the data in cache we will request them
   if(takeinfo.evolutionary.state==0){
+    //We actualise the state of data
     takeinfo.evolutionary.state==1;
-    //en el caso de que lo consiga dibujo la gráfica y activo el disparador de evento para el times
-    $.getJSON('templates/json/'+takeinfo.evolutionary.inside).success(function(data){
+    //The request is on course
 
-      //actualizo mi estado a terminado
+    $.getJSON(takeinfo.evolutionary.inside).success(function(data){
+
+      //We actualise the state of data again
       takeinfo.evolutionary.saveData=data
       takeinfo.evolutionary.state=2;
 
-      //y llamo a pintar grafica de tipo info
       $("*").trigger("DrawTimes",["DrawTimes",data])
      
     }).error(function(){
-      //En caso de error levanto el evento de gráfica mal pintada
+      //In case of error we will throw the error event
       $("*").trigger("ErrorGraphTimes")
       takeinfo.static.static=0;
     });
   }else if(takeinfo.evolutionary.state==2){
     //Si lo tengo en caché lo dibujo directamente
-    var serie= parserGraphTime(from,to,takeinfo.evolutionary.saveData,selected);
-    var x= parserGraphTimeX(takeinfo.evolutionary.saveData,from,to)
-    drawGraphTimes(graph,serie,takeinfo.evolutionary.inside,from,to,x)
+    var serie= parserGraphTime(configuration.time.indexOf(from.toString()),configuration.time.indexOf(to.toString()),takeinfo.evolutionary.saveData,selected);
+    var x= parserGraphTimeX(takeinfo.evolutionary.saveData,configuration.time.indexOf(from.toString()),configuration.time.indexOf(to.toString()))
+    drawGraphTimes(graph,serie,title,size,x)
   }
 }
 
@@ -1185,22 +1207,21 @@ function remakeGraphSeries(dash,selected,from,to,graph){
       takeinfo.evolutionary.static=0;
     });
   }else if(takeinfo.evolutionary.state==2){
-    //Si lo tengo en caché lo dibujo directamente
+    //If we have the data in caché we will use it
     var serie= parserGraphTime(from,to,takeinfo.evolutionary.saveData,selected);
     var x= parserGraphTimeX(takeinfo.evolutionary.saveData,from,to)
     drawGraphTimes(graph,serie,takeinfo.evolutionary.inside,from,to,x)
   }
 }
 
-//función para dibujar una gráfica de tipo Times con el tamaño
-//que corresponde
-function drawGraphTimes(graph,serie,title,from,to,xAxis){
+//Function that draws a graph of kind TIMES in highcharts
+function drawGraphTimes(graph,serie,title,size,xAxis){
 
   $("#load"+graph).remove()
 
   var chart = $('#'+graph).highcharts();
 
-  if((to-from)<=12 && (to-from)>=8){
+  if((size)<=12 && (size)>=8){
     var options={
       chart:{
           renderTo:graph.toString(),
@@ -1216,7 +1237,7 @@ function drawGraphTimes(graph,serie,title,from,to,xAxis){
       series: serie
     }
 
-  }else if((to-from)<8){
+  }else if((size)<8){
     var options={
       chart:{
           renderTo:graph.toString(),
@@ -1253,12 +1274,12 @@ function drawGraphTimes(graph,serie,title,from,to,xAxis){
 
 }
 
-//funcion para interpretar las X en tiempo
+//Function to interpret the x plane
 function parserGraphTimeX(data,from,to){
   return data.date.slice(from,to+1)
 }
 
-//funcion para interpretar los datos
+//Function to interpret the data
 function parserGraphTime(from,to,data,selected){
     var selection=[];
     var dataAux;
@@ -1274,41 +1295,43 @@ function parserGraphTime(from,to,data,selected){
     return selection;
 }
 
+//This function shows a new menu with the metrics of a specific graph created selected
+//It leaves to draw an existing graph with new metrics
 function settingsTimeGraph(numGraph){
   var chart = $('#'+numGraph).highcharts();
   var keys=configuration.evolutionary
   var auxseries;
   $("#making").slideDown("slow")
 
-  if($("#actualMenu")){
-    $("#actualMenu").remove();
+  if($("#currentMenu")){
+    $("#currentMenu").remove();
   }
-  $("#conten").append('<div id="actualMenu"></div>')
+  $("#conten").append('<div id="currentMenu"><div id="list" style="height: 200px; overflow-y: scroll;"></div></div>')
 
   keys.forEach(function(element){
-    if(existLabel(chart,element)){
+    if(existLabelHigh(chart,element)){
       auxseries=getSeriesbyName(chart,element);
       if(auxseries.type=="column"){
-        $("#actualMenu").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column" checked>Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>');
+        $("#currentMenu #list").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column" checked>Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>');
       }else{
-        $("#actualMenu").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column" >Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline" checked>Lineas <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>');
+        $("#currentMenu #list").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column" >Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline" checked>Lineas <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>');
       }
     }else{
-      $("#actualMenu").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>');
+      $("#currentMenu #list").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>');
     }
   })
-  $("#actualMenu").append('From')
-  $("#actualMenu").append('<select id="from" class="form-control">')
+  $("#currentMenu").append('From')
+  $("#currentMenu").append('<select id="from" class="form-control">')
   configuration.time.forEach(function(element){
-    $("#actualMenu #from").append('<option value="'+element+'">'+element+'</option>')
+    $("#currentMenu #from").append('<option value="'+element+'">'+element+'</option>')
   })
-  $("actualMenu").append('</select>')
-  $("#actualMenu").append('To')
-  $("#actualMenu").append('<select id="to" class="form-control">')
+  $("#currentMenu").append('</select>')
+  $("#currentMenu").append('To')
+  $("#currentMenu").append('<select id="to" class="form-control">')
   configuration.time.forEach(function(element){
-    $("#actualMenu #to").append('<option value="'+element+'">'+element+'</option>')
+    $("#currentMenu #to").append('<option value="'+element+'">'+element+'</option>')
   })
-  $("actualMenu").append('</select>')
+  $("#currentMenu").append('</select>')
 
   var position=chart.series[0].data.length-1;
   var position2= configuration.time.indexOf(chart.series[0].data[position-1].category)
@@ -1316,8 +1339,9 @@ function settingsTimeGraph(numGraph){
 
   $("#from").val(chart.series[0].data[0].category)
   $("#to").val(configuration.time[position2+1])
-  $("#actualMenu").append('<button onclick="takeDataTime('+numGraph+')" type="button" class="btn btn-xs btn-default">Redraw</button>')
-  $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+  $("#currentMenu").append('<p>Title</p><p><input placeholder="'+chart.title.textStr+'" id="title" class="form-control"></div></p>')
+  $("#currentMenu").append('<button onclick="takeDataTime('+numGraph+')" type="button" class="btn btn-xs btn-default">Redraw</button>')
+  $("#currentMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
 
 }
 
@@ -1325,7 +1349,7 @@ function resetRatios(element1,element2){
   element1.checked=false;
   element2.checked=false;
 }
-*/
+
 //************************************************ FUNCIONES DE MOVIMIENTOS DEL DASH Y DEMÁS************
 /*
 
@@ -1423,11 +1447,21 @@ function makeDashboardContent(dash){
 */
 //**********************************  FUNCIONES DE FILTRADO Y SELECCION DE DATOS ********************////
 
+//función para obtener una serie y sus opciones por el nombre
+function getSeriesbyName(chart,label){
+  var result='';
+  chart.series.forEach(function (element){
+    if(element.name==label){
+      result=element;
+    }
+  })
+  return result;
+}
 
 //With this function we get an object widget from caché 
 function GetElementFromDash(panel,id){
   var result;
-  dashToSave["#panel"+numPanel].forEach(function(element){
+  dashToSave["#panel"+panel].forEach(function(element){
     if(element.id=id){
       result=element
       return false

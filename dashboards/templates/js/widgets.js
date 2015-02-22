@@ -25,23 +25,77 @@ function Widget(id,color,x,y,panel){
 
 //Widget orientado al uso de Times con highcharts
 //falta el aplanado, el moverse
-function HighTimes(id,color,x,y,panel,title,series,jsons){
-	Widget.call(this,id,color,x,y,panel)
+function HighTimes(id,color,panel,from,to,size,title,series,json){
+	this.from=from;
+	this.to=to;
+	this.size=size
+    if((size)<=12 && (size)>=8){
+
+    	Widget.call(this,id,color,15,12,panel)
+
+
+    }else if((size)<8){
+
+    	Widget.call(this,id,color,12,8,panel)
+
+
+    }else{
+
+    	Widget.call(this,id,color,34,13,panel)
+
+    }
 	this.title=title;
-	this.buttons='<button onclick="settingsTimeGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
-	this.series=[];
-	this.jsons=[];
+	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
+	this.square='<div id="graph'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
+	this.series=series;
+	this.json=json;
+	this.flatten= function(){
+		var objaux={}
+		objaux.type="HighTimes";
+		objaux.series=this.series;
+		objaux.from= this.from;
+		objaux.to=	this.to;
+		objaux.id=this.id;
+		objaux.title=this.title;
+		objaux.color=this.color;
+		objaux.jsons=this.json
+		return objaux
+	}
+	this.changeSize=function(newSize){
+		this.size=newSize;
+		if((this.size)<=12 && (this.size)>=8){
+
+	    	this.x=15
+	    	this.y=12
+
+
+	    }else if((this.size)<8){
+
+			this.x=12
+	    	this.y=8
+
+	    }else{
+
+			this.x=34
+	    	this.y=13
+	    }
+	}
+	this.changeId= function(newId){
+		this.id=newId
+		this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsTimeGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
+		this.square='<div id="graph'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>'
+	}
 }
 
 //Widget orientado al uso de Info con highcharts
 //falta el aplanado, el moverse
-function HighInfo(id,color,panel,title,series,jsons){
+function HighInfo(id,color,panel,title,series,json){
 	Widget.call(this,id,color,12,8,panel)
 	this.title=title;
 	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
 	this.square='<div id="graph'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
 	this.series=series;
-	this.jsons=jsons;
+	this.json=json;
 	this.flatten= function(){
 		var objaux={}
 		objaux.type="HighInfo";
@@ -49,6 +103,7 @@ function HighInfo(id,color,panel,title,series,jsons){
 		objaux.id=this.id;
 		objaux.title=this.title;
 		objaux.color=this.color;
+		objaux.jsons=this.jsons
 		return objaux
 	}
 }
