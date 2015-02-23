@@ -331,8 +331,10 @@ function makeGraphInfo(panel,selected,title,jsons,color,graph){
     chart.destroy()
     var wid=GetWidget(graph)
     wid.series=selected
+    wid.title=title;
     var flatten=GetElementFromDash(panel,graph)
     flatten.series=selected;
+    flatten.title=title;
   }
 
   //I destroy the current menu
@@ -550,6 +552,12 @@ function makeGraphAges(panel,selected,title,color,jsons,graph){
   }else{
     var chart = $('#'+graph).highcharts();
     chart.destroy()
+    var wid=GetWidget(graph)
+    wid.series=selected
+    wid.title=title;
+    var flatten=GetElementFromDash(panel,graph)
+    flatten.series=selected;
+    flatten.title=title;
   }
 
   //Destruyo el actual menú de seleccion
@@ -802,7 +810,7 @@ function createAxisx(max){
 }
 
 
-/*
+
 function makeAutorsGraph(categoria,title){
   var jsons= title.split(" ")
   var aux= categoria.split("-")
@@ -980,27 +988,28 @@ function settingsDemoGraph(numGraph){
 
   $("#making").slideDown("slow")
 
-  if($("#actualMenu")){
-    $("#actualMenu").remove();
+  if($("#currentMenu")){
+    $("#currentMenu").remove();
   }
 
-  $("#conten").append('<div id="actualMenu"></div>')
-  if(existLabel(chart,"aging")){
+  $("#conten").append('<div id="currentMenu"></div>')
+  if(existLabelHigh(chart,"aging")){
     auxseries=getSeriesbyName(chart,"aging");
-    $("#actualMenu").append('<p><div class="form-group"><label><input id="aging" type="checkbox" value="aging" checked>Aging</label><input placeholder="'+auxseries.color+'" id="agingColor" class="form-control"></div></p>')
+    $("#currentMenu").append('<p><div class="form-group"><label><input id="aging" type="checkbox" value="aging" checked>Aging</label><input placeholder="'+auxseries.color+'" id="agingColor" class="form-control"></div></p>')
   }else{
-    $("#actualMenu").append('<p><div class="form-group"><label><input id="aging" type="checkbox" value="aging">Aging</label><input placeholder="#4D8FB8" id="agingColor" class="form-control"></div></p>')
+    $("#currentMenu").append('<p><div class="form-group"><label><input id="aging" type="checkbox" value="aging">Aging</label><input placeholder="#4D8FB8" id="agingColor" class="form-control"></div></p>')
   }
-  if(existLabel(chart,"birth")){
+  if(existLabelHigh(chart,"birth")){
     auxseries=getSeriesbyName(chart,"birth");
-    $("#actualMenu").append('<p><div class="form-group"><label><input id="birth" type="checkbox" value="birth" checked>Birth</label><input placeholder="'+auxseries.color+'" id="birthColor" class="form-control"></div></p>')
+    $("#currentMenu").append('<p><div class="form-group"><label><input id="birth" type="checkbox" value="birth" checked>Birth</label><input placeholder="'+auxseries.color+'" id="birthColor" class="form-control"></div></p>')
   }else{
-    $("#actualMenu").append('<p><div class="form-group"><label><input id="birth" type="checkbox" value="birth">Birth</label><input placeholder="#081923" id="birthColor" class="form-control"></div></p>')
+    $("#currentMenu").append('<p><div class="form-group"><label><input id="birth" type="checkbox" value="birth">Birth</label><input placeholder="#081923" id="birthColor" class="form-control"></div></p>')
   }
-  $("#actualMenu").append('<button onclick="takeDataDemo('+numGraph+')" type="button" class="btn btn-xs btn-default">Redraw</button>')
-  $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+  $("#currentMenu").append('<p>Title</p><p><input placeholder="'+chart.title.textStr+'" id="title" class="form-control"></div></p>')
+  $("#currentMenu").append('<button onclick="takeDataDemo('+numGraph+')" type="button" class="btn btn-xs btn-default">Redraw</button>')
+  $("#currentMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
 }
-*/
+
 //*******************************************************************************************************//
 //************************************** Create a graph of kind "Time series chart" *********************//
 //*******************************************************************************************************//
@@ -1086,9 +1095,10 @@ function makeGraphSeries(panel,selected,from,to,size,jsons,color,title,graph){
   //If the variable graph is undefined we have to create a new graph. 
   //In other case we have to change the variables of an existing graph.
   if(!isNaN(graph)){
-    deleteWidget(panel,graph);
     var chart=GetWidget(graph);
     var flatten=GetElementFromDash(panel,graph);
+
+    deleteWidget(panel,graph);
 
     numGraph+=1;
     graph=numGraph;
@@ -1097,12 +1107,17 @@ function makeGraphSeries(panel,selected,from,to,size,jsons,color,title,graph){
     chart.changeId(graph);
     chart.changeSize(size);
     chart.from=from;
+    chart.title=title;
     chart.to=to;
-    console.log(chart)
+
     flatten.series=selected;
     flatten.id=graph;
     flatten.from=from;
     flatten.to=to;
+    flatten.title=title;
+
+    widgets.push(chart)
+    dashToSave["#panel"+panel].push(chart.flatten())
   }else{
     numGraph+=1;
     graph=numGraph;
