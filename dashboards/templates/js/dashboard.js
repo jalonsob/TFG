@@ -246,7 +246,7 @@ function showSettings(panel){
 }
 
 //******************************************************************************************************//
-//************************************** Crear una gráfica del tipo Info chart *************************//
+//************************************** Create a graph of kind "Info chart" ***************************//
 //******************************************************************************************************//
 
 
@@ -270,7 +270,7 @@ function showInfoSettings(panel){
       keys.forEach(function(element){
         $("#currentMenu #list").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
       })
-      $("#currentMenu").append('<p>Título</p><p><input placeholder="'+takeinfo.static.inside+'" id="title" class="form-control"></div></p>')
+      $("#currentMenu").append('<p>Title</p><p><input placeholder="'+takeinfo.static.inside+'" id="title" class="form-control"></div></p>')
       $("#currentMenu").append('<button onclick="takeDataInfo()" type="button" class="btn btn-xs btn-default">Create</button>')
       $("#currentMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
     }
@@ -454,111 +454,126 @@ function settingsInfoGraph(numGraph){
 }
 
 //*******************************************************************************************************//
-//************************************** Crear una gráfica del tipo Aging chart *************************//
+//************************************** Create a graph of kind "Aging chart" ***************************//
 //*******************************************************************************************************//
-/*
+
 //Enseñamos las opciones si estan todos los archivos correctos
 function showAgingSettings(dash){
   $("#settings"+dash).slideUp("slow");
   $("#making").slideDown("slow")
   if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
       $("#conten").append('<div id="actualMenu"></div>')
-      $("#actualMenu").append('<p>Los ficheros de configuración no han sido cargados con normalidad. Compruebe su conexión<p>');
-      $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Continue</button>')
+      $("#currentMenu").append('<p>Los ficheros de configuración no han sido cargados con normalidad. Compruebe su conexión<p>');
+      $("#currentMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Continue</button>')
   }else{
-    if($("#actualMenu")){
-      $("#actualMenu").remove();
+    if($("#currentMenu")){
+      $("#currentMenu").remove();
     }
-    $("#conten").append('<div id="actualMenu"></div>')
-    $("#actualMenu").append('<p><div class="form-group"><label><input id="aging" type="checkbox" value="aging">Aging</label><input placeholder="#4D8FB8" id="agingColor" class="form-control"></div></p>')
-    $("#actualMenu").append('<p><div class="form-group"><label><input id="birth" type="checkbox" value="birth">Birth</label><input placeholder="#081923" id="birthColor" class="form-control"></div></p>')
-    $("#actualMenu").append('<button onclick="takeDataDemo()" type="button" class="btn btn-xs btn-default">Create</button>')
-    $("#actualMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+    $("#conten").append('<div id="currentMenu"></div>')
+    $("#currentMenu").append('<p><div class="form-group"><label><input id="aging" type="checkbox" value="aging">Aging</label><input placeholder="#4D8FB8" id="agingColor" class="form-control"></div></p>')
+    $("#currentMenu").append('<p><div class="form-group"><label><input id="birth" type="checkbox" value="birth">Birth</label><input placeholder="#081923" id="birthColor" class="form-control"></div></p>')
+    $("#currentMenu").append('<p>Title</p><p><input placeholder="Demograph graph" id="title" class="form-control"></div></p>')
+    $("#currentMenu").append('<button onclick="takeDataDemo()" type="button" class="btn btn-xs btn-default">Create</button>')
+    $("#currentMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
   }
 }
 
 //tomamos los datos seleccionados 
 
 function takeDataDemo(graph){
-  var toDraw=[];
+  var jsons=[];
+  var selected=[];
+  if($("#currentMenu #title").val()==''){
+    var title=($("#currentMenu #title").attr("placeholder"))
+  }else{
+    var title=$("#currentMenu #title").val()
+  }
+
+  //taking background color
+  var color=($("#panel"+actualPanel).css('background-color'))
 
   //Miramos si cada dato está seleccionado, y en caso de estarlo
   //miramos si se ha seleccionado un color específico
   if($("#aging").is(':checked')){
+    jsons.push(takeinfo.aging.inside)
     var colorbar;
-    if($("#actualMenu #agingColor").val()==''){
-      colorbar=($("#actualMenu #agingColor").attr("placeholder"))
+    if($("#currentMenu #agingColor").val()==''){
+      colorbar=($("#currentMenu #agingColor").attr("placeholder"))
     }else{
-      colorbar=$("#actualMenu #agingColor").val()
+      colorbar=$("#currentMenu #agingColor").val()
     }
+
     var objaux={
-      form: "aging",
+      type: "bar",
+      name: "aging",
       color: colorbar
     }
-    toDraw.push(objaux)
+    selected.push(objaux)
   }
   if($("#birth").is(':checked')){
+    jsons.push(takeinfo.birth.inside)
     var colorbar;
-    if($("#actualMenu #birthColor").val()==''){
-      colorbar=($("#actualMenu #birthColor").attr("placeholder"))
+    if($("#currentMenu #birthColor").val()==''){
+      colorbar=($("#currentMenu #birthColor").attr("placeholder"))
     }else{
-      colorbar=$("#actualMenu #birthColor").val()
+      colorbar=$("#currentMenu #birthColor").val()
     }
     var objaux={
-      form: "birth",
+      type: "bar",
+      name: "birth",
       color: colorbar
     }
-    toDraw.push(objaux)
+    selected.push(objaux)
+
   }
 
   //El producto final será un array con cada parte seleccionada
 
-  if(toDraw.length==0){
-    alert("Debe seleccionar al menos un tipo de dato para dibujar")
+  if(selected.length==0){
+    alert("We can not represent a graph without data")
   }else{
-    makeGraphAges(actualDash,graph,toDraw)
+    makeGraphAges(actualPanel,selected,title,color,jsons,graph)
   }
 }
 
 //Función que crea lo básico para que la gráfica se dibuje
-function makeGraphAges(dash,graph,toDraw){
+function makeGraphAges(panel,selected,title,color,jsons,graph){
   //dibujamos su posible div o elminamos la gráfica anterior
   if(isNaN(graph)){
     numGraph+=1;
     graph=numGraph
-    var inDash= "dash"+dash.toString()
-    color=($("#dash"+dash).css('background-color'))
-    var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-    gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 16, 15);
+    var gridster = $("#panel"+panel+" ul").gridster().data('gridster');
+    var chart= new HighAge(graph,color,panel,title,selected,jsons)
+    gridster.add_widget(chart.square, chart.x, chart.y);
+    widgets.push(chart)
+    dashToSave["#panel"+panel].push(chart.flatten())
   }else{
     var chart = $('#'+graph).highcharts();
     chart.destroy()
   }
 
   //Destruyo el actual menú de seleccion
-  $("#actualMenu").remove();
-
+  $("#currentMenu").remove();
   $("#making").slideUp("slow")
+
   //Si toDraw es solo 1 hemos elegido un único dato, en otro caso debemos hacer referencia a todos los
   //seleccionados
-  if(toDraw.length==1){
+  if(selected.length==1){
     //En caso de que la llamada sea positiva serializo con lso datos obtenidos
     $("#"+graph).on("DrawAges",function(event,trigger,data){
       
       var series=[];
-      var title="";
 
       //parseamos los datos
       var dato=parserDemograph(data)
       max=dato.length
       var objaux={
             type: "bar",
-            name: toDraw[0].form,
+            name: selected[0].name,
             data: dato.reverse(),
-            color: toDraw[0].color
+            color: selected[0].color
       }
       series.push(objaux)
-      title+=takeinfo[toDraw[0].form].inside.split(".")[0]
 
       var axisx=createAxisx(max).reverse()
 
@@ -573,15 +588,15 @@ function makeGraphAges(dash,graph,toDraw){
     })
 
     //Si nunca he pedido esta información significa que debo pedirla
-    if(takeinfo[toDraw[0].forma].state==0){
+    if(takeinfo[selected[0].name].state==0){
 
-      takeinfo[toDraw[0].forma].state=1
+      takeinfo[selected[0].name].state=1
 
       //hago la llamada para obtener el dato
-      $.getJSON("templates/json/"+takeinfo[toDraw[0].forma].inside).success(function(data) {
+      $.getJSON(takeinfo[selected[0].name].inside).success(function(data) {
 
-        takeinfo[toDraw[0].forma].state=2
-        takeinfo[toDraw[0].forma].saveData=data
+        takeinfo[selected[0].name].state=2
+        takeinfo[selected[0].name].saveData=data
 
         //desatamos el evento de dibujar posibles gráficas en curso
         $("*").trigger("DrawAges",["DrawAges",data])
@@ -591,22 +606,20 @@ function makeGraphAges(dash,graph,toDraw){
       })
 
     //El otro caso es que ya lo tenga
-    }else if(takeinfo[toDraw[0].forma].state==2){
-      var data=takeinfo[toDraw[0].forma].saveData
+    }else if(takeinfo[selected[0].name].state==2){
+      var data=takeinfo[selected[0].name].saveData
       var series=[];
-      var title="";
 
       //parseamos los datos
       var dato=parserDemograph(data)
       max=dato.length
       var objaux={
             type: "bar",
-            name: toDraw[0].form,
+            name: selected[0].name,
             data: dato.reverse(),
-            color: toDraw[0].color
+            color: selected[0].color
       }
       series.push(objaux)
-      title+=takeinfo[toDraw[0].form].inside.split(".")[0]
 
       var axisx=createAxisx(max).reverse()
       //Si ya lo tenemos parseamos los datos y dibujamos
@@ -614,41 +627,39 @@ function makeGraphAges(dash,graph,toDraw){
     }
 
   //El otro caso es que seleccionara los 2 posibles casos
-  }else if(toDraw.length==2){
+  }else if(selected.length==2){
 
     //En caso positivo lo dibujo
     $("#"+graph).on("DrawAgesD",function(event,trigger){
       var series=[]
 
-      if(parserDemograph(toDraw[0].save).length>=parserDemograph(toDraw[1].save).length){
-        max=parserDemograph(toDraw[0].save).length
+      if(parserDemograph(selected[0].save).length>=parserDemograph(selected[1].save).length){
+        max=parserDemograph(selected[0].save).length
       }else{
-        max=parserDemograph(toDraw[1].save).length
+        max=parserDemograph(selected[1].save).length
       }
 
-      var dato=parserDemograph(toDraw[0].save).reverse()
+      var dato=parserDemograph(selected[0].save).reverse()
       
       var objaux={
             type: "bar",
-            name: toDraw[0].form,
+            name: selected[0].name,
             data: dato,
-            color: toDraw[0].color
+            color: selected[0].color
       }
       series.push(objaux)
 
-      var dato=parserDemograph(toDraw[1].save).reverse()
+      var dato=parserDemograph(selected[1].save).reverse()
       
       var objaux={
             type: "bar",
-            name: toDraw[1].form,
+            name: selected[1].name,
             data: dato,
-            color: toDraw[1].color
+            color: selected[1].color
       }
       series.push(objaux)
 
-      var title=takeinfo[toDraw[0].form].inside.split(".")[0]+" "+takeinfo[toDraw[1].form].inside.split(".")[0]
       var axisx=createAxisx(max).reverse();
-      console.log(series)
       drawDemograph(series,axisx,title,graph)
       $("#"+this.id).off()
     })
@@ -661,71 +672,70 @@ function makeGraphAges(dash,graph,toDraw){
 
     //Si cualquiera de los dos widgets falla debo hacer un allamada, lo mismo da que se haga a dos cosas
     //si la que ya he pedido funcionó volverá a hacerlo
-    if((takeinfo[toDraw[0].form].state==0) || (takeinfo[toDraw[1].form].state==0)){
+    if((takeinfo[selected[0].name].state==0) || (takeinfo[selected[1].name].state==0)){
       //establezco pautas de partes con jquery y coloco mi estado a "pedido"
-      takeinfo[toDraw[0].form].state=1
-      takeinfo[toDraw[1].form].state=1
+      takeinfo[selected[0].name].state=1
+      takeinfo[selected[1].name].state=1
 
       $.when(
-        $.getJSON("templates/json/"+takeinfo[toDraw[0].form].inside).success(function(data) { 
-            toDraw[0].save = data;
+        $.getJSON(takeinfo[selected[0].name].inside).success(function(data) { 
+            selected[0].save = data;
         }),
-        $.getJSON("templates/json/"+takeinfo[toDraw[1].forma].inside).success(function(data) {
-            toDraw[1].save = data;
+        $.getJSON(takeinfo[selected[1].name].inside).success(function(data) {
+            selected[1].save = data;
         })
       ).done(function() {
         //si lo hemos conseguido actualizamos nuestros datos
-        takeinfo[toDraw[0].form].state=2
-        takeinfo[toDraw[0].form].saveData=toDraw[0].save
+        takeinfo[selected[0].name].state=2
+        takeinfo[selected[0].name].saveData=selected[0].save
 
-        takeinfo[toDraw[1].form].state=2
-        takeinfo[toDraw[1].form].saveData=toDraw[1].save
+        takeinfo[selected[1].name].state=2
+        takeinfo[selected[1].name].saveData=selected[1].save
 
         $("*").trigger("DrawAgesD",["DrawAgesD",data])
 
       }).fail(function(){
         //en caso de equivocarnos no nos olvidemos de colocar todo a 0
-        takeinfo[toDraw[0].form].state=0
-        takeinfo[toDraw[1].form].state=0
+        takeinfo[selected[0].name].state=0
+        takeinfo[selected[1].name].state=0
 
         $("*").trigger("ErrorGraphAgesD")
 
       })
 
-    }else if((takeinfo[toDraw[0].form].state==2) && (takeinfo[toDraw[1].form].state==2)){
+    }else if((takeinfo[selected[0].name].state==2) && (takeinfo[selected[1].name].state==2)){
 
       //Si ya lo tenemos todo nos limitamos a dibujar como hacemos arriba
       var series=[]
 
-      if(parserDemograph(takeinfo[toDraw[0].form].saveData).length>=parserDemograph(takeinfo[toDraw[1].form].saveData).length){
-        max=parserDemograph(takeinfo[toDraw[0].form].saveData).length
+      if(parserDemograph(takeinfo[selected[0].name].saveData).length>=parserDemograph(takeinfo[selected[1].name].saveData).length){
+        max=parserDemograph(takeinfo[selected[0].name].saveData).length
       }else{
-        max=parserDemograph(takeinfo[toDraw[1].form].saveData).length
+        max=parserDemograph(takeinfo[selected[1].name].saveData).length
       }
 
-      var dato=parserDemograph(takeinfo[toDraw[0].form].saveData).reverse()
+      var dato=parserDemograph(takeinfo[selected[0].name].saveData).reverse()
       
       var objaux={
             type: "bar",
-            name: "aging",
+            name: selected[0].name,
             data: dato,
-            color: toDraw[0].color
+            color: selected[0].color
       }
       series.push(objaux)
 
-      var dato=parserDemograph(takeinfo[toDraw[1].form].saveData).reverse()
+      var dato=parserDemograph(takeinfo[selected[1].name].saveData).reverse()
       
       var objaux={
             type: "bar",
-            name: "aging",
+            name: selected[1].name,
             data: dato,
-            color: toDraw[1].color
+            color: selected[1].color
       }
       series.push(objaux)
 
-      var title=takeinfo[toDraw[0].form].inside.split(".")[0]+" "+takeinfo[toDraw[0].form].inside.split(".")[1]
       var axisx=createAxisx(max).reverse();
-      console.log(series)
+
       drawDemograph(series,axisx,title,graph)
     }
   }
@@ -766,6 +776,33 @@ function drawDemograph(series,axisx,title,graph){
     chart= new Highcharts.Chart(options);
 }
 
+//función que me clasifica las edades
+function parserDemograph(data){
+  var aux=0;
+  var result=[];
+
+  data.persons.age.forEach(function(element){
+    aux=Math.floor(element/181);
+    if(result[aux]==undefined){
+      result[aux]=1;
+    }else{
+      result[aux]+=1;
+    }
+  })
+  return result;
+}
+
+//función que crea las categorias de una gráfica de edades
+function createAxisx(max){
+  var result=[];
+  for (i = 0; i < max; i++) {
+    result[i]= (i*181)+"-"+((i+1)*181)
+  }
+  return result
+}
+
+
+/*
 function makeAutorsGraph(categoria,title){
   var jsons= title.split(" ")
   var aux= categoria.split("-")
@@ -937,31 +974,6 @@ function parseLookInfo(from,to,data,aux){
   return result
 }
 
-//función que crea las categorias de una gráfica de edades
-function createAxisx(max){
-  var result=[];
-  for (i = 0; i < max; i++) {
-    result[i]= (i*181)+"-"+((i+1)*181)
-  }
-  return result
-}
-
-//función que me clasifica las edades
-function parserDemograph(data){
-  var aux=0;
-  var result=[];
-
-  data.persons.age.forEach(function(element){
-    aux=Math.floor(element/181);
-    if(result[aux]==undefined){
-      result[aux]=1;
-    }else{
-      result[aux]+=1;
-    }
-  })
-  return result;
-}
-
 function settingsDemoGraph(numGraph){
   var chart = $('#'+numGraph).highcharts();
   var auxseries;
@@ -990,7 +1002,7 @@ function settingsDemoGraph(numGraph){
 }
 */
 //*******************************************************************************************************//
-//************************************** Crear una gráfica del tipo Time series chart *******************//
+//************************************** Create a graph of kind "Time series chart" *********************//
 //*******************************************************************************************************//
 
 //This function creates the configuration menu to draw an Time graph. In the menu will be the metrics to select what we want to draw.
@@ -1505,7 +1517,7 @@ function drawErrorWidget(graph){
 
 //Function that cancels the creation of a widget
 function deleteCreation(){
-  $("#actualMenu").remove();
+  $("#currentMenu").remove();
   $("#making").slideUp("slow")
 }
 
@@ -1517,10 +1529,10 @@ function showPanel(panel){
     $("#panel"+actualPanel).slideUp("slow");
     $("#settings"+actualPanel).slideUp("slow");
     $("#making").slideUp("slow")
-    $("#actualMenu").remove();
+    $("#currentMenu").remove();
     $("#panel"+panel).slideDown("slow");
 
-    actualDash=panel;
+    actualPanel=panel;
     //makeDashboardContent(panel)
   }
 
@@ -1551,7 +1563,7 @@ function DashCreation(){
         };
     }
   }).data('gridster');
-  $("#panels").append('<li onclick="showPanel('+numPanel+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollPanel'+numPanel+'"><i class="fa fa-fw fa-edit"></i> Panel '+numPanel+' <i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollPanel'+numPanel+'" class="collapse"><li><a onclick="showSettings('+numPanel+')" href="javascript:void(0)">Add Graph</a></li><li><a onclick="deleteAllGraphs('+numPanel+')" href="javascript:void(0)">Delete all</a></li></ul></li>')
+  $("#panels").append('<li onclick="showPanel('+numPanel+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollPanel'+numPanel+'"><i class="fa fa-fw fa-edit"></i> Panel '+numPanel+' <i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollPanel'+numPanel+'" class="collapse"><li><a onclick="showSettings('+numPanel+')" href="javascript:void(0)">Add Graph</a></li><li><a onclick="deleteAllWidgets('+numPanel+')" href="javascript:void(0)">Delete all</a></li></ul></li>')
   if(actualPanel==0){
     actualPanel=1;
   }

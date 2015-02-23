@@ -110,11 +110,23 @@ function HighInfo(id,color,panel,title,series,json){
 
 //Widget orientado al uso de Ages con highcharts
 //falta el aplanado, el moverse
-function HighAge(id,color,x,y,panel,title){
-	Widget.call(this,id,color,x,y,panel)
+function HighAge(id,color,panel,title,series,jsons){
+	Widget.call(this,id,color,16,15,panel)
 	this.title=title;
-	this.buttons='<button onclick="settingsDemoGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
-	this.series=[];
+	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
+	this.square='<div id="graph'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
+	this.series=series;
+	this.jsons=jsons;
+	this.flatten=function(){
+		var objaux={}
+		objaux.type="HighAge";
+		objaux.series=this.series;
+		objaux.id=this.id;
+		objaux.title=this.title;
+		objaux.color=this.color;
+		objaux.jsons=this.jsons
+		return objaux
+	}
 }
 
 //******************************//
@@ -131,14 +143,24 @@ HighTimes.prototype = new Widget();
 
 //Function to remove a widget
 function deleteWidget(panel,graph){
-  
   var gridster = $("#panel"+panel+" ul").gridster().data('gridster');
   gridster.remove_widget("#graph"+graph)
-
+  var widget=GetWidget(graph)
+  widgets.splice(widgets.indexOf(widget), 1);
+  var flatten=GetElementFromDash(panel,graph)
+  dashToSave["#panel"+panel].splice(dashToSave["#panel"+panel].indexOf(flatten), 1);
 }
 
 //Function that removes all widgets from a panel
 function deleteAllWidgets(panel){
   var gridster = $("#panel"+panel+" ul").gridster().data('gridster');
   gridster.remove_all_widgets();
+  dashToSave["#panel"+panel]=[]
+  var arrayAux=[]
+  widgets.forEach(function(element){
+  	if(element.panel!=panel){
+  		arrayAux.push(element)
+  	}
+  })
+  widgets=arrayAux
 }
