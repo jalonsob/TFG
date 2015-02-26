@@ -4,18 +4,43 @@
 //**************************************//
 
 //Basic widget for any use
-function Widget(id,color,x,y,panel){
-	this.id=id;
-	this.color=color;
-	this.x=x;
-	this.y=y;
-	this.panel=panel;
-	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button>'
-	this.content='<img id="load'+this.id+'" src="/templates/images/cargando.gif" height="42" width="42">'
-	this.square='<div id= "graph'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
+function Widget(id,panel,color,x,y){
+	var id=id;
+	var color=color||getRandomColor();
+	var panel= panel
+	var buttons='<button onclick="deleteWidget('+panel+','+id+')" type="button" class="btn btn-xs btn-default">Delete</button>'
+	var content='<img id="load'+id+'" src="/templates/images/cargando.gif" height="42" width="42">'
+	var square='<div id= "graph'+id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'">'+buttons+'</div><div id="'+id+'" class="panel-body">'+content+'</div></div>';
+
+
+	this.gridsterWidth=x||10;
+	this.gridsterheight=y||10;
+
+	this.getContent=function(){
+		return content;
+	}
+
+	this.getButtons=function(){
+		return buttons;
+	}
+
+	this.getSquare=function(){
+		return square;
+	}
+
+	this.getId=function(){
+		return id
+	}
+
 	this.changeContent= function(newContent){
-		this.content=newContent
-		this.square='<div id= "graph'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
+		content=newContent;
+		square='<div id= "graph'+id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'">'+buttons+'</div><div id="'+id+'" class="panel-body">'+content+'</div></div>';
+	}
+
+	this.changeColor=function(newColor){
+		color=newColor;
+		square='<div id= "graph'+id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'">'+buttons+'</div><div id="'+id+'" class="panel-body">'+content+'</div></div>';
+
 	}
 }
 
@@ -145,10 +170,7 @@ HighTimes.prototype = new Widget();
 function deleteWidget(panel,graph){
   var gridster = $("#panel"+panel+" ul").gridster().data('gridster');
   gridster.remove_widget("#graph"+graph)
-  var widget=GetWidget(graph)
-  widgets.splice(widgets.indexOf(widget), 1);
-  var flatten=GetElementFromDash(panel,graph)
-  dashToSave["#panel"+panel].splice(dashToSave["#panel"+panel].indexOf(flatten), 1);
+
 }
 
 //Function that removes all widgets from a panel

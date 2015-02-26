@@ -17,15 +17,14 @@
 //variables to count widgets and panels
 var actualPanel=0;
 var numPanel=0;
-var numGraph=0;
+var numWidget=0;
 //variables to get the configuration from a dashboard
 var dashConfiguration={};
 //configuration of files where we will read
 var configuration={};
 var takeinfo={};
 //Caché that has all widgets
-var dashToSave={};
-var widgets=[]
+var panels=[]
 
 
 $(document).ready(function() {
@@ -249,32 +248,21 @@ function showSettings(panel){
 //************************************** Create a graph of kind "Info chart" ***************************//
 //******************************************************************************************************//
 
-
 //This function creates the configuration menu to draw an INFO graph. In the menu will be the metrics to select what we want to draw.
 //--Esta función hay que modificarla con las futuras nuevas métricas y el menu desplegable
 function showInfoSettings(panel){
-    keys=configuration.static
-    $("#settings"+panel).slideUp("slow");
-    $("#making").slideDown("slow")
-    if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
-      $("#conten").append('<div id="currentMenu"></div>')
-      $("#currentMenu").append('<p>Los ficheros de configuración no han sido cargados con normalidad. Compruebe su conexión<p>');
-      $("#currentMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Continue</button>')
-
-    }else{
-      if($("#currentMenu")){
-        $("#currentMenu").remove();
-      }
-      $("#conten").append('<div id="currentMenu"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
-      $("#currentMenu").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column">Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras  </p>');
-      keys.forEach(function(element){
-        $("#currentMenu #list").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
-      })
-      $("#currentMenu").append('<p>Title</p><p><input placeholder="'+takeinfo.static.inside+'" id="title" class="form-control"></div></p>')
-      $("#currentMenu").append('<button onclick="takeDataInfo()" type="button" class="btn btn-xs btn-default">Create</button>')
-      $("#currentMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
-    }
+  $("#settings"+panel).slideUp("slow");
+  var color=($("#panel"+actualPanel).css('background-color'));
+  var objectPanel=GetPanel(panel);
+  numWidget++;
+  alert("hola")
+  var widget= new HighInfo(numWidget,panel,takeinfo.static.inside);
+  objectPanel.pushElement(widget)
+  console.log(widget)
+  widget.makeMenu()
 }
+
+/*
 
 //Function to get the selected options to create the graph
 function takeDataInfo(numGraph){
@@ -454,11 +442,11 @@ function settingsInfoGraph(numGraph){
     alert("This graph does not exist or has errors")
   }
 }
-
+*/
 //*******************************************************************************************************//
 //************************************** Create a graph of kind "Aging chart" ***************************//
 //*******************************************************************************************************//
-
+/*
 //Enseñamos las opciones si estan todos los archivos correctos
 function showAgingSettings(dash){
   $("#settings"+dash).slideUp("slow");
@@ -1009,11 +997,11 @@ function settingsDemoGraph(numGraph){
   $("#currentMenu").append('<button onclick="takeDataDemo('+numGraph+')" type="button" class="btn btn-xs btn-default">Redraw</button>')
   $("#currentMenu").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
 }
-
+*/
 //*******************************************************************************************************//
 //************************************** Create a graph of kind "Time series chart" *********************//
 //*******************************************************************************************************//
-
+/*
 //This function creates the configuration menu to draw an Time graph. In the menu will be the metrics to select what we want to draw.
 function showTimeSettings(dash){
   $("#settings"+dash).slideUp("slow");
@@ -1376,7 +1364,7 @@ function resetRatios(element1,element2){
   element1.checked=false;
   element2.checked=false;
 }
-
+*/
 //************************************************ FUNCIONES DE MOVIMIENTOS DEL DASH Y DEMÁS************
 /*
 
@@ -1485,13 +1473,15 @@ function getSeriesbyName(chart,label){
   return result;
 }
 
-//With this function we get an object widget from caché 
-function GetElementFromDash(panel,id){
+//With this function we get an object panel from cache
+function GetPanel(panel){
   var result;
-  dashToSave["#panel"+panel].forEach(function(element){
-    if(element.id=id){
-      result=element
-      return false
+  //Is necessary to create a new variable aux because javascript make a comparation of functions in the "if"
+  panels.forEach(function(element){
+    var aux=element.getId()
+    if(aux=panel){
+      result=element;
+      return false;
     }
   })
   return result
@@ -1499,11 +1489,19 @@ function GetElementFromDash(panel,id){
 
 //With this function we get an object widget from caché
 function GetWidget(id){
-  var result;
-  widgets.forEach(function(element){
-    if(element.id==id){
-      result=element;
-      return false;
+  var result="";
+  panels.forEach(function(element){
+    var widgets=element.getWidgets();
+    console.log(widgets)
+    widgets.forEach(function(widget){
+      var aux= widget.getId()
+      if(aux=id){
+        result=widget;
+        return false;
+      }
+    })
+    if(result!=""){
+      return false
     }
   })
   return result;
@@ -1562,9 +1560,9 @@ function getRandomColor() {
 //Function to create a new panel
 function DashCreation(){
   numPanel+=1;
-  dashToSave["#panel"+numPanel]=[]
-  var color=getRandomColor()
-  $(".container-fluid").append('<div id="settings'+(numPanel)+'"class="panel-body" hidden><ul><button onclick="showTimeSettings('+numPanel+')" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="showAgingSettings('+numPanel+')" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="showInfoSettings('+numPanel+')" type="button" class="btn btn-xs btn-default">Info widget</button></ul></div><div id="panel'+(numPanel)+'" class="gridster ready" style="background-color:'+color+'"><ul></ul></div> ')
+  var panel= new Panel(numPanel)
+  panels.push(panel)
+  $(".container-fluid").append(panel.getContent())
   $(".gridster ul").gridster({
     widget_margins: [6, 6],
     widget_base_dimensions: [20, 20],
