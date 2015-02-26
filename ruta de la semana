@@ -170,12 +170,28 @@ Martes 17 a las 14:00
 —-Posibilidad de ciclos en ingles
 	*Preferiblemente en español para evitar pérdidas de tiempo
 +Traducir variables del código
--Traducir comentarios 
++Traducir comentarios 
 -Mirar en la app y de jquery como coger un objeto del dom y trasladarlo a donde yo quiera
--Guardar en caché las gráficas y crear un tipo objeto gráfica detach(), unwrap()
--Reestructurar orientado a objetos
--Crear nueva estructura
++Guardar en caché las gráficas 
+-Crear un tipo objeto gráfica detach(), unwrap() para moverla
++Reestructurar orientado a objetos
  
 Martes 24 a las 12:00
+
+———————————
+*Libresoft en IRC para acceder al chat de ayuda
+
+- cambiar parámetros de x e y
+- - quitar la propiedad de panel
+	*Es necesaria para que el botón de borrado funcione
++ crear objeto panel
+- quitar dashToSave
+- widgets por paneles
+- mirar herramientas javascript de desarrollo 
+- mirar las funciones de template de moustache
+- crear widgets como una propiedad de panel
+
+Día 10 de marzo a las 12:00
+
 
 
