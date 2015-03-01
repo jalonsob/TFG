@@ -9,15 +9,19 @@ function Widget(id,panel,color,x,y){
 	var color=color||getRandomColor();
 	var panel= panel
 	var buttons='<button onclick="deleteWidget('+panel+','+id+')" type="button" class="btn btn-xs btn-default">Delete</button>'
-	var content='<img id="load'+id+'" src="/templates/images/cargando.gif" height="42" width="42">'
 	var square='<div id= "graph'+id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'">'+buttons+'</div><div id="'+id+'" class="panel-body">'+content+'</div></div>';
 
 
 	this.gridsterWidth=x||10;
 	this.gridsterheight=y||10;
-
+	this.toDraw= false;
+	
 	this.getContent=function(){
 		return content;
+	}
+
+	this.getPanel= function(){
+		return panel;
 	}
 
 	this.getButtons=function(){
@@ -112,54 +116,10 @@ function HighTimes(id,color,panel,from,to,size,title,series,json){
 	}
 }
 
-//Widget orientado al uso de Info con highcharts
-//falta el aplanado, el moverse
-function HighInfo(id,color,panel,title,series,json){
-	Widget.call(this,id,color,12,8,panel)
-	this.title=title;
-	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
-	this.square='<div id="graph'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
-	this.series=series;
-	this.json=json;
-	this.flatten= function(){
-		var objaux={}
-		objaux.type="HighInfo";
-		objaux.series=this.series;
-		objaux.id=this.id;
-		objaux.title=this.title;
-		objaux.color=this.color;
-		objaux.jsons=this.jsons
-		return objaux
-	}
-}
-
-//Widget orientado al uso de Ages con highcharts
-//falta el aplanado, el moverse
-function HighAge(id,color,panel,title,series,jsons){
-	Widget.call(this,id,color,16,15,panel)
-	this.title=title;
-	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
-	this.square='<div id="graph'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
-	this.series=series;
-	this.jsons=jsons;
-	this.flatten=function(){
-		var objaux={}
-		objaux.type="HighAge";
-		objaux.series=this.series;
-		objaux.id=this.id;
-		objaux.title=this.title;
-		objaux.color=this.color;
-		objaux.jsons=this.jsons
-		return objaux
-	}
-}
-
 //******************************//
 //*******Heritage area**********//
 //******************************//
 
-HighAge.prototype = new Widget();
-HighInfo.prototype = new Widget();
 HighTimes.prototype = new Widget();
 
 //*************************************************//
@@ -167,22 +127,19 @@ HighTimes.prototype = new Widget();
 //*************************************************//
 
 //Function to remove a widget
-function deleteWidget(panel,graph){
+function deleteWidget(panel,id){
   var gridster = $("#panel"+panel+" ul").gridster().data('gridster');
-  gridster.remove_widget("#graph"+graph)
-
+  gridster.remove_widget("#widget"+id);
+  var widget=GetWidget(id);
+  var panel=GetPanel(panel)
+  panel.deleteElement(widget)
 }
 
 //Function that removes all widgets from a panel
 function deleteAllWidgets(panel){
   var gridster = $("#panel"+panel+" ul").gridster().data('gridster');
   gridster.remove_all_widgets();
-  dashToSave["#panel"+panel]=[]
-  var arrayAux=[]
-  widgets.forEach(function(element){
-  	if(element.panel!=panel){
-  		arrayAux.push(element)
-  	}
-  })
-  widgets=arrayAux
+  var panel=GetPanel(panel)
+
+  panel.deleteAll()
 }

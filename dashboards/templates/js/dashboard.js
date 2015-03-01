@@ -248,19 +248,6 @@ function showSettings(panel){
 //************************************** Create a graph of kind "Info chart" ***************************//
 //******************************************************************************************************//
 
-//This function creates the configuration menu to draw an INFO graph. In the menu will be the metrics to select what we want to draw.
-//--Esta función hay que modificarla con las futuras nuevas métricas y el menu desplegable
-function showInfoSettings(panel){
-  $("#settings"+panel).slideUp("slow");
-  var color=($("#panel"+actualPanel).css('background-color'));
-  var objectPanel=GetPanel(panel);
-  numWidget++;
-  alert("hola")
-  var widget= new HighInfo(numWidget,panel,takeinfo.static.inside);
-  objectPanel.pushElement(widget)
-  console.log(widget)
-  widget.makeMenu()
-}
 
 /*
 
@@ -366,29 +353,6 @@ function makeGraphInfo(panel,selected,title,jsons,color,graph){
     var serie= parserGraphInfoHigh(selected,takeinfo.static.saveData);
     drawGraphInfoHigh(graph,serie,title)
   }
-}
-
-//Function that draws a graph of kind Info in highcharts
-function drawGraphInfoHigh(id,serie,title){
-
-  $("#load"+id).remove()
-
-  var options={
-      chart:{
-          renderTo:id.toString(),
-          width: 350,
-          height: 177
-      },
-
-      xAxis: {
-        categories: ["Total"]
-      },
-      title: {
-          text: title
-      },
-      series: serie
-  }
-  var chart= new Highcharts.Chart(options);
 }
 
 //it massages the info to draw a graph in highchart
@@ -1078,6 +1042,7 @@ function takeDataTime(numGraph){
 //In case of "times graph" in highchart we have a problem to remove the old graph and put the new 
 //graph with the original id because the function to remove in this library is too slow and makes 
 //an error. So this function remove the old graph and creates a new widget with a new  id and a new actualized graph.
+
 function makeGraphSeries(panel,selected,from,to,size,jsons,color,title,graph){
 
   //If the variable graph is undefined we have to create a new graph. 
@@ -1460,9 +1425,73 @@ function makeDashboardContent(dash){
   dashConfiguration["#dash"+dash]=[]
 }
 */
+//********************************************************************************//
+//************************************** Create graphs ***************************//
+//********************************************************************************//
+
+//This function creates the configuration menu to draw a graph. In the menu will be the metrics to select what we want to draw.
+//--Esta función hay que modificarla con las futuras nuevas métricas y el menu desplegable
+function showConfiguration(panel,type){
+
+  $("#settings"+panel).slideUp("slow");
+  var aux=$("#currentCreation").length
+  if(aux!=0){
+    deleteCreation(numWidget)
+    numWidget--
+  }
+  aux=$("#currentSettings").length
+  if(aux!=0){
+    $("#currentSettings").remove()
+  }
+  var color=($("#panel"+panel).css('background-color'));
+  var objectPanel=GetPanel(panel);
+  numWidget++;
+
+  if(type=="HighInfo"){
+    var widget= new HighInfo(numWidget,panel,color);
+    
+  }else if(type=="HighDemo"){
+    var widget= new HighDemo(numWidget,panel,color);
+    
+  }else if(type=="HighTime"){
+    var widget= new HighTime(numWidget,panel,color);
+    
+  }
+
+  objectPanel.pushElement(widget)
+  $("#making").slideDown("slow")
+  widget.makeMenu()
+}
+
+function FillWidget(id){
+  var widget=GetWidget(id);
+  widget.takeData();
+  if(widget.toDraw){
+    MakeWidget(widget)
+  }
+}
+
+function MakeWidget(widget){
+  widget.MakeWidget();
+}
+
+function ShowValuesGraph(id){
+  $("#making").slideDown("slow")
+  var widget=GetWidget(id);
+  widget.settings();
+}
+
+function ChangeValuesGraph(id){
+  var widget=GetWidget(id);
+  widget.redraw()
+}
+
+
+
 //**********************************  FUNCIONES DE FILTRADO Y SELECCION DE DATOS ********************////
 
 //función para obtener una serie y sus opciones por el nombre
+//no se usa en info
 function getSeriesbyName(chart,label){
   var result='';
   chart.series.forEach(function (element){
@@ -1492,7 +1521,6 @@ function GetWidget(id){
   var result="";
   panels.forEach(function(element){
     var widgets=element.getWidgets();
-    console.log(widgets)
     widgets.forEach(function(widget){
       var aux= widget.getId()
       if(aux=id){
@@ -1529,9 +1557,19 @@ function drawErrorWidget(graph){
 
 
 //Function that cancels the creation of a widget
-function deleteCreation(){
-  $("#currentMenu").remove();
-  $("#making").slideUp("slow")
+function deleteCreation(id){
+  $("#currentCreation").remove();
+  $("#making").slideUp("slow");
+  var widget=GetWidget(id);
+  var idPanel= widget.getPanel();
+  var panel=GetPanel(idPanel) 
+  panel.deleteElement(widget)
+}
+
+//Function that cancels the remake of a widget
+function deleteSettings(id){
+  $("#currentSettings").remove();
+  $("#making").slideUp("slow");
 }
 
 
