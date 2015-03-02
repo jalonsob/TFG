@@ -3,8 +3,6 @@
 function HighDemo(id,panel,color,jsons,title,serie){
 	HighWidget.call(this,id,panel,color,16,15)
 	this.title=title || "Grafico "+this.id;
-	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
-	this.square='<div id="widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body"><img id="load'+this.id+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>';
 	var series=serie || [];
 	if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
 		var json= "" ;
@@ -338,33 +336,45 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		$("#load"+id).remove()
 
 		var options={
-		chart:{
-		    renderTo:id.toString(),
-		    width: 460,
-		    height: 395
-		},
+			chart:{
+			    renderTo:id.toString(),
+			    width: 460,
+			    height: 395
+			},
 
-		xAxis: {
-		  categories: axisx
-		},
+			xAxis: {
+			  categories: axisx
+			},
 
-		plotOptions: {
-		            series: {
-		                cursor: 'pointer',
-		                point: {
-		                    events: {
-		                        click: function () {
-		                        	alert("yolo!")
-		                        }
-		                    }
-		                }
-		            }
-		        },
+			plotOptions: {
+			            series: {
+			                cursor: 'pointer',
+			                point: {
+			                    events: {
+			                        click: function () {
+			                        	alert("yolo!")
+			                        }
+			                    }
+			                }
+			            }
+			        },
 
-		title: {
-		    text: title
-		},
-		series: serie
+			title: {
+			    text: title
+			},
+			series: serie,
+			exporting: {
+				buttons: {
+					contextButton: {
+						menuItems: [{
+							text: 'Destroy',
+							onclick: function () {
+								ShowValuesGraph(id);
+							}
+						}]
+					}
+				}
+			}
 		}
 
 		chart= new Highcharts.Chart(options);
