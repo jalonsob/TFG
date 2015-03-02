@@ -1,7 +1,7 @@
 //Widget oriented to make a chart of kind INFO with Highcharts
 
 function HighInfo(id,panel,color,json,title,serie){
-	Widget.call(this,id,panel,color,12,8)
+	HighWidget.call(this,id,panel,color,12,8)
 	this.title=title || "Grafico "+this.id;
 	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
 	this.square='<div id="widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body"><img id="load'+this.id+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>';
@@ -181,6 +181,7 @@ function HighInfo(id,panel,color,json,title,serie){
 
 	this.settings= function(){
 		var chart = $('#'+id).highcharts();
+		var existLabel= this.existLabel
 		if(chart!=undefined){
 			var keys=configuration.static
 
@@ -195,7 +196,7 @@ function HighInfo(id,panel,color,json,title,serie){
 			  $("#currentSettings").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column">Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar" checked>Barras  </p>');
 			}
 			keys.forEach(function(element){
-			  if(existLabelHigh(chart,element)){
+			  if(existLabel(chart,element)){
 			    $("#currentSettings #list").append('<p><input type="checkbox" value="'+element+'" checked> '+element+'</p>')
 			  }else{
 			    $("#currentSettings #list").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
@@ -224,4 +225,4 @@ function HighInfo(id,panel,color,json,title,serie){
 	
 }
 
-HighInfo.prototype = new Widget();
+HighInfo.prototype = new HighWidget();

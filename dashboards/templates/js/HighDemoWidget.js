@@ -1,7 +1,7 @@
 //Widget oriented to make a chart of kind AGES with Highcharts
 
 function HighDemo(id,panel,color,jsons,title,serie){
-	Widget.call(this,id,panel,color,16,15)
+	HighWidget.call(this,id,panel,color,16,15)
 	this.title=title || "Grafico "+this.id;
 	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
 	this.square='<div id="widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body"><img id="load'+this.id+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>';
@@ -376,20 +376,21 @@ function HighDemo(id,panel,color,jsons,title,serie){
 
 	this.settings= function(){
 		var chart = $('#'+id).highcharts();
-
+		var getSerie= this.getSerie
+		var existLabel= this.existLabel
 		if(chart!=undefined){
 
 			$("#conten").append('<div id="currentSettings"></div>')
 
-			if(existLabelHigh(chart,"aging")){
-				auxseries=this.getSerie(chart,"aging");
+			if(existLabel(chart,"aging")){
+				auxseries=getSerie(chart,"aging");
 				$("#currentSettings").append('<p><div class="form-group"><label><input id="aging" type="checkbox" value="aging" checked>Aging</label><input placeholder="'+auxseries.color+'" id="agingColor" class="form-control"></div></p>')
 			}else{
 				$("#currentSettings").append('<p><div class="form-group"><label><input id="aging" type="checkbox" value="aging">Aging</label><input placeholder="#4D8FB8" id="agingColor" class="form-control"></div></p>')
 			}
 
-			if(existLabelHigh(chart,"birth")){
-				auxseries=this.getSerie(chart,"birth");
+			if(existLabel(chart,"birth")){
+				auxseries=getSerie(chart,"birth");
 				$("#currentSettings").append('<p><div class="form-group"><label><input id="birth" type="checkbox" value="birth" checked>Birth</label><input placeholder="'+auxseries.color+'" id="birthColor" class="form-control"></div></p>')
 			}else{
 				$("#currentSettings").append('<p><div class="form-group"><label><input id="birth" type="checkbox" value="birth">Birth</label><input placeholder="#081923" id="birthColor" class="form-control"></div></p>')
@@ -412,18 +413,6 @@ function HighDemo(id,panel,color,jsons,title,serie){
     
 	}
 
-	this.getSerie= function(chart,label){
-
-		var result='';
-		chart.series.forEach(function (element){
-			if(element.name==label){
-			  result=element;
-			}
-		})
-		return result;
-
-	}
-	
 }
 
-HighDemo.prototype = new Widget();
+HighDemo.prototype = new HighWidget();

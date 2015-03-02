@@ -70,7 +70,7 @@ $(document).ready(function() {
               dashConfiguration=data;
               //Before to begin we make the dashboards to put in each of them their widgets
               Object.keys(dashConfiguration).forEach(function(element){
-                DashCreation()
+                PanelCreation()
               })
 
               
@@ -232,8 +232,8 @@ $(document).ready(function() {
 
   })
 */
-  $("#addDash").click(function(){
-    DashCreation()
+  $("#addPanel").click(function(){
+    PanelCreation()
   })
 
 });
@@ -1325,10 +1325,6 @@ function settingsTimeGraph(numGraph){
 
 }
 
-function resetRatios(element1,element2){
-  element1.checked=false;
-  element2.checked=false;
-}
 */
 //************************************************ FUNCIONES DE MOVIMIENTOS DEL DASH Y DEMÁS************
 /*
@@ -1425,9 +1421,9 @@ function makeDashboardContent(dash){
   dashConfiguration["#dash"+dash]=[]
 }
 */
-//********************************************************************************//
-//************************************** Create graphs ***************************//
-//********************************************************************************//
+//******************************************************************//
+//*********************** Functions dashboard **********************//
+//******************************************************************//
 
 //This function creates the configuration menu to draw a graph. In the menu will be the metrics to select what we want to draw.
 //--Esta función hay que modificarla con las futuras nuevas métricas y el menu desplegable
@@ -1486,21 +1482,34 @@ function ChangeValuesGraph(id){
   widget.redraw()
 }
 
-
-
-//**********************************  FUNCIONES DE FILTRADO Y SELECCION DE DATOS ********************////
-
-//función para obtener una serie y sus opciones por el nombre
-//no se usa en info
-function getSeriesbyName(chart,label){
-  var result='';
-  chart.series.forEach(function (element){
-    if(element.name==label){
-      result=element;
+//Function to create a new panel
+function PanelCreation(){
+  numPanel+=1;
+  var panel= new Panel(numPanel)
+  panels.push(panel)
+  $(".container-fluid").append(panel.getContent())
+  $(".gridster ul").gridster({
+    widget_margins: [6, 6],
+    widget_base_dimensions: [20, 20],
+    serialize_params: function($w, wgd) { 
+        return { 
+               id: $($w).attr('id'), 
+               col: wgd.col, 
+               row: wgd.row, 
+               size_x: wgd.size_x, 
+               size_y: wgd.size_y 
+        };
     }
-  })
-  return result;
+  }).data('gridster');
+  $("#panels").append('<li onclick="showPanel('+numPanel+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollPanel'+numPanel+'"><i class="fa fa-fw fa-edit"></i> Panel '+numPanel+' <i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollPanel'+numPanel+'" class="collapse"><li><a onclick="showSettings('+numPanel+')" href="javascript:void(0)">Add Graph</a></li><li><a onclick="deleteAllWidgets('+numPanel+')" href="javascript:void(0)">Delete all</a></li></ul></li>')
+  if(actualPanel==0){
+    actualPanel=1;
+  }
 }
+
+
+
+//**********************************  Funciones de filtrado y seleccion de datos ********************////
 
 //With this function we get an object panel from cache
 function GetPanel(panel){
@@ -1534,17 +1543,6 @@ function GetWidget(id){
   return result;
 }
 
-//Function that leave us to know if an element is selected in a highchart
-function existLabelHigh(chart,label){
-  var result=false;
-  chart.series.forEach(function (element){
-    if(element.name==label){
-      result=true;
-    }
-  })
-  return result;
-}
-
 //Transforms a widget in an error widget.
 function drawErrorWidget(graph){
   $("#graph"+graph+" #settingsButton").remove()
@@ -1560,7 +1558,7 @@ function deleteCreation(id){
   $("#currentCreation").remove();
   $("#making").slideUp("slow");
   var widget=GetWidget(id);
-  var idPanel= widget.getPanel();
+  var idPanel= widget.panel;
   var panel=GetPanel(idPanel) 
   panel.deleteElement(widget)
 }
@@ -1594,28 +1592,9 @@ function getRandomColor() {
     return colors[Math.floor(Math.random() * 5)]
 }
 
-//Function to create a new panel
-function DashCreation(){
-  numPanel+=1;
-  var panel= new Panel(numPanel)
-  panels.push(panel)
-  $(".container-fluid").append(panel.getContent())
-  $(".gridster ul").gridster({
-    widget_margins: [6, 6],
-    widget_base_dimensions: [20, 20],
-    serialize_params: function($w, wgd) { 
-        return { 
-               id: $($w).attr('id'), 
-               col: wgd.col, 
-               row: wgd.row, 
-               size_x: wgd.size_x, 
-               size_y: wgd.size_y 
-        };
-    }
-  }).data('gridster');
-  $("#panels").append('<li onclick="showPanel('+numPanel+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollPanel'+numPanel+'"><i class="fa fa-fw fa-edit"></i> Panel '+numPanel+' <i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollPanel'+numPanel+'" class="collapse"><li><a onclick="showSettings('+numPanel+')" href="javascript:void(0)">Add Graph</a></li><li><a onclick="deleteAllWidgets('+numPanel+')" href="javascript:void(0)">Delete all</a></li></ul></li>')
-  if(actualPanel==0){
-    actualPanel=1;
-  }
+function resetRatios(element1,element2){
+  element1.checked=false;
+  element2.checked=false;
 }
+
 

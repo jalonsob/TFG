@@ -29,7 +29,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 		this.size=0
 	}
 
-	Widget.call(this,id,panel,color,this.gridsterWidth,this.gridsterheight)
+	HighWidget.call(this,id,panel,color,this.gridsterWidth,this.gridsterheight)
 
 
 	this.from=from || "";
@@ -92,9 +92,9 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 			$("#currentCreation").append('</select>')
 			$("#to").val(configuration.time[configuration.time.length-1])
 
-			$("#currentCreation").append('<p>Title</p><p><input placeholder="Time graph '+id+'" id="title" class="form-control"></div></p>')
-			$("#currentCreation").append('<button onclick="FillWidget('+id+')" type="button" class="btn btn-xs btn-default">Create</button>')
-			$("#currentCreation").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+			$("#currentCreation").append('<p>Title</p><p><input placeholder="Time graph '+this.id+'" id="title" class="form-control"></div></p>')
+			$("#currentCreation").append('<button onclick="FillWidget('+this.id+')" type="button" class="btn btn-xs btn-default">Create</button>')
+			$("#currentCreation").append('<button onclick="deleteCreation('+this.id+')" type="button" class="btn btn-xs btn-default">Cancel</button>')
     	}
 	}
 
@@ -308,6 +308,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 		var keys=configuration.evolutionary
 		var auxseries;
 		var getSerie=this.getSerie
+		var existLabel= this.existLabel
 		$("#making").slideDown("slow")
 
 		if($("#currentSettings")){
@@ -316,7 +317,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 		$("#conten").append('<div id="currentSettings"><div id="list" style="height: 200px; overflow-y: scroll;"></div></div>')
 
 		keys.forEach(function(element){
-			if(existLabelHigh(chart,element)){
+			if(existLabel(chart,element)){
 			  auxseries=getSerie(chart,element);
 			  if(auxseries.type=="column"){
 			    $("#currentSettings #list").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column" checked>Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>');
@@ -365,19 +366,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
   		this.takeData("Settings");
   		this.MakeWidget()
 	}
-
-	this.getSerie= function(chart,label){
-
-		var result='';
-		chart.series.forEach(function (element){
-			if(element.name==label){
-			  result=element;
-			}
-		})
-		return result;
-
-	}
 	
 }
 
-HighTime.prototype = new Widget();
+HighTime.prototype = new HighWidget();
