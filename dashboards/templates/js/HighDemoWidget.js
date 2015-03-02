@@ -2,9 +2,9 @@
 
 function HighDemo(id,panel,color,jsons,title,serie){
 	Widget.call(this,id,panel,color,16,15)
-	this.title=title || "Grafico "+id;
-	var buttons='<button onclick="deleteWidget('+panel+','+id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ShowValuesGraph('+id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
-	var square='<div id="widget'+id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'">'+buttons+'</div><div id="'+id+'" class="panel-body"><img id="load'+id+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>';
+	this.title=title || "Grafico "+this.id;
+	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
+	this.square='<div id="widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body"><img id="load'+this.id+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>';
 	var series=serie || [];
 	if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
 		var json= "" ;
@@ -16,9 +16,9 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		var objaux={}
 		objaux.type="HighDemo";
 		objaux.series= series;
-		objaux.id= id;
+		objaux.id= this.id;
 		objaux.title=this.title;
-		objaux.color= color;
+		objaux.color= this.color;
 		objaux.jsons= json
 		return objaux
 	}
@@ -39,9 +39,9 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		$("#conten").append('<div id="currentCreation"></div>')
 		$("#currentCreation").append('<p><div class="form-group"><label><input id="aging" type="checkbox" value="aging">Aging</label><input placeholder="#4D8FB8" id="agingColor" class="form-control"></div></p>')
 		$("#currentCreation").append('<p><div class="form-group"><label><input id="birth" type="checkbox" value="birth">Birth</label><input placeholder="#081923" id="birthColor" class="form-control"></div></p>')
-		$("#currentCreation").append('<p>Title</p><p><input placeholder="Demograph graph '+id+'" id="title" class="form-control"></div></p>')
-		$("#currentCreation").append('<button onclick="FillWidget('+id+')" type="button" class="btn btn-xs btn-default">Create</button>')
-		$("#currentCreation").append('<button onclick="deleteCreation('+id+')" type="button" class="btn btn-xs btn-default">Cancel</button>')
+		$("#currentCreation").append('<p>Title</p><p><input placeholder="Demograph graph '+this.id+'" id="title" class="form-control"></div></p>')
+		$("#currentCreation").append('<button onclick="FillWidget('+this.id+')" type="button" class="btn btn-xs btn-default">Create</button>')
+		$("#currentCreation").append('<button onclick="deleteCreation('+this.id+')" type="button" class="btn btn-xs btn-default">Cancel</button>')
 		}
 		    
 	}
@@ -117,8 +117,8 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		var title= this.title
 
 		if(mode!="remake"){
-			var gridster = $("#panel"+panel+" ul").gridster().data('gridster');
-			gridster.add_widget(square, this.gridsterWidth, this.gridsterheight);
+			var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
+			gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight);
 		}
 
 		if(series.length==1){
@@ -127,7 +127,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		    $("#"+id).on("DrawAges",function(event,trigger,data){
 		      
 		      //parseamos los datos
-		      var serie=[]
+		      var serieChart=[]
 			  var dato= parser(data)
 
 			  max=dato.length
@@ -138,10 +138,10 @@ function HighDemo(id,panel,color,jsons,title,serie){
 			        color: series[0].color
 			  }
 
-			  serie.push(objaux)
+			  serieChart.push(objaux)
 			  var axisx=createX(max).reverse()
 
-			  draw(serie,axisx,title)
+			  draw(serieChart,axisx,title)
 		      $("#"+id).off()
 		    })
 
@@ -172,7 +172,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		    }else if(takeinfo[series[0].name].state==2){
 		      var data=takeinfo[series[0].name].saveData
 
-		      var serie=[]
+		      var serieChart=[]
 			  var dato= parser(data)
 
 			  max=dato.length
@@ -183,10 +183,10 @@ function HighDemo(id,panel,color,jsons,title,serie){
 			        color: series[0].color
 			  }
 
-			  serie.push(objaux)
+			  serieChart.push(objaux)
 			  var axisx=createX(max).reverse()
 
-			  draw(serie,axisx,title)
+			  draw(serieChart,axisx,title)
 		    }
 
 		//El otro caso es que seleccionara los 2 posibles casos
@@ -194,8 +194,8 @@ function HighDemo(id,panel,color,jsons,title,serie){
 			var save=[];
 
 		    //En caso positivo lo dibujo
-		    $("#"+id).on("DrawAgesD",function(event,trigger){
-		      	var serie=[]
+		    $("#"+this.id).on("DrawAgesD",function(event,trigger){
+		      	var serieChart=[]
 
 				if(parser(save[0]).length>=parser(save[1]).length){
 					max=parser(save[0]).length
@@ -211,7 +211,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 				    data: dato,
 				    color: series[0].color
 				}
-				serie.push(objaux)
+				serieChart.push(objaux)
 
 				var dato=parser(save[1]).reverse()
 
@@ -222,17 +222,17 @@ function HighDemo(id,panel,color,jsons,title,serie){
 				    color: series[1].color
 				}
 
-				serie.push(objaux)
+				serieChart.push(objaux)
 
 				var axisx=createX(max).reverse();
 
-				draw(serie,axisx,title)
+				draw(serieChart,axisx,title)
 
 		      	$("#"+this.id).off()
 		    })
 
 		    //En caso negativo dibujo un widget roto
-		    $("#"+id).on("ErrorGraphAges",function(){
+		    $("#"+this.id).on("ErrorGraphAges",function(){
 		      console.log("pinto uno de error")
 		      $("#"+this.id).off()
 		    })
@@ -271,9 +271,8 @@ function HighDemo(id,panel,color,jsons,title,serie){
 				})
 
 		    }else if((takeinfo[series[0].name].state==2) && (takeinfo[series[1].name].state==2)){
-		    	alert("me meto por aqui")
 		    	//Si ya lo tenemos todo nos limitamos a dibujar como hacemos arriba
-				var serie=[]
+				var serieChart=[]
 
 				if(parser(takeinfo[series[0].name].saveData).length>=parser(takeinfo[series[1].name].saveData).length){
 					max=parser(takeinfo[series[0].name].saveData).length
@@ -290,7 +289,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 				    color: series[0].color
 				}
 
-				serie.push(objaux)
+				serieChart.push(objaux)
 
 				var dato=parser(takeinfo[series[1].name].saveData).reverse()
 
@@ -300,11 +299,11 @@ function HighDemo(id,panel,color,jsons,title,serie){
 				    data: dato,
 				    color: series[1].color
 				}
-				serie.push(objaux)
+				serieChart.push(objaux)
 
 				var axisx=createX(max).reverse();
 
-				draw(serie,axisx,title)
+				draw(serieChart,axisx,title)
 				      
 		    }
 		}
@@ -372,7 +371,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 	}
 
 	this.getSeries= function(){
-		return this.series;
+		return series;
 	}
 
 	this.settings= function(){
@@ -396,7 +395,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 				$("#currentSettings").append('<p><div class="form-group"><label><input id="birth" type="checkbox" value="birth">Birth</label><input placeholder="#081923" id="birthColor" class="form-control"></div></p>')
 			}
 			$("#currentSettings").append('<p>Title</p><p><input placeholder="'+chart.title.textStr+'" id="title" class="form-control"></div></p>')
-			$("#currentSettings").append('<button onclick="ChangeValuesGraph('+id+')" type="button" class="btn btn-xs btn-default">Create</button>')
+			$("#currentSettings").append('<button onclick="ChangeValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Create</button>')
 			$("#currentSettings").append('<button onclick="deleteSettings()" type="button" class="btn btn-xs btn-default">Cancel</button>')
 		}else{
 			alert("This graph does not exist or has errors")

@@ -2,9 +2,9 @@
 
 function HighInfo(id,panel,color,json,title,serie){
 	Widget.call(this,id,panel,color,12,8)
-	this.title=title || "Grafico "+id;
-	var buttons='<button onclick="deleteWidget('+panel+','+id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ShowValuesGraph('+id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
-	var square='<div id="widget'+id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'">'+buttons+'</div><div id="'+id+'" class="panel-body"><img id="load'+id+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>';
+	this.title=title || "Grafico "+this.id;
+	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
+	this.square='<div id="widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body"><img id="load'+this.id+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>';
 	var series=serie || [];
 	if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
 		var json= "" ;
@@ -47,6 +47,7 @@ function HighInfo(id,panel,color,json,title,serie){
 	}
 
 	this.takeData= function(state){
+		var selected=[]
 		if(state==undefined){
 			state="Creation"
 		}
@@ -74,7 +75,7 @@ function HighInfo(id,panel,color,json,title,serie){
 		      $("#current"+state).remove();
 		      $("#making").slideUp("slow")
 		      this.toDraw=true;
-		      this.series=selected
+		      series=selected
 		    }else{
 
 		      alert("We can not represent a graph without data")
@@ -89,24 +90,23 @@ function HighInfo(id,panel,color,json,title,serie){
 	this.MakeWidget=function(){
 
 		var parser=this.Parser;
-		var selected= this.series;
-		var auxTitle= this.title
+		var selected= series;
 		var draw=this.Draw
 		var title= this.title
 		
-		var gridster = $("#panel"+panel+" ul").gridster().data('gridster');
-		gridster.add_widget(square, this.gridsterWidth, this.gridsterheight);
+		var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
+		gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight);
 		//In the right way i will draw the graph
-		$("#"+id).on("DrawInfo",function(event,trigger,data){
-			var serie= parser(selected,data)
-			draw(serie,title)
-			$("#"+id).off()
+		$("#"+this.id).on("DrawInfo",function(event,trigger,data){
+			var serieChart= parser(selected,data)
+			draw(serieChart,title)
+			$("#"+this.id).off()
 		})
 
 		//In the wrong way i will draw an error widget
-		$("#"+id).on("ErrorGraphInfo",function(){
+		$("#"+this.id).on("ErrorGraphInfo",function(){
 		  console.log("hay error")
-		  $("#"+id).off()
+		  $("#"+this.id).off()
 		})
 
 		//If we haven't the data in cache we will request them
@@ -129,8 +129,8 @@ function HighInfo(id,panel,color,json,title,serie){
 		}else if(takeinfo.static.state==2){
 			//If we have the data in caché we will use it
 			if(takeinfo.static.inside==json){
-				var serie= parser(selected,takeinfo.static.saveData)
-				draw(serie,title)
+				var serieChart= parser(selected,takeinfo.static.saveData)
+				draw(serieChart,title)
 			}
 		}
 	}
@@ -176,7 +176,7 @@ function HighInfo(id,panel,color,json,title,serie){
 	}
 
 	this.getSeries= function(){
-		return this.series;
+		return series;
 	}
 
 	this.settings= function(){
@@ -202,7 +202,7 @@ function HighInfo(id,panel,color,json,title,serie){
 			  }
 			})
 			$("#currentSettings").append('<p>Title</p><p><input placeholder="'+this.title+'" id="title" class="form-control"></div></p>')
-			$("#currentSettings").append('<button onclick="ChangeValuesGraph('+id+')" type="button" class="btn btn-xs btn-default">Create</button>')
+			$("#currentSettings").append('<button onclick="ChangeValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Create</button>')
 			$("#currentSettings").append('<button onclick="deleteSettings()" type="button" class="btn btn-xs btn-default">Cancel</button>')
 		}else{
 			alert("This graph does not exist or has errors")
@@ -214,8 +214,8 @@ function HighInfo(id,panel,color,json,title,serie){
 		var chart = $('#'+id).highcharts();
     	chart.destroy()
     	if(takeinfo.static.inside==json){
-    		var series= this.Parser(this.series,takeinfo.static.saveData)
-    		this.Draw(series,this.title)
+    		var serieChart= this.Parser(series,takeinfo.static.saveData)
+    		this.Draw(serieChart,this.title)
     	}else{
     		alert("cuidado que hemos cambiado")
     	}

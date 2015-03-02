@@ -1508,7 +1508,7 @@ function GetPanel(panel){
   //Is necessary to create a new variable aux because javascript make a comparation of functions in the "if"
   panels.forEach(function(element){
     var aux=element.getId()
-    if(aux=panel){
+    if(aux==panel){
       result=element;
       return false;
     }
@@ -1522,8 +1522,7 @@ function GetWidget(id){
   panels.forEach(function(element){
     var widgets=element.getWidgets();
     widgets.forEach(function(widget){
-      var aux= widget.getId()
-      if(aux=id){
+      if(widget.id==id){
         result=widget;
         return false;
       }

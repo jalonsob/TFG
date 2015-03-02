@@ -29,23 +29,24 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 		this.size=0
 	}
 
-	this.from=from || "";
-	this.to=to || "";
-	this.title=title || "Grafico "+id;
-	
 	Widget.call(this,id,panel,color,this.gridsterWidth,this.gridsterheight)
 
-	var buttons='<button onclick="deleteWidget('+panel+','+id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ShowValuesGraph('+id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
-	var square='<div id="widget'+id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'">'+buttons+'</div><div id="'+id+'" class="panel-body"><img id="load'+id+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>';
+
+	this.from=from || "";
+	this.to=to || "";
+	this.title=title || "Grafico "+this.id;
+	
+	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
+	this.square='<div id="widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body"><img id="load'+this.id+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>';
 
 	this.flatten= function(){
 		var objaux={}
 
 		objaux.type="HighTime";
-		objaux.series=this.series;
-		objaux.id= id;
+		objaux.series= series;
+		objaux.id= this.id;
 		objaux.title=this.title;
-		objaux.color= color;
+		objaux.color= this.color;
 		objaux.jsons= json
 		objaux.from= this.from;
 		objaux.to= this.to;
@@ -56,8 +57,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 
 
 	this.makeMenu= function(){
-
-		if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
+		if(json==""){
 			$("#conten").append('<div id="currentCreation"></div>')
 			$("#currentCreation").append('<p>Los ficheros de configuración no han sido cargados con normalidad. Compruebe su conexión<p>');
 			$("#currentCreation").append('<button onclick="deleteCreation()" type="button" class="btn btn-xs btn-default">Continue</button>')
@@ -114,15 +114,14 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 			selected.push(objaux);
 		});
 
-		this.series=selected
-		this.to=$("#to option:selected").text()
-		this.from=$("#from option:selected").text()
 
 		if($("#current"+state+" #title").val()==''){
 			this.title=($("#current"+state+" #title").attr("placeholder"))
 		}else{
 			this.title=$("#current"+state+" #title").val()
 		}
+		this.to=$("#to option:selected").text()
+		this.from=$("#from option:selected").text()
 		
 		this.size= configuration.time.indexOf(this.to.toString()) - configuration.time.indexOf(this.from.toString()) +1;
 
@@ -145,7 +144,10 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 
 		if(selected.length!=0){
 			if(this.size>0){
+				series=selected
+				
 				this.toDraw=true;
+
 				$("#current"+state).remove();
 		    	$("#making").slideUp("slow")
 			}else{
@@ -160,9 +162,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 	}
 
 	this.MakeWidget=function(){
-
 		var parser=this.Parser;
-		var selected= this.series;
 		var draw=this.Draw;
 		var title= this.title;
 		var from= this.from;
@@ -171,20 +171,19 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 		var serie= this.series;
 		var createX= this.CreateX
 
-		var gridster = $("#panel"+panel+" ul").gridster().data('gridster');
- 		gridster.add_widget(square, this.gridsterWidth, this.gridsterheight);
+		var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
+ 		gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight);
 
 		//In the right way i will draw the graph
-		$("#"+id).on("DrawTimes",function(event,trigger,data,serie){
-			
-			var serie= parser(from,to,data,serie);
+		$("#"+this.id).on("DrawTimes",function(event,trigger,data,serie){
+			var serieChart= parser(from,to,data,series);
 		    var x= createX(data,from,to)
-		    draw(serie,x,title,size)
+		    draw(serieChart,x,title,size,this.id)
 			$("#"+this.id).off()
 		})
 
 		//In the wrong way i will draw an error widget
-		$("#"+id).on("ErrorGraphTimes",function(){
+		$("#"+this.id).on("ErrorGraphTimes",function(){
 			alert("pinto uno de error")
 			$("#"+this.id).off()
 		})
@@ -212,11 +211,11 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 			//Si lo tengo en caché lo dibujo directamente
 		
 			if(takeinfo.evolutionary.inside==json){
-				var serie= parser(from,to,takeinfo.evolutionary.saveData,serie);
+				var serieChart= parser(from,to,takeinfo.evolutionary.saveData,series);
 			
 			    var x= createX(takeinfo.evolutionary.saveData,from,to)
 			    
-			    draw(serie,x,title,size)
+			    draw(serieChart,x,title,size,this.id)
     		}
 		}
 	}
@@ -243,7 +242,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 
 	}
 
-	this.Draw= function(serie,x,title,size){
+	this.Draw= function(serie,x,title,size,id){
 		
   	  $("#load"+id).remove()
 
@@ -301,13 +300,14 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 	}
 
 	this.getSeries= function(){
-		return this.series;
+		return series;
 	}
 
 	this.settings= function(){
-		var chart = $('#'+id).highcharts();
+		var chart = $('#'+this.id).highcharts();
 		var keys=configuration.evolutionary
 		var auxseries;
+		var getSerie=this.getSerie
 		$("#making").slideDown("slow")
 
 		if($("#currentSettings")){
@@ -317,7 +317,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 
 		keys.forEach(function(element){
 			if(existLabelHigh(chart,element)){
-			  auxseries=getSeriesbyName(chart,element);
+			  auxseries=getSerie(chart,element);
 			  if(auxseries.type=="column"){
 			    $("#currentSettings #list").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column" checked>Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>');
 			  }else{
@@ -347,28 +347,35 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 		$("#from").val(chart.series[0].data[0].category)
 		$("#to").val(configuration.time[position2+1])
 		$("#currentSettings").append('<p>Title</p><p><input placeholder="'+chart.title.textStr+'" id="title" class="form-control"></div></p>')
-		$("#currentSettings").append('<button onclick="ChangeValuesGraph('+id+')" type="button" class="btn btn-xs btn-default">Redraw</button>')
+		$("#currentSettings").append('<button onclick="ChangeValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Redraw</button>')
 		$("#currentSettings").append('<button onclick="deleteSettings()" type="button" class="btn btn-xs btn-default">Cancel</button>')
 
 	}
 
 	this.redraw= function(){
+		var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
+  		gridster.remove_widget("#widget"+this.id);
 
-		var gridster = $("#panel"+panel+" ul").gridster().data('gridster');
-  		gridster.remove_widget("#widget"+id);
-
-  		id=numWidget+1
+  		this.id=numWidget+1
   		numWidget++
 
-
-		buttons='<button onclick="deleteWidget('+panel+','+id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ShowValuesGraph('+id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
-		square='<div id="widget'+id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'">'+buttons+'</div><div id="'+id+'" class="panel-body"><img id="load'+id+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>';
+		this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
+		this.square='<div id="widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body"><img id="load'+this.id+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>';
 
   		this.takeData("Settings");
   		this.MakeWidget()
-  		var serie= this.Parser(this.from,this.to,takeinfo.evolutionary.saveData,this.series);
-		var x= this.CreateX(takeinfo.evolutionary.saveData,this.from,this.to)
-		this.Draw(serie,x,this.title,this.size)
+	}
+
+	this.getSerie= function(chart,label){
+
+		var result='';
+		chart.series.forEach(function (element){
+			if(element.name==label){
+			  result=element;
+			}
+		})
+		return result;
+
 	}
 	
 }
