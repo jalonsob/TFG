@@ -357,8 +357,6 @@ function HighDemo(id,panel,color,jsons,title,serie){
 			                        click: function () {
 			                        	numWidget++
 			                       		var widget= new HighAutors(numWidget,panel,color,json,title,this.category);
-			                       		var objectPanel=GetPanel(panel);
-			                       		objectPanel.pushElement(widget);
 			                       		widget.MakeWidget();
 			                        }
 			                    }

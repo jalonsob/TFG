@@ -35,7 +35,7 @@ function Panel(idPanel){
 		var objaux={};
 		objaux["panel"+id]=[];
 		widgets.forEach(function(element){
-			objaux["#panel"+id].push(element.flatten)
+			objaux["panel"+id].push(element.flatten())
 		})
 		return objaux
 	}

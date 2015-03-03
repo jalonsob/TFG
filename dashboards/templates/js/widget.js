@@ -40,8 +40,10 @@ function deleteWidget(panel,id){
   gridster.remove_widget("#widget"+id);
 
   var widget=GetWidget(id);
-  var panel=GetPanel(panel)
-  panel.deleteElement(widget)
+  if(widget!=""){
+	  var panel=GetPanel(panel)
+	  panel.deleteElement(widget)
+  }
 }
 
 //Function that removes all widgets from a panel

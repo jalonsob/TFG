@@ -118,7 +118,7 @@ $(document).ready(function() {
       alert("Los archivos de configuración no se han cargado correctamente. Sus gráficas no pueden ser reproducidas")
     })
   
-/*
+
 
   //Save button
   $("#save").click(function(){
@@ -126,61 +126,19 @@ $(document).ready(function() {
     var finalObj={}
  
     //Antes de empezar compruebo que al menos existe 1 dashboard del que guardar algo
-    if(numDash>0){
+    if(numPanel>0){
+        var info={};
+        panels.forEach(function(element){
+          info[(Object.keys(element.flatten())[0])]=(element.flatten()[(Object.keys(element.flatten())[0])])
+        })
       
-      for (i=1; i<=numDash;i++){
-       //paseándome dashboard por dashboard
-        if($("#dash"+i+" ul")){
-
-          //creo un objeto único para cada uno con id la misma que la de su div
-          finalObj["#dash"+i]=[]
-          var gridster = $("#dash"+i+" ul").gridster().data('gridster');
-          //obtengo y serializo el gridster que tiene en su interior para conseguir acceder a todas sus graficas
-          var gridata=gridster.serialize()
-
-          for(j=0; j<gridata.length; j++){
-
-            //consigo el chart de cada una y creo un nuevo objeto con las caracteristicas de objaux
-            content= $("#"+gridata[j].id)
-            var chart = $("#"+content.selector.split("#graph")[1]).highcharts()
-            var objaux={
-              graph: content.selector.split("#graph")[1],
-              xAxis:chart.series[0].xAxis.categories,
-              title: chart.title.textStr,
-              series: []
-            }
-
-            //dentro de objaux relleno las opciones de series
-            chart.series.forEach(function(serie){
-              var name= serie.name
-              var type= serie.options.type
-              if(serie.options.color==undefined){
-                var color=""
-              }else{
-                var color= serie.options.color
-              }
-              var objaux2={
-                name: name,
-                type: type,
-              }
-              objaux.series.push(objaux2)
-            })
-
-            //y finalmente lo añado al objeto final donde queda un objeto de indices cada dashboard,
-            //de cada indice de propiedad un array con las propiedades de cada una de las gráficas para 
-            //pintarlas
-            finalObj["#dash"+i].push(objaux)
-          }
-        }
-      }
-
       //Para guardar comprobamos que no nos encontramos ya en un dashboard guardado
       if(document.URL.split("/")[document.URL.split("/").length-1]==""){
-
         $.ajax({
           type: "GET",
           url: "/db/",
           success: function(data){
+
             var idList= data.split(",")
             if(idList.length==1000000000000000){
               alert("Lo sentimos el servidor está lleno.")
@@ -194,7 +152,7 @@ $(document).ready(function() {
 
               var send={
                 N: id,
-                C: finalObj
+                C: info
               }
 
               //y creamos uno nuevo con un post al recurso /db/
@@ -227,11 +185,10 @@ $(document).ready(function() {
           }
         });
       }
-
     }
 
   })
-*/
+
   $("#addPanel").click(function(){
     PanelCreation()
   })

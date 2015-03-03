@@ -27,6 +27,7 @@ function HighAutors(id,panel,color,jsons,title,serie){
 		var aux= serie.split("-")
 		var from= parseInt(aux[0])
 		var to= parseInt(aux[1])
+		var serieChart;
 
 		var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
 
