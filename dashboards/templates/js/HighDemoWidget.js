@@ -109,10 +109,14 @@ function HighDemo(id,panel,color,jsons,title,serie){
 	}
 
 	this.MakeWidget=function(mode){
+
 		var parser= this.Parser
 		var createX=this.CreateX
 		var draw= this.Draw
 		var title= this.title
+		var panel= this.panel
+		var color= this.color
+		var jsons= json
 
 		if(mode!="remake"){
 			var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
@@ -123,7 +127,6 @@ function HighDemo(id,panel,color,jsons,title,serie){
 
 		    //En caso de que la llamada sea positiva serializo con lso datos obtenidos
 		    $("#"+id).on("DrawAges",function(event,trigger,data){
-		      
 		      //parseamos los datos
 		      var serieChart=[]
 			  var dato= parser(data)
@@ -138,8 +141,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 
 			  serieChart.push(objaux)
 			  var axisx=createX(max).reverse()
-
-			  draw(serieChart,axisx,title)
+			  draw(serieChart,axisx,title,panel,color,jsons)
 		      $("#"+id).off()
 		    })
 
@@ -184,7 +186,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 			  serieChart.push(objaux)
 			  var axisx=createX(max).reverse()
 
-			  draw(serieChart,axisx,title)
+			  draw(serieChart,axisx,title,panel,color,jsons)
 		    }
 
 		//El otro caso es que seleccionara los 2 posibles casos
@@ -193,6 +195,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 
 		    //En caso positivo lo dibujo
 		    $("#"+this.id).on("DrawAgesD",function(event,trigger){
+
 		      	var serieChart=[]
 
 				if(parser(save[0]).length>=parser(save[1]).length){
@@ -224,7 +227,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 
 				var axisx=createX(max).reverse();
 
-				draw(serieChart,axisx,title)
+				draw(serieChart,axisx,title,panel,color,jsons)
 
 		      	$("#"+this.id).off()
 		    })
@@ -301,7 +304,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 
 				var axisx=createX(max).reverse();
 
-				draw(serieChart,axisx,title)
+				draw(serieChart,axisx,title,panel,color,jsons)
 				      
 		    }
 		}
@@ -332,9 +335,9 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		return result
 	}
 
-	this.Draw= function(serie,axisx,title){
+	this.Draw= function(serie,axisx,title,panel,color,json){
 		$("#load"+id).remove()
-
+	
 		var options={
 			chart:{
 			    renderTo:id.toString(),
@@ -352,7 +355,11 @@ function HighDemo(id,panel,color,jsons,title,serie){
 			                point: {
 			                    events: {
 			                        click: function () {
-			                        	alert("yolo!")
+			                        	numWidget++
+			                       		var widget= new HighAutors(numWidget,panel,color,json,title,this.category);
+			                       		var objectPanel=GetPanel(panel);
+			                       		objectPanel.pushElement(widget);
+			                       		widget.MakeWidget();
 			                        }
 			                    }
 			                }
