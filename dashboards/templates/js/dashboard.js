@@ -19,7 +19,7 @@ var actualPanel=0;
 var numPanel=0;
 var numWidget=0;
 //variables to get the configuration from a dashboard
-var dashConfiguration={};
+var dashConfiguration=[];
 //configuration of files where we will read
 var configuration={};
 var takeinfo={};
@@ -66,21 +66,29 @@ $(document).ready(function() {
             data: N.toString(),
             dataType: "json",
             success: function(data){
-
-              dashConfiguration=data;
-              //Before to begin we make the dashboards to put in each of them their widgets
-              Object.keys(dashConfiguration).forEach(function(element){
-                PanelCreation()
+              Object.keys(data).forEach(function(element){
+                PanelCreation(data[element].panel.color);
+                var id=element.split("panel")[1]
+                dashConfiguration.push(id)
+                var panel= GetPanel(id)
+                data[element].widgets.forEach(function(widgetSaved){
+                  if(numWidget<widgetSaved.id){
+                    numWidget=widgetSaved.id
+                  }
+                  if(widgetSaved.type=="HighInfo"){
+                    var widget= new HighInfo(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.title,widgetSaved.series)
+                    panel.pushElement(widget)
+                  }else if(widgetSaved.type=="HighDemo"){
+                    var widget= new HighDemo(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.title,widgetSaved.series)
+                    panel.pushElement(widget)
+                  }else if(widgetSaved.type=="HighTime"){
+                    var widget= new HighTime(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.title,widgetSaved.series,widgetSaved.from,widgetSaved.to,widgetSaved.size)
+                    panel.pushElement(widget)
+                  }
+                })
               })
-
-              
-              //To make a save we have to have a panel as minimum.
-              //That means that we can try to draw a panel if we have one.
-    
-              numGraphActual(dashConfiguration)
-              makeDashboardContent(1)
-              actualDash= 1
-              $("#dash1").slideDown("slow");
+              $("#panel"+1).slideDown("slow");
+              makePanel(1)
             }
           });
       }else{
@@ -141,7 +149,7 @@ $(document).ready(function() {
 
             var idList= data.split(",")
             if(idList.length==1000000000000000){
-              alert("Lo sentimos el servidor está lleno.")
+              alert("Sorry, the server is full.")
             }else{
 
               var id= Math.floor((Math.random() * 1000000000000000) + 1)
@@ -174,7 +182,7 @@ $(document).ready(function() {
         //en otro caso se realiza un put al recurso /db/<integer>
         var send={
           N: document.URL.split("/")[document.URL.split("/").length-1],
-          C: finalObj
+          C: info
         }
         $.ajax({
           type: "PUT",
@@ -201,280 +209,6 @@ function showSettings(panel){
 
 }
 
-//*******************************************************************************************************//
-//************************************** Create a graph of kind "Aging chart" ***************************//
-//*******************************************************************************************************//
-/*
-
-
-
-function makeAutorsGraph(categoria,title){
-  var jsons= title.split(" ")
-  var aux= categoria.split("-")
-  var from= parseInt(aux[0])
-  var to= parseInt(aux[1])
-  if(jsons.length==2){
-    var graphicAging, graphicBirth;
-    var whereaging=takeinfo.aging;
-    var wherebirth=takeinfo.birth;
-    
-    graphicAging=takeinfo[jsons[0].split("-")[2]].saveData
-    graphicBirth=takeinfo[jsons[1].split("-")[2]].saveData
-    var series= parseLookInfo(from,to,graphicAging)
-    series=parseLookInfo(from,to,graphicBirth,series)
-    series=parserAutorsData(series)
-
-    numGraph+=1;
-    var inDash= "dash"+actualDash.toString()
-    color=($("#dash"+actualDash).css('background-color'))
-    var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-    var title="Usuarios entre "+from+"-"+to+" de "+title
-
-
-    if((series.length)<=12 && (series.length)>=8){
-
-      gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 15, 12);
-
-    }else if((series.length)<8){
-
-      gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 12, 8);
-
-    }else{
-
-      gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 13);
-
-    }
-
-    drawAutorsGraph(numGraph,series)
-  
-  }else{
-    data=takeinfo[title.split("-")[2]].saveData
-    var series= parseLookInfo(from,to,data)
-    numGraph+=1;
-    var inDash= "dash"+actualDash.toString()
-    color=($("#dash"+actualDash).css('background-color'))
-    var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-    series=parserAutorsData(series)
-    var title="Usuarios entre "+from+"-"+to+" de "+title
-
-
-    if((series.length)<=12 && (series.length)>=8){
-
-      gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 15, 12);
-
-    }else if((series.length)<8){
-
-      gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 12, 8);
-
-    }else{
-
-      gridster.add_widget('<div id= "graph'+numGraph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+numGraph+')" type="button" class="btn btn-xs btn-default">Delete</button></div><div id="'+numGraph+'" class="panel-body"> </div></div>', 34, 13);
-
-    }
-
-    drawAutorsGraph(numGraph,series)
-  
-  }
-}
-
-
-//funcion para dibujar la grafica de autores de manera que sea mas facil
-//y agradable a la vista el representarla
-function drawAutorsGraph(id,serie,title){
-
-  if((serie.length)<=12 && (serie.length)>=8){
-
-    var options={
-      chart:{
-          renderTo: id.toString(),
-          width: 430,
-          height: 307
-      },
-
-      xAxis: {
-        categories: ["Age"]
-      },
-      title: {
-          text: title
-      },
-      series: serie
-    }
-
-  }else if((serie.length)<8){
-
-    var options={
-      chart:{
-          renderTo: id.toString(),
-          width: 340,
-          height: 177
-      },
-
-      xAxis: {
-        categories: ["Age"]
-      },
-      title: {
-          text: title
-      },
-      series: serie
-    }
-
-  }else{
-
-    var options={
-      chart:{
-          renderTo:numGraph.toString(),
-          width: 1050,
-          height: 337
-      },
-
-      xAxis: {
-        categories: ["Age"]
-      },
-      title: {
-          text: title
-      },
-      series: serie
-    }
-
-  }
-
-  chart= new Highcharts.Chart(options);
-
-}
-
-function parserAutorsData(series){
-  var result=[];
-  for(i=0;i<series.dato.length;i++){
-    objaux={
-          type: "column",
-          name: series.xAxis[i],
-          data: [series.dato[i]]
-      }
-    result.push(objaux)
-  }
-  return result
-  }
-
-function parseLookInfo(from,to,data,aux){
-  if(aux==undefined){
-    var result={
-      xAxis: [],
-      dato: []
-    }
-  }else{
-    var result=aux;
-    
-  }
-  var i=0;
-  data.persons.age.forEach(function(element){
-    aux=Math.floor(element/181)
-    if(aux>=Math.floor(from/181) && aux<Math.floor(to/181)){
-      result.dato.push(element)
-      result.xAxis.push(data.persons.name[i])
-           
-    }
-    i++
-  })
-
-  return result
-}
-
-*/
-//************************************************ FUNCIONES DE MOVIMIENTOS DEL DASH Y DEMÁS************
-/*
-
-//función que a partir del json de configuración mira cual es el numero
-//actual de gráfica
-function numGraphActual(dashConfiguration){
-  Object.keys(dashConfiguration).forEach(function(element){
-
-    dashConfiguration[element].forEach(function(graph){
-
-      if(numGraph < graph.graph){
-        numGraph= graph.graph
-
-      }
-    })
-
-  })
-
-}
-
-//función que dado un dashboard indicado a partir de la configuración descargada
-//lo dibuja con todo su contenido
-function makeDashboardContent(dash){
-
-  dashConfiguration["#dash"+dash].forEach(function(x){
-
-      var graph=parseInt(x.graph);
-      var inDash= "dash"+dash
-      var gridster = $("#"+inDash+" ul").gridster().data('gridster');
-      color=($("#"+inDash).css('background-color'))
-
-      var options={
-        chart:{
-          renderTo: x.graph,
-            width: 100,
-            height: 100
-          },
-          xAxis: {
-            categories: []
-          },
-          title: {
-              text: ""
-          },
-          series: []
-      }
-
-      if(x.title==takeinfo.aging.inside.split(".")[0] || x.title==takeinfo.birth.inside.split(".")[0] || x.title.split(" ").length==2){
-
-        var toDraw=[]
-
-        x.series.forEach(function(y){
-          var objaux={
-            forma: y.name,
-            color: getRandomColor()
-          }
-          toDraw.push(objaux)
-
-        })
-
-        gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+actualDash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsDemoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 23, 22);
-        var chart= new Highcharts.Chart(options);
-
-        makeGraphAges(actualDash,graph,toDraw)                      
-        
-      }else{
-
-        var selected = [];
-
-        x.series.forEach(function(y){
-          var objaux = {
-            name: y.name,
-            form: y.type,
-          }
-          selected.push(objaux)
-
-        })
-        if(x.title==takeinfo.evolutionary.inside){
-
-          from=configuration.time.indexOf(x.xAxis[0])
-          to=configuration.time.indexOf(x.xAxis[x.xAxis.length-1])
-          
-          remakeGraphSeries(actualDash,selected,from,to,graph)
-
-        }else if(x.title==takeinfo.static.inside){
-
-          gridster.add_widget('<div id= "graph'+graph+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'"><button onclick="deleteGraph('+dash+','+graph+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="settingsInfoGraph('+graph+')" type="button" class="btn btn-xs btn-default">Settings</button></div><div id="'+graph+'" class="panel-body"> </div></div>', 12, 8);
-          var chart= new Highcharts.Chart(options);
-          makeGraphInfo(actualDash,selected,graph)
-        
-        }
-      }
-    })
-  dashConfiguration["#dash"+dash]=[]
-}
-*/
 //******************************************************************//
 //*********************** Functions dashboard **********************//
 //******************************************************************//
@@ -537,9 +271,15 @@ function ChangeValuesGraph(id){
 }
 
 //Function to create a new panel
-function PanelCreation(){
+function PanelCreation(color){
   numPanel+=1;
-  var panel= new Panel(numPanel)
+  if(color!=undefined){
+    var panel= new Panel(numPanel,color)
+  }else{
+    var panel= new Panel(numPanel)
+
+  }
+
   panels.push(panel)
   $(".container-fluid").append(panel.getContent())
   $(".gridster ul").gridster({
@@ -635,9 +375,21 @@ function showPanel(panel){
     $("#panel"+panel).slideDown("slow");
 
     actualPanel=panel;
-    //makeDashboardContent(panel)
+
+    if(dashConfiguration.indexOf(panel)){
+      makePanel(panel)
+    }
   }
 
+}
+
+function makePanel(panel){
+  var panel= GetPanel(panel)
+  dashConfiguration.splice(dashConfiguration.indexOf(panel)-1,1)
+  var widgets= panel.getWidgets()
+  widgets.forEach(function(widget){
+    widget.MakeWidget()
+  })
 }
 
 //Function get a random color from a list

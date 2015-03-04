@@ -2,11 +2,10 @@
 //*************Oject panel**************//
 //**************************************//
 
-function Panel(idPanel){
-
+function Panel(idPanel,color,wid){
 	var id=idPanel;
-	var widgets=[];
-	var color=getRandomColor();
+	var widgets=wid || [];
+	var color=color || getRandomColor();
 	var settings= '<div id="settings'+id+'"class="panel-body" hidden><ul><button onclick="'+"showConfiguration("+id+",'HighTime')"+'" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="'+"showConfiguration("+id+",'HighDemo')"+'" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="'+"showConfiguration("+id+",'HighInfo')"+'" type="button" class="btn btn-xs btn-default">Info widget</button></ul></div>'
 	var gridster= '<div id="panel'+id+'" class="gridster ready" style="background-color:'+color+'"><ul></ul></div>'
 	var content= settings+gridster
@@ -33,9 +32,14 @@ function Panel(idPanel){
 
 	this.flatten=function(){
 		var objaux={};
-		objaux["panel"+id]=[];
+		objaux["panel"+id]={};
+		objaux["panel"+id].panel={
+			color: color,
+			id: id
+		};
+		objaux["panel"+id].widgets=[];
 		widgets.forEach(function(element){
-			objaux["panel"+id].push(element.flatten())
+			objaux["panel"+id].widgets.push(element.flatten())
 		})
 		return objaux
 	}

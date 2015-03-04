@@ -13,7 +13,7 @@ function HighInfo(id,panel,color,json,title,serie){
 	this.flatten= function(){
 		var objaux={}
 		objaux.type="HighInfo";
-		objaux.series=this.series;
+		objaux.series= series;
 		objaux.id= id;
 		objaux.title=this.title;
 		objaux.color= color;

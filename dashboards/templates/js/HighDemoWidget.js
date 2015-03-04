@@ -8,7 +8,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		var json= "" ;
 
 	}else{
-		var json= []
+		var json= jsons || []
 	}
 	this.flatten= function(){
 		var objaux={}
@@ -337,7 +337,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 
 	this.Draw= function(serie,axisx,title,panel,color,json){
 		$("#load"+id).remove()
-	
+
 		var options={
 			chart:{
 			    renderTo:id.toString(),
@@ -372,7 +372,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 				buttons: {
 					contextButton: {
 						menuItems: [{
-							text: 'Destroy',
+							text: 'Settings',
 							onclick: function () {
 								ShowValuesGraph(id);
 							}
