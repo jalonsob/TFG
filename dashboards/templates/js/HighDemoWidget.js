@@ -25,6 +25,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		this.series.push(element)
 	}
 
+	//Function that creates a menu where we can select the data that we want represent.
 	this.makeMenu= function(){
 		if(json!=""){
 		  $("#conten").append('<div id="currentCreation"></div>')
@@ -44,6 +45,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		    
 	}
 
+	//This function take the data from the menu created by this widget.
 	this.takeData= function(state){
 		series=[]
 		json=[]
@@ -57,8 +59,6 @@ function HighDemo(id,panel,color,jsons,title,serie){
 			this.title=$("#current"+state+" #title").val()
 		}
 
-		//Miramos si cada dato está seleccionado, y en caso de estarlo
-		//miramos si se ha seleccionado un color específico
 		if($("#aging").is(':checked')){
 
 			json.push(takeinfo.aging.inside)
@@ -151,24 +151,25 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		      $("#"+id).off()
 		    })
 
-		    //Si nunca he pedido esta información significa que debo pedirla
+			//If we haven't the data in cache we will request them
 		    if(takeinfo[series[0].name].state==0){
-
+		      //We actualise the state of data
 		      takeinfo[series[0].name].state=1
 
-		      //hago la llamada para obtener el dato
+		      	//The request is on course
+
 		      $.getJSON(takeinfo[series[0].name].inside).success(function(data) {
 		        takeinfo[series[0].name].state=2
 		        takeinfo[series[0].name].saveData=data
 
-		        //desatamos el evento de dibujar posibles gráficas en curso
+		        //In case of error we will throw the error event
 		        $("*").trigger("DrawAges",["DrawAges",data])
 		      }).error(function(){
 		        $("*").trigger("ErrorGraphAges")
 
 		      })
 
-		    //El otro caso es que ya lo tenga
+			//If we have the data in caché we will use it
 		    }else if(takeinfo[series[0].name].state==2){
 		      var data=takeinfo[series[0].name].saveData
 
@@ -189,11 +190,9 @@ function HighDemo(id,panel,color,jsons,title,serie){
 			  draw(serieChart,axisx,title,panel,color,jsons)
 		    }
 
-		//El otro caso es que seleccionara los 2 posibles casos
 		}else if(series.length==2){
 			var save=[];
 
-		    //En caso positivo lo dibujo
 		    $("#"+this.id).on("DrawAgesD",function(event,trigger){
 
 		      	var serieChart=[]
@@ -232,16 +231,12 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		      	$("#"+this.id).off()
 		    })
 
-		    //En caso negativo dibujo un widget roto
 		    $("#"+this.id).on("ErrorGraphAges",function(){
 		      console.log("pinto uno de error")
 		      $("#"+this.id).off()
 		    })
 
-			//Si cualquiera de los dos widgets falla debo hacer un allamada, lo mismo da que se haga a dos cosas
-			//si la que ya he pedido funcionó volverá a hacerlo
 			if((takeinfo[series[0].name].state==0) || (takeinfo[series[1].name].state==0)){
-				//establezco pautas de partes con jquery y coloco mi estado a "pedido"
 				takeinfo[series[0].name].state=1
 				takeinfo[series[1].name].state=1
 
@@ -253,7 +248,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 					    save[1] = data;
 					})
 				).done(function() {
-			        //si lo hemos conseguido actualizamos nuestros datos
+
 			        takeinfo[series[0].name].state=2
 			        takeinfo[series[0].name].saveData=save[0]
 
@@ -263,7 +258,6 @@ function HighDemo(id,panel,color,jsons,title,serie){
 			        $("*").trigger("DrawAgesD",["DrawAgesD",data])
 
 				}).fail(function(){
-					//en caso de equivocarnos no nos olvidemos de colocar todo a 0
 					takeinfo[series[0].name].state=0
 					takeinfo[series[1].name].state=0
 
@@ -272,7 +266,6 @@ function HighDemo(id,panel,color,jsons,title,serie){
 				})
 
 		    }else if((takeinfo[series[0].name].state==2) && (takeinfo[series[1].name].state==2)){
-		    	//Si ya lo tenemos todo nos limitamos a dibujar como hacemos arriba
 				var serieChart=[]
 
 				if(parser(takeinfo[series[0].name].saveData).length>=parser(takeinfo[series[1].name].saveData).length){
@@ -388,7 +381,9 @@ function HighDemo(id,panel,color,jsons,title,serie){
 	this.getSeries= function(){
 		return series;
 	}
-
+	
+	//Function that creates a menu where we can select the data that we want represent.
+	//In this case, there will be some checkbox selected with the data that the widget already has.
 	this.settings= function(){
 		var chart = $('#'+id).highcharts();
 		var getSerie= this.getSerie

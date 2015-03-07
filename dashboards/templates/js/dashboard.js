@@ -71,6 +71,43 @@ $(document).ready(function() {
                 var id=element.split("panel")[1]
                 dashConfiguration.push(id)
                 var panel= GetPanel(id)
+
+                //With the panel created we pass to create the object of the widgets to draw them when we want to see each panel.
+                data[element].widgets.forEach(function(widgetSaved){
+                  if(numWidget<widgetSaved.id){
+                    numWidget=widgetSaved.id
+                  }
+                  if(widgetSaved.type=="HighInfo"){
+                    var widget= new HighInfo(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.title,widgetSaved.series)
+                    panel.pushElement(widget)
+                  }else if(widgetSaved.type=="HighDemo"){
+                    var widget= new HighDemo(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.title,widgetSaved.series)
+                    panel.pushElement(widget)
+                  }else if(widgetSaved.type=="HighTime"){
+                    var widget= new HighTime(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.title,widgetSaved.series,widgetSaved.from,widgetSaved.to,widgetSaved.size)
+                    panel.pushElement(widget)
+                  }
+                })
+              })
+              $("#panel"+1).slideDown("slow");
+              //makepanel is a function that creates a panel with the configuration saved
+              makePanel(1)
+            }
+          });
+      }else{
+        
+        //In other case we request the default configuration file
+        $.ajax({
+            type: "GET",
+            url: "/db/0",
+            data: "0",
+            dataType: "json",
+            success: function(data){
+              Object.keys(data).forEach(function(element){
+                PanelCreation(data[element].panel.color);
+                var id=element.split("panel")[1]
+                dashConfiguration.push(id)
+                var panel= GetPanel(id)
                 data[element].widgets.forEach(function(widgetSaved){
                   if(numWidget<widgetSaved.id){
                     numWidget=widgetSaved.id
@@ -90,36 +127,8 @@ $(document).ready(function() {
               $("#panel"+1).slideDown("slow");
               makePanel(1)
             }
-          });
-      }else{
-        /*
-        //en otro caso solicito la descarga del fichero por defecto
-        $.ajax({
-            type: "GET",
-            url: "/db/0",
-            data: 0,
-            dataType: "json",
-            success: function(data){
-
-              dashConfiguration=data;
-
-              //Antes de empezar creo todos los dashboards para evitarme problemas de dibujar
-              Object.keys(data).forEach(function(element){
-                DashCreation()
-              })
-
-              
-              //Para guardar como mínimo debo tener 1 dashboard, dash1 va a existir, esto significa
-              //que al menos puedo intentar pintarlo, y solo pinto este y lo muestro
-              //Cada dashboard se pinta cuando se desea ver
-              numGraphActual(dashConfiguration)
-              makeDashboardContent(1)
-              actualDash= 1
-              
-              $("#dash1").slideDown("slow");
-            }
-          });
-        */
+        });
+        
       }
 
     }).fail(function(){
@@ -133,14 +142,14 @@ $(document).ready(function() {
 
     var finalObj={}
  
-    //Antes de empezar compruebo que al menos existe 1 dashboard del que guardar algo
+    //Before to save we check that we have one dashboard at least
     if(numPanel>0){
         var info={};
         panels.forEach(function(element){
           info[(Object.keys(element.flatten())[0])]=(element.flatten()[(Object.keys(element.flatten())[0])])
         })
       
-      //Para guardar comprobamos que no nos encontramos ya en un dashboard guardado
+      //To save we have to see if we are working in a created environment or we are creating a new dashboard.
       if(document.URL.split("/")[document.URL.split("/").length-1]==""){
         $.ajax({
           type: "GET",
@@ -163,7 +172,7 @@ $(document).ready(function() {
                 C: info
               }
 
-              //y creamos uno nuevo con un post al recurso /db/
+              //With the post we create the dashboard in the server.
               $.ajax({
                 type: "POST",
                 url: "/db/",
@@ -179,7 +188,7 @@ $(document).ready(function() {
         });
 
       }else{
-        //en otro caso se realiza un put al recurso /db/<integer>
+        //In other case we overwrite the existing configuration file in the server
         var send={
           N: document.URL.split("/")[document.URL.split("/").length-1],
           C: info
@@ -214,7 +223,6 @@ function showSettings(panel){
 //******************************************************************//
 
 //This function creates the configuration menu to draw a graph. In the menu will be the metrics to select what we want to draw.
-//--Esta función hay que modificarla con las futuras nuevas métricas y el menu desplegable
 function showConfiguration(panel,type,extraData){
 
   $("#settings"+panel).slideUp("slow");
@@ -300,10 +308,57 @@ function PanelCreation(color){
     actualPanel=1;
   }
 }
+//This function shows a configuration menu to change the widget to other panel
+function ChangePanelMenu (id){
+  var widget=GetWidget(id);
+
+  $("#making").slideDown("slow")
+
+  $("#conten").append('<div id="currentSettings"></div>')
+  for(i=1; i<=numPanel; i++){
+    if(widget.panel==i){
+      $("#currentSettings").append('<p><input type="radio" name="PanelOptions" class="radios" value="'+i+'" checked>Panel '+i+'</p>');
+    }else{
+      $("#currentSettings").append('<p><input type="radio" name="PanelOptions" class="radios" value="'+i+'">Panel '+i+'</p>');
+    }
+  }
+  $("#currentSettings").append('<button onclick="ChangePanel('+id+')" type="button" class="btn btn-xs btn-default">Move</button>')
+  $("#currentSettings").append('<button onclick="deleteSettings()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+
+}
+//This function changes the widget to other panel
+function ChangePanel (id){
+  var newPanel;
+  var widget=GetWidget(id);
+
+  var gridster = $("#panel"+actualPanel+" ul").gridster().data('gridster');
+  gridster.remove_widget("#widget"+id,function(){
+    var NowPanel= GetPanel(actualPanel)
+    NowPanel.deleteElement(widget)
+
+    $("#panel"+actualPanel).slideUp("slow");
+
+    $("#currentSettings input[type='radio']:checked").each(function() {
+      newPanel=$(this).attr('value')
+    });
+
+    $("#panel"+newPanel).slideDown("slow");
+
+    widget.panel=parseInt(newPanel);
+    var ToPanel= GetPanel(newPanel)
+    ToPanel.pushElement(widget)
+    widget.MakeWidget();
+
+    $("#currentSettings").remove();
+    $("#making").slideUp("slow");
+
+  });
+
+}
 
 
 
-//**********************************  Funciones de filtrado y seleccion de datos ********************////
+//**************  Filtering and selection of data functions ************////
 
 //With this function we get an object panel from cache
 function GetPanel(panel){
@@ -375,14 +430,14 @@ function showPanel(panel){
     $("#panel"+panel).slideDown("slow");
 
     actualPanel=panel;
-
-    if(dashConfiguration.indexOf(panel)){
+    if(dashConfiguration.indexOf(panel)!=-1){
       makePanel(panel)
     }
   }
 
 }
 
+//Function that creates all components in a panel.
 function makePanel(panel){
   var panel= GetPanel(panel)
   dashConfiguration.splice(dashConfiguration.indexOf(panel)-1,1)

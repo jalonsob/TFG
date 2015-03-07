@@ -36,7 +36,6 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 	this.to=to || "";
 	this.title=title || "Grafico "+this.id;
 	
-	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
 	this.square='<div id="widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body"><img id="load'+this.id+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>';
 
 	this.flatten= function(){
@@ -55,7 +54,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 		return objaux
 	}
 
-
+	//Function that creates a menu where we can select the data that we want represent.
 	this.makeMenu= function(){
 		if(json==""){
 			$("#conten").append('<div id="currentCreation"></div>')
@@ -98,6 +97,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
     	}
 	}
 
+	//This function take the data from the menu created by this widget.
 	this.takeData= function(state){
 
 		if(state==undefined){
@@ -208,7 +208,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 			  takeinfo.static.static=0;
 			});
 		}else if(takeinfo.evolutionary.state==2){
-			//Si lo tengo en caché lo dibujo directamente
+			//If we have the data in caché we will use it
 		
 			if(takeinfo.evolutionary.inside==json){
 				var serieChart= parser(from,to,takeinfo.evolutionary.saveData,series);
@@ -220,6 +220,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 		}
 	}
 
+	//This function is useful to parse the data and flatten them to draw this widget.
 	this.Parser=function(from,to,data,serie){
 		var selection=[];
 		var dataAux;
@@ -259,7 +260,19 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 	      title: {
 	          text: title
 	      },
-	      series: serie
+	      series: serie,
+	      exporting: {
+				buttons: {
+					contextButton: {
+						menuItems: [{
+							text: 'Settings',
+							onclick: function () {
+								ShowValuesGraph(id);
+							}
+						}]
+					}
+				}
+			}
 	    }
 
 	  }else if((size)<8){
@@ -275,7 +288,19 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 	      title: {
 	          text: title
 	      },
-	      series: serie
+	      series: serie,
+	      exporting: {
+				buttons: {
+					contextButton: {
+						menuItems: [{
+							text: 'Settings',
+							onclick: function () {
+								ShowValuesGraph(id);
+							}
+						}]
+					}
+				}
+			}
 	    }
 
 	  }else{
@@ -292,6 +317,18 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 	          text: title
 	      },
 	      series: serie,
+	      exporting: {
+				buttons: {
+					contextButton: {
+						menuItems: [{
+							text: 'Settings',
+							onclick: function () {
+								ShowValuesGraph(id);
+							}
+						}]
+					}
+				}
+			}
 	      
 	    }
 	  }
@@ -303,6 +340,8 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 		return series;
 	}
 
+	//Function that creates a menu where we can select the data that we want represent.
+	//In this case, there will be some checkbox selected with the data that the widget already has.
 	this.settings= function(){
 		var chart = $('#'+this.id).highcharts();
 		var keys=configuration.evolutionary
@@ -360,7 +399,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
   		this.id=numWidget+1
   		numWidget++
 
-		this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
+		this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
 		this.square='<div id="widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body"><img id="load'+this.id+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>';
 
   		this.takeData("Settings");

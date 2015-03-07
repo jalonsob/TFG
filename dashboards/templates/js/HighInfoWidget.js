@@ -21,7 +21,7 @@ function HighInfo(id,panel,color,json,title,serie){
 		return objaux
 	}
 
-
+	//Function that creates a menu where we can select the data that we want represent.
 	this.makeMenu= function(){
 		var keys= configuration.static
 		if(json==""){
@@ -43,7 +43,7 @@ function HighInfo(id,panel,color,json,title,serie){
 		}
 		    
 	}
-
+	//This function take the data from the menu created by this widget.
 	this.takeData= function(state){
 		var selected=[]
 		if(state==undefined){
@@ -69,7 +69,6 @@ function HighInfo(id,panel,color,json,title,serie){
 		    }
 	    	
 		    if(selected.length!=0){
-		      //makeGraphInfo(actualPanel,selected,title,jsons,color,numGraph)
 		      $("#current"+state).remove();
 		      $("#making").slideUp("slow")
 		      this.toDraw=true;
@@ -133,6 +132,7 @@ function HighInfo(id,panel,color,json,title,serie){
 		}
 	}
 
+	//This function is useful to parse the data and flatten them to draw this widget.
 	this.Parser=function(selected,data){
 		
 		var selection=[];
@@ -189,6 +189,8 @@ function HighInfo(id,panel,color,json,title,serie){
 		return series;
 	}
 
+	//Function that creates a menu where we can select the data that we want represent.
+	//In this case, there will be some checkbox selected with the data that the widget already has.
 	this.settings= function(){
 		var chart = $('#'+id).highcharts();
 		var existLabel= this.existLabel
