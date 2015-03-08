@@ -90,7 +90,8 @@ function HighInfo(id,panel,color,json,title,serie){
 		var selected= series;
 		var draw=this.Draw
 		var title= this.title
-		
+		var drawError = this.drawErrorWidget
+
 		var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
 		gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight);
 		//In the right way i will draw the graph
@@ -102,7 +103,7 @@ function HighInfo(id,panel,color,json,title,serie){
 
 		//In the wrong way i will draw an error widget
 		$("#"+this.id).on("ErrorGraphInfo",function(){
-		  console.log("hay error")
+		  drawError()
 		  $("#"+this.id).off()
 		})
 

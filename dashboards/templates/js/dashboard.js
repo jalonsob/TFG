@@ -392,15 +392,6 @@ function GetWidget(id){
   return result;
 }
 
-//Transforms a widget in an error widget.
-function drawErrorWidget(graph){
-  $("#graph"+graph+" #settingsButton").remove()
-  $("#graph"+graph).attr("data-sizex",5)
-  $("#graph"+graph).attr("data-sizey",5)
-  $("#load"+graph).remove()
-  $("#"+graph).append("Error al cargar los datos requeridos")
-}
-
 
 //Function that cancels the creation of a widget
 function deleteCreation(id){

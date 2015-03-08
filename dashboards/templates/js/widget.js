@@ -27,6 +27,11 @@ function Widget(id,panel,color,x,y){
 		square='<div id= "graph'+id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+color+'">'+buttons+'</div><div id="'+id+'" class="panel-body">'+content+'</div></div>';
 
 	}
+
+	this.drawErrorWidget=function(){
+	  $("#load"+id).remove()
+	  $("#"+id).html("Error to load data")
+	}
 }
 
 //*************************************************//

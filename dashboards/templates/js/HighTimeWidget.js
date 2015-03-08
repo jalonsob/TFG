@@ -170,6 +170,8 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 		var size= this.size;
 		var serie= this.series;
 		var createX= this.CreateX
+		var drawError = this.drawErrorWidget
+
 
 		var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
  		gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight);
@@ -184,7 +186,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 
 		//In the wrong way i will draw an error widget
 		$("#"+this.id).on("ErrorGraphTimes",function(){
-			alert("pinto uno de error")
+		    drawError()
 			$("#"+this.id).off()
 		})
 

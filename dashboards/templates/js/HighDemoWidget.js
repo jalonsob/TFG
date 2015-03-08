@@ -117,6 +117,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		var panel= this.panel
 		var color= this.color
 		var jsons= json
+		var drawError = this.drawErrorWidget
 
 		if(mode!="remake"){
 			var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
@@ -147,7 +148,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 
 		    //En caso negativo dibujo un widget roto
 		    $("#"+id).on("ErrorGraphAges",function(){
-		      alert("hago uno de error")
+		      drawError()
 		      $("#"+id).off()
 		    })
 
@@ -192,7 +193,6 @@ function HighDemo(id,panel,color,jsons,title,serie){
 
 		}else if(series.length==2){
 			var save=[];
-
 		    $("#"+this.id).on("DrawAgesD",function(event,trigger){
 
 		      	var serieChart=[]
@@ -231,8 +231,8 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		      	$("#"+this.id).off()
 		    })
 
-		    $("#"+this.id).on("ErrorGraphAges",function(){
-		      console.log("pinto uno de error")
+		    $("#"+this.id).on("ErrorGraphAgesD",function(){
+		      drawError()
 		      $("#"+this.id).off()
 		    })
 
