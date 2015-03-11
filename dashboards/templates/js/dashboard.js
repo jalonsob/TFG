@@ -121,6 +121,9 @@ $(document).ready(function() {
                   }else if(widgetSaved.type=="HighTime"){
                     var widget= new HighTime(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.title,widgetSaved.series,widgetSaved.from,widgetSaved.to,widgetSaved.size)
                     panel.pushElement(widget)
+                  }else if(widgetSaved.type=="VideoWidget"){
+                    var widget= new VideoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.title,widgetSaved.series,widgetSaved.from,widgetSaved.to,widgetSaved.size)
+                    panel.pushElement(widget)
                   }
                 })
               })
@@ -248,6 +251,9 @@ function showConfiguration(panel,type,extraData){
   }else if(type=="HighTime"){
     var widget= new HighTime(numWidget,panel,color);
     
+  }else if(type=="VideoWidget"){
+    var widget= new VideoWidget(numWidget,panel,color)
+
   }
 
   objectPanel.pushElement(widget)
