@@ -6,7 +6,7 @@ function Panel(idPanel,color,wid){
 	var id=idPanel;
 	var widgets=wid || [];
 	var color=color || getRandomColor();
-	var settings= '<div id="settings'+id+'"class="panel-body" hidden><ul><button onclick="'+"showConfiguration("+id+",'HighTime')"+'" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="'+"showConfiguration("+id+",'HighDemo')"+'" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="'+"showConfiguration("+id+",'HighInfo')"+'" type="button" class="btn btn-xs btn-default">Info widget</button><button onclick="'+"showConfiguration("+id+",'VideoWidget')"+'" type="button" class="btn btn-xs btn-default">Video Widget</button></ul></div>'
+	var settings= '<div id="settings'+id+'"class="panel-body" hidden><ul><button onclick="'+"showConfiguration("+id+",'HighTime')"+'" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="'+"showConfiguration("+id+",'HighDemo')"+'" type="button" class="btn btn-xs btn-default">Aging chart</button><button onclick="'+"showConfiguration("+id+",'HighInfo')"+'" type="button" class="btn btn-xs btn-default">Info widget</button><button onclick="'+"showConfiguration("+id+",'VideoWidget')"+'" type="button" class="btn btn-xs btn-default">Video Widget</button><button onclick="'+"showConfiguration("+id+",'HtmlInfoWidget')"+'" type="button" class="btn btn-xs btn-default">HtmlInfoWidget</button></ul></div>'
 	var gridster= '<div id="panel'+id+'" class="gridster ready" style="background-color:'+color+'"><ul></ul></div>'
 	var content= settings+gridster
 

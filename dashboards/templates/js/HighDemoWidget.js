@@ -2,6 +2,8 @@
 
 function HighDemo(id,panel,color,jsons,title,serie){
 	HighWidget.call(this,id,panel,color,16,15)
+	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
+	this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
 	this.title=title || "Grafico "+this.id;
 	var series=serie || [];
 	if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
@@ -361,18 +363,6 @@ function HighDemo(id,panel,color,jsons,title,serie){
 			    text: title
 			},
 			series: serie,
-			exporting: {
-				buttons: {
-					contextButton: {
-						menuItems: [{
-							text: 'Settings',
-							onclick: function () {
-								ShowValuesGraph(id);
-							}
-						}]
-					}
-				}
-			}
 		}
 
 		chart= new Highcharts.Chart(options);

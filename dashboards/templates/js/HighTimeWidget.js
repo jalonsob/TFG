@@ -36,7 +36,8 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 	this.to=to || "";
 	this.title=title || "Grafico "+this.id;
 	
-	this.square='<div id="widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body"><img id="load'+this.id+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>';
+	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
+	this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
 
 	this.flatten= function(){
 		var objaux={}
@@ -69,7 +70,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 			$("#conten").append('<div id="currentCreation"><div id="list" style="height: 200px; overflow-y: scroll;"></div></div>')
 
 			configuration.evolutionary.forEach(function(element){
-				$("#currentCreation #list").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas    <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>')
+				$("#currentCreation #list").append('<p><button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset </button>    '+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas</p>')
 			})
 
 			$("#currentCreation").append('From')
@@ -263,18 +264,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 	          text: title
 	      },
 	      series: serie,
-	      exporting: {
-				buttons: {
-					contextButton: {
-						menuItems: [{
-							text: 'Settings',
-							onclick: function () {
-								ShowValuesGraph(id);
-							}
-						}]
-					}
-				}
-			}
+	      
 	    }
 
 	  }else if((size)<8){
@@ -291,18 +281,6 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 	          text: title
 	      },
 	      series: serie,
-	      exporting: {
-				buttons: {
-					contextButton: {
-						menuItems: [{
-							text: 'Settings',
-							onclick: function () {
-								ShowValuesGraph(id);
-							}
-						}]
-					}
-				}
-			}
 	    }
 
 	  }else{
@@ -319,18 +297,6 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 	          text: title
 	      },
 	      series: serie,
-	      exporting: {
-				buttons: {
-					contextButton: {
-						menuItems: [{
-							text: 'Settings',
-							onclick: function () {
-								ShowValuesGraph(id);
-							}
-						}]
-					}
-				}
-			}
 	      
 	    }
 	  }
@@ -361,12 +327,12 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 			if(existLabel(chart,element)){
 			  auxseries=getSerie(chart,element);
 			  if(auxseries.type=="column"){
-			    $("#currentSettings #list").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column" checked>Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>');
+			    $("#currentSettings #list").append('<p><button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button>    '+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column" checked>Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas </p>');
 			  }else{
-			    $("#currentSettings #list").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column" >Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline" checked>Lineas <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>');
+			    $("#currentSettings #list").append('<p><button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button>    '+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column" >Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline" checked>Lineas </p>');
 			  }
 			}else{
-			  $("#currentSettings #list").append('<p>'+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas <button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button></p>');
+			  $("#currentSettings #list").append('<p><button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button>    '+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas</p>');
 			}
 		})
 		$("#currentSettings").append('From')
@@ -402,7 +368,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
   		numWidget++
 
 		this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
-		this.square='<div id="widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body"><img id="load'+this.id+'" src="/templates/images/cargando.gif" height="42" width="42"></div></div>';
+		this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
 
   		this.takeData("Settings");
   		this.MakeWidget()
