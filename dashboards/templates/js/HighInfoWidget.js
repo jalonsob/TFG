@@ -129,6 +129,7 @@ function HighInfo(id,panel,color,json,title,serie){
 		}else if(takeinfo.static.state==2){
 			//If we have the data in caché we will use it
 			if(takeinfo.static.inside==json){
+				$("#"+this.id).off()
 				var serieChart= parser(selected,takeinfo.static.saveData)
 				draw(serieChart,title)
 			}

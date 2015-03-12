@@ -1,7 +1,7 @@
 //Widget oriented to make a charts with Highcharts
 
 function HtmlInfoWidget(id,panel,color,json,serie){
-	HighWidget.call(this,id,panel,color,15,15)
+	HighWidget.call(this,id,panel,color,12,7)
 	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
 	this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
 	var series=serie || {up:[],down:[]};
@@ -88,7 +88,19 @@ function HtmlInfoWidget(id,panel,color,json,serie){
 		gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight);
 		//In the right way i will draw the graph
 		$("#"+this.id).on("DrawInfoHTML",function(event,trigger,data){
-			alert("lo pinto")
+			
+			var up="";
+			selected.up.forEach(function(element){
+				up=  up+'<div style="float: left; width: '+(100/selected.up.length)+'%;"><p><strong>'+element.name+':</strong></p><p>'+data[element.name]+'</p></div>'
+			})
+			var down="";
+			selected.down.forEach(function(element){
+				down=  down+'<div style="float: left; width: '+(100/selected.down.length)+'%;"><p><strong>'+element.name+':</strong></p><p>'+data[element.name]+'</p></div>'
+			})
+			result=up+"<hr>"+down
+			$("#"+this.id).html(result)
+			$("#"+this.id).off()
+
 		})
 
 		//In the wrong way i will draw an error widget
@@ -107,7 +119,7 @@ function HtmlInfoWidget(id,panel,color,json,serie){
 			    takeinfo.static.saveData=data
 			    takeinfo.static.state=2;
 
-			    $("*").trigger("DrawInfoHTML",["DrawInfo",data])
+			    $("*").trigger("DrawInfoHTML",["DrawInfoHTML",data])
 			  }).error(function(){
 			    //In case of error we will throw the error event
 			    $("*").trigger("ErrorGraphInfoHTML")
@@ -116,26 +128,63 @@ function HtmlInfoWidget(id,panel,color,json,serie){
 			});
 		}else if(takeinfo.static.state==2){
 			
-			alert("lo tengo y lo pinto")
+			$("*").trigger("DrawInfoHTML",["DrawInfoHTML",takeinfo.static.saveData])
+
 		}		
 	}
-
-	//This function is useful to parse the data and flatten them to draw this widget.
-	this.Parser=function(selected,data){
-		
-		
-	}
-
 
 	//Function that creates a menu where we can select the data that we want represent.
 	//In this case, there will be some checkbox selected with the data that the widget already has.
 	this.settings= function(){
-		alert("creo las opciones")
+		var keys=configuration.static
+		var existLabel=this.existLabel
+
+		if($("#currentSettings")){
+			$("#currentSettings").remove();
+		}
+		
+		$("#conten").append('<div id="currentSettings"> Up: <p id="up" style="height: 150px; overflow-y: scroll;"></p>Down: <p id="down" style="height: 150px; overflow-y: scroll;"></p></div>')
+		keys.forEach(function(element){
+			if(existLabel("up",element)){
+				$("#currentSettings #up").append('<p><input checked type="checkbox" value="'+element+'"> '+element+'</p>')
+			}else{
+				$("#currentSettings #up").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
+
+			}
+			if(existLabel("down",element)){
+				$("#currentSettings #down").append('<p><input checked type="checkbox" value="'+element+'"> '+element+'</p>')
+
+			}else{
+				$("#currentSettings #down").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
+			}
+		})
+		$("#currentSettings").append('<button onclick="ChangeValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Create</button>')
+		$("#currentSettings").append('<button onclick="deleteSettings()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+	}
+
+	this.existLabel= function(where,label){
+		var result=false;
+		series[where].forEach(function(element){
+			if(element.name==label){
+				result=true;
+				return false;
+			}
+		})
+		return result
 	}
 
 	this.redraw= function(){
-		alert("redibujo")
-    	
+		this.takeData("Settings");
+		var up="";
+		series.up.forEach(function(element){
+			up=  up+'<div style="float: left; width: '+(100/series.up.length)+'%;"><p><strong>'+element.name+':</strong></p><p>'+takeinfo.static.saveData[element.name]+'</p></div>'
+		})
+		var down="";
+		series.down.forEach(function(element){
+			down=  down+'<div style="float: left; width: '+(100/series.down.length)+'%;"><p><strong>'+element.name+':</strong></p><p>'+takeinfo.static.saveData[element.name]+'</p></div>'
+		})
+		var result=up+"<hr>"+down
+		$("#"+this.id).html(result)
 	}
 	
 

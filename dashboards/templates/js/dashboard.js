@@ -89,6 +89,9 @@ $(document).ready(function() {
                   }else if(widgetSaved.type=="VideoWidget"){
                     var widget= new VideoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.url,widgetSaved.title,widgetSaved.width,widgetSaved.height)
                     panel.pushElement(widget)
+                  }else if(widgetSaved.type=="HtmlInfoWidget"){
+                    var widget= new HtmlInfoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.series)
+                    panel.pushElement(widget)
                   }
                 })
               })
@@ -126,6 +129,9 @@ $(document).ready(function() {
                     panel.pushElement(widget)
                   }else if(widgetSaved.type=="VideoWidget"){
                     var widget= new VideoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.url,widgetSaved.title,widgetSaved.width,widgetSaved.height)
+                    panel.pushElement(widget)
+                  }else if(widgetSaved.type=="HtmlInfoWidget"){
+                    var widget= new HtmlInfoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.series)
                     panel.pushElement(widget)
                   }
                 })

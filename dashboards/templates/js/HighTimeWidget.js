@@ -214,6 +214,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 			//If we have the data in caché we will use it
 		
 			if(takeinfo.evolutionary.inside==json){
+				$("#"+this.id).off()
 				var serieChart= parser(from,to,takeinfo.evolutionary.saveData,series);
 			
 			    var x= createX(takeinfo.evolutionary.saveData,from,to)

@@ -174,6 +174,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 
 			//If we have the data in caché we will use it
 		    }else if(takeinfo[series[0].name].state==2){
+		      $("#"+this.id).off()
 		      var data=takeinfo[series[0].name].saveData
 
 		      var serieChart=[]
@@ -268,6 +269,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 				})
 
 		    }else if((takeinfo[series[0].name].state==2) && (takeinfo[series[1].name].state==2)){
+		    	$("#"+this.id).off()
 				var serieChart=[]
 
 				if(parser(takeinfo[series[0].name].saveData).length>=parser(takeinfo[series[1].name].saveData).length){
