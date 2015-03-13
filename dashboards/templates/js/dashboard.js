@@ -226,7 +226,18 @@ $(document).ready(function() {
 
 //Function to show the settings to create new widgets
 function showSettings(panel){
-  $("#settings"+panel).slideDown();
+  var objectPanel=GetPanel(panel);
+  $("#settings").remove()
+  $("#widgets").slideDown("slow");
+  $("#currentSettings").remove()
+  $("#making").slideUp("slow")
+  if($("#currentCreation").length!=0){
+      $("#currentCreation").remove()
+      deleteCreation(numWidget);
+      numWidget--;
+  }
+  objectPanel.writeSettings()
+
 
 }
 
@@ -237,7 +248,9 @@ function showSettings(panel){
 //This function creates the configuration menu to draw a graph. In the menu will be the metrics to select what we want to draw.
 function showConfiguration(panel,type,extraData){
 
-  $("#settings"+panel).slideUp("slow");
+  $("#settings").remove();
+  $("#widgets").slideUp("slow");
+
   var aux=$("#currentCreation").length
   if(aux!=0){
     deleteCreation(numWidget)
@@ -287,6 +300,14 @@ function MakeWidget(widget){
 
 function ShowValuesGraph(id){
   $("#making").slideDown("slow")
+  $("#settings").remove()
+  $("#currentSettings").remove()
+  if($("#currentCreation").length!=0){
+      $("#currentCreation").remove()
+      deleteCreation(numWidget);
+      numWidget--;
+  }
+  $("#widgets").slideUp("slow");
   var widget=GetWidget(id);
   widget.settings();
 }
@@ -433,13 +454,18 @@ function showPanel(panel){
   if(actualPanel!=panel){
     //We hide the previous panel and we show the new
     $("#panel"+actualPanel).slideUp("slow");
-    $("#settings"+actualPanel).slideUp("slow");
+    $("#settings").remove();
     $("#making").slideUp("slow")
+    $("#widgets").slideUp("slow");
     $("#currentMenu").remove();
     $("#panel"+panel).slideDown("slow");
-
+    if($("#currentCreation").length!=0){
+      deleteCreation(numWidget);
+      numWidget--;
+    }
     actualPanel=panel;
-    if(dashConfiguration.indexOf(panel)!=-1){
+
+    if(dashConfiguration.indexOf(panel.toString())!=-1){
       makePanel(panel)
     }
   }
@@ -449,7 +475,7 @@ function showPanel(panel){
 //Function that creates all components in a panel.
 function makePanel(panel){
   var panel= GetPanel(panel)
-  dashConfiguration.splice(dashConfiguration.indexOf(panel)-1,1)
+  dashConfiguration.splice(dashConfiguration.indexOf(panel.getId().toString()),1)
   var widgets= panel.getWidgets()
   widgets.forEach(function(widget){
     widget.MakeWidget()
