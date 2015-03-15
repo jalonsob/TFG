@@ -95,6 +95,15 @@ function VideoWidget(id,panel,color,direction,content,x,y){
 
 	this.redraw= function(){
     	this.takeData("Settings");
+    	var square=this.square;
+    	var x= this.gridsterWidth;
+    	var y= this.gridsterheight;
+    	var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
+    	gridster.remove_widget("#widget"+this.id,function(){
+    		gridster.add_widget(square, x, y);
+
+    	})
+
     	$("#"+this.id).html(this.content)
 
 	}
