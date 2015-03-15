@@ -1,13 +1,13 @@
 //Widget oriented to make a charts with Highcharts
 
-function VideoWidget(id,panel,color,direction,x,y){
+function VideoWidget(id,panel,color,direction,content,x,y){
 	Widget.call(this,id,panel,color,x,y)
 	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
+	this.content=content||'<img id="load'+id+'" src="/templates/images/cargando.gif" height="42" width="42">'
 	this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
 	if(direction!=undefined){
 		this.direction=direction
 		direction="http://www.youtube.com/embed/"+(this.direction.split("/")[this.direction.split("/").length-1])
-		this.content='<iframe src="'+direction+'" width="'+(this.gridsterWidth*27)+'" height="'+(this.gridsterheight*23)+'" frameborder="0" allowfullscreen></iframe>'
 		this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
 
 	}
@@ -18,6 +18,7 @@ function VideoWidget(id,panel,color,direction,x,y){
 		objaux.id= this.id;
 		objaux.color= this.color;
 		objaux.url= this.direction;
+		objaux.content= this.content
 		objaux.width=this.gridsterWidth;
 		objaux.height=this.gridsterheight;
 		return objaux

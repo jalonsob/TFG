@@ -87,7 +87,7 @@ $(document).ready(function() {
                     var widget= new HighTime(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.title,widgetSaved.series,widgetSaved.from,widgetSaved.to,widgetSaved.size)
                     panel.pushElement(widget)
                   }else if(widgetSaved.type=="VideoWidget"){
-                    var widget= new VideoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.url,widgetSaved.title,widgetSaved.width,widgetSaved.height)
+                    var widget= new VideoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.url,widgetSaved.content,widgetSaved.width,widgetSaved.height)
                     panel.pushElement(widget)
                   }else if(widgetSaved.type=="HtmlInfoWidget"){
                     var widget= new HtmlInfoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.series)
