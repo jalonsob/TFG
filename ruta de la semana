@@ -195,14 +195,63 @@ Día 10 de marzo a las 12:00
 
 —————————————
 
--Meter widget de youtube
++Meter widget de youtube
 	*mirar viemo
--Meter widget escrito en plan html
--Mirar plantilla de latex que me ha pasado barahona y set latex de gema
++Meter widget escrito en plan html
++Mirar plantilla de latex que me ha pasado barahona y set latex de gema
 -Mirar entornos de desarrollo
 	*grunt
 	*glup
--Mirar que las opciones de la barra desaparezcan y quitar el settings
+-Mirar que las opciones de la barra desaparezcan
++ quitar el settings
++Quitar el settings de los gráficos
 
 Día 17 de marzo a las 12:00
 
+——————————————————————
+
+- scm, its, mls, scr, irc
+- crear configuración entre fuentes de datos con distintos botones
+- simplificar times series
+- quitar directorios relativos en el html
+- que funcione con gh-pages
+	*usar github como sitio de almacenamiento
+	*django que acepte cabeceras “cors”
+- escribir siguiente ciclo y pasar memoria escrita hasta la fecha
+
+Después de Quan el martes
+
+——————————
+
+Notas de latex:
+
+á= \’a
+ñ= \~n
+
+lista por puntos:
+
+\begin{itemize}
+  \item The first item
+  \item The second item
+  \item The third etc \ldots
+\end{itemize}
+
+lista por numeros:
+
+\begin{enumerate}
+  \item The first item
+  \item The second item
+  \item The third etc \ldots
+\end{enumerate}
+
+links:
+
+\href{http://www.sharelatex.com}{Something Linky}
+
+
+Hojas:
+40
+
+Referencias:
+
+http://collection.openlibra.com.s3.amazonaws.com/pdf/Curso-HTML5-v1.pdf?AWSAccessKeyId=AKIAIGY5Y2YOT7GYM5UQ&Signature=uAxjFJtxc3DmpPKZ3Y4I7FxkOAM%3D&Expires=1426323059
