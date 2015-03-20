@@ -1,6 +1,436 @@
 {
 	"time":["Jan 2001","Feb 2001","Mar 2001","Apr 2001","May 2001","Jun 2001","Jul 2001","Aug 2001","Sep 2001","Oct 2001","Nov 2001","Dec 2001","Jan 2002","Feb 2002","Mar 2002","Apr 2002","May 2002","Jun 2002","Jul 2002","Aug 2002","Sep 2002","Oct 2002","Nov 2002","Dec 2002","Jan 2003","Feb 2003","Mar 2003","Apr 2003","May 2003","Jun 2003","Jul 2003","Aug 2003","Sep 2003","Oct 2003","Nov 2003","Dec 2003","Jan 2004","Feb 2004","Mar 2004","Apr 2004","May 2004","Jun 2004","Jul 2004","Aug 2004","Sep 2004","Oct 2004","Nov 2004","Dec 2004","Jan 2005","Feb 2005","Mar 2005","Apr 2005","May 2005","Jun 2005","Jul 2005","Aug 2005","Sep 2005","Oct 2005","Nov 2005","Dec 2005","Jan 2006","Feb 2006","Mar 2006","Apr 2006","May 2006","Jun 2006","Jul 2006","Aug 2006","Sep 2006","Oct 2006","Nov 2006","Dec 2006","Jan 2007","Feb 2007","Mar 2007","Apr 2007","May 2007","Jun 2007","Jul 2007","Aug 2007","Sep 2007","Oct 2007","Nov 2007","Dec 2007","Jan 2008","Feb 2008","Mar 2008","Apr 2008","May 2008","Jun 2008","Jul 2008","Aug 2008","Sep 2008","Oct 2008","Nov 2008","Dec 2008","Jan 2009","Feb 2009","Mar 2009","Apr 2009","May 2009","Jun 2009","Jul 2009","Aug 2009","Sep 2009","Oct 2009","Nov 2009","Dec 2009","Jan 2010","Feb 2010","Mar 2010","Apr 2010","May 2010","Jun 2010","Jul 2010","Aug 2010","Sep 2010","Oct 2010","Nov 2010","Dec 2010","Jan 2011","Feb 2011","Mar 2011","Apr 2011","May 2011","Jun 2011","Jul 2011","Aug 2011","Sep 2011","Oct 2011","Nov 2011","Dec 2011","Jan 2012","Feb 2012","Mar 2012","Apr 2012","May 2012","Jun 2012","Jul 2012","Aug 2012","Sep 2012","Oct 2012","Nov 2012","Dec 2012","Jan 2013","Feb 2013","Mar 2013","Apr 2013","May 2013","Jun 2013","Jul 2013","Aug 2013","Sep 2013","Oct 2013","Nov 2013","Dec 2013","Jan 2014","Feb 2014","Mar 2014","Apr 2014","May 2014","Jun 2014","Jul 2014","Aug 2014","Sep 2014","Oct 2014","Nov 2014","Dec 2014"],
-	"static":["added_lines","authors","authors_30","authors_365","authors_7","avg_commits_author","avg_commits_month","commits","commits_30","commits_365","commits_7","committers","companies","core","diff_netauthors_30","diff_netauthors_365","diff_netauthors_7","diff_netcommits_30","diff_netcommits_365","diff_netcommits_7","files","first_date","last_date","occasional","percentage_authors_30","percentage_authors_365","percentage_authors_7","percentage_commits_30","percentage_commits_365","percentage_commits_7","regular","removed_lines","repositories","type"],
+	"static-scm":{
+				"values":[{
+					"nameUser":"actions",
+					"realName":"actions",
+					"periods":[""]
+					},{
+					"nameUser":"added lines",
+					"realName":"added_lines",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"authors",
+					"realName":"authors",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"branches",
+					"realName":"branches",
+					"periods":[""]
+					},{
+					"nameUser":"commits",
+					"realName":"commits",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"committers",
+					"realName":"committers",
+					"periods":[""]
+					},{
+					"nameUser":"companies",
+					"realName":"companies",
+					"periods":[""]
+					},{
+					"nameUser":"core",
+					"realName":"core",
+					"periods":[""]
+					},{
+					"nameUser":"diff net added lines",
+					"realName":"diff_netadded_lines",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net authors",
+					"realName":"diff_netauthors",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net netcommits",
+					"realName":"diff_netcommits",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net files",
+					"realName":"diff_netfiles",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net new authors",
+					"realName":"diff_netnewauthors",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net removed lines",
+					"realName":"diff_netremoved_lines",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"files",
+					"realName":"files",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"new authors",
+					"realName":"newauthors",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"occasional",
+					"realName":"occasional",
+					"periods":[""]
+					},{
+					"nameUser":"percentage added lines",
+					"realName":"percentage_added_lines",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage authors",
+					"realName":"percentage_authors",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage commits",
+					"realName":"percentage_commits",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage files",
+					"realName":"percentage_files",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage new authors",
+					"realName":"percentage_newauthors",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage removed lines",
+					"realName":"percentage_removed_lines",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"regular",
+					"realName":"regular",
+					"periods":[""]
+					},{
+					"nameUser":"removed lines",
+					"realName":"removed_lines",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"repositories",
+					"realName":"repositories",
+					"periods":[""]
+					}],
+				"periods":["","_365","_30", "_7"],
+				"state":0,
+				"saveData":{},
+				"reference": "templates/json/scm-static.json"
+	},
+	"static-its":{
+				"values":[{
+					"nameUser":"all history participants",
+					"realName":"allhistory_participants",
+					"periods":[""]
+					},{
+					"nameUser":"bmi tickets",
+					"realName":"bmitickets",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"changed",
+					"realName":"changed",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"changers",
+					"realName":"changers",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"closed",
+					"realName":"closed",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"closers",
+					"realName":"closers",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"companies",
+					"realName":"companies",
+					"periods":[""]
+					},{
+					"nameUser":"diff net bmi tickets",
+					"realName":"diff_netbmitickets",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net changed",
+					"realName":"diff_netchanged",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net changers",
+					"realName":"diff_netchangers",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net closed",
+					"realName":"diff_netclosed",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net closers",
+					"realName":"diff_netclosers",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net opened",
+					"realName":"diff_netopened",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net openers",
+					"realName":"diff_netopeners",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"opened",
+					"realName":"opened",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"openers",
+					"realName":"openers",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage bmi tickets",
+					"realName":"percentage_bmitickets",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage changed",
+					"realName":"percentage_changed",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage changers",
+					"realName":"percentage_changers",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage closed",
+					"realName":"percentage_closed",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage closers",
+					"realName":"percentage_closers",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage opened",
+					"realName":"percentage_opened",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage openers",
+					"realName":"percentage_openers",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"trackers",
+					"realName":"trackers",
+					"periods":[""]
+					}],
+				"periods":["","_365","_30", "_7"],
+				"state":0,
+				"saveData":{},
+				"reference": "templates/json/its-static.json"
+	},
+	"static-mls":{
+				"values":[{
+					"nameUser":"companies",
+					"realName":"companies",
+					"periods":[""]
+					},{
+					"nameUser":"diff net senders",
+					"realName":"diff_netsenders",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net sent",
+					"realName":"diff_netsent",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage senders",
+					"realName":"percentage_senders",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage sent",
+					"realName":"percentage_sent",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"repositories",
+					"realName":"repositories",
+					"periods":[""]
+					},{
+					"nameUser":"senders",
+					"realName":"senders",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"senders init",
+					"realName":"senders_init",
+					"periods":[""]
+					},{
+					"nameUser":"senders response",
+					"realName":"senders_response",
+					"periods":[""]
+					},{
+					"nameUser":"sent",
+					"realName":"sent",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"sent response",
+					"realName":"sent_response",
+					"periods":[""]
+					},{
+					"nameUser":"threads",
+					"realName":"threads",
+					"periods":[""]
+					}],
+				"periods":["","_365","_30", "_7"],
+				"state":0,
+				"saveData":{},
+				"reference": "templates/json/mls-static.json"
+	},
+	"static-scr":{
+				"values":[{
+					"nameUser":"waiting for reviewer",
+					"realName":"WaitingForReviewer",
+					"periods":[""]
+					},{
+					"nameUser":"waiting for submitter",
+					"realName":"WaitingForSubmitter",
+					"periods":[""]
+					},{
+					"nameUser":"abandoned",
+					"realName":"abandoned",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"approved",
+					"realName":"approved",
+					"periods":[""]
+					},{
+					"nameUser":"closed",
+					"realName":"closed",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"code review",
+					"realName":"codereview",
+					"periods":[""]
+					},{
+					"nameUser":"companies",
+					"realName":"companies",
+					"periods":[""]
+					},{
+					"nameUser":"diff net abandoned",
+					"realName":"diff_netabandoned",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net closed",
+					"realName":"diff_netclosed",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net merged",
+					"realName":"diff_netmerged",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net pending",
+					"realName":"diff_netpending",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net submitted",
+					"realName":"diff_netsubmitted",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net submitters",
+					"realName":"diff_netsubmitters",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"inprogress",
+					"realName":"inprogress",
+					"periods":[""]
+					},{
+					"nameUser":"merged",
+					"realName":"merged",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"new",
+					"realName":"new",
+					"periods":[""]
+					},{
+					"nameUser":"opened",
+					"realName":"opened",
+					"periods":[""]
+					},{
+					"nameUser":"pending",
+					"realName":"pending",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage abandoned",
+					"realName":"percentage_abandoned",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage abandoned",
+					"realName":"percentage_abandoned",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage merged",
+					"realName":"percentage_merged",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage pending",
+					"realName":"percentage_pending",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage submitted",
+					"realName":"percentage_submitted",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage submitters",
+					"realName":"percentage_submitters",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"repositories",
+					"realName":"repositories",
+					"periods":[""]
+					},{
+					"nameUser":"reviewers",
+					"realName":"reviewers",
+					"periods":[""]
+					},{
+					"nameUser":"sent",
+					"realName":"sent",
+					"periods":[""]
+					},{
+					"nameUser":"submitted",
+					"realName":"submitted",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"submitters",
+					"realName":"submitters",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"verified",
+					"realName":"verified",
+					"periods":[""]
+					}],
+				"periods":["","_365","_30", "_7"],
+				"state":0,
+				"saveData":{},
+				"reference": "templates/json/scr-static.json"
+	},
+	"static-irc":{
+				"values":[{
+					"nameUser":"diff net senders",
+					"realName":"diff_netsenders",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"diff net sent",
+					"realName":"diff_netsent",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage senders",
+					"realName":"percentage_senders",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"percentage sent",
+					"realName":"percentage_sent",
+					"periods":["_30", "_365", "_7"]
+					},{
+					"nameUser":"repositories",
+					"realName":"repositories",
+					"periods":[""]
+					},{
+					"nameUser":"senders",
+					"realName":"senders",
+					"periods":["","_30", "_365", "_7"]
+					},{
+					"nameUser":"sent",
+					"realName":"sent",
+					"periods":["","_30", "_365", "_7"]
+					}],
+				"periods":["","_365","_30", "_7"],
+				"state":0,
+				"saveData":{},
+				"reference": "templates/json/irc-static.json"
+	},
 	"evolutionary":["added_lines","authors","commits","committers","companies","files","id","month","removed_lines","repositories","unixtime"],
 	"aging":[ "age", "id", "name" ],
 	"birth":[ "age", "id", "name" ]

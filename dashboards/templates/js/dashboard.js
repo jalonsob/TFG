@@ -22,7 +22,6 @@ var numWidget=0;
 var dashConfiguration=[];
 //configuration of files where we will read
 var configuration={};
-var takeinfo={};
 //Caché that has all widgets
 var panels=[]
 
@@ -31,25 +30,13 @@ $(document).ready(function() {
     //Request of configuration keys
 
     $.when(
-      $.getJSON("templates/json/configurationfile.json").success(function(data){
-        Object.keys(data).forEach(function(element){
-            configuration[element]=data[element]
-        })
-      }),
-
       //Request of files of configuration to know where to read our data
       //Each kind of data has three states:
       // --0: not, --1: in demand, --2: is there
 
-      $.getJSON("templates/json/referenceinfo.json").success(function(data){
-        var objaux;
+      $.getJSON("templates/json/configurationfile.json").success(function(data){
         Object.keys(data).forEach(function(element){
-            objaux={
-                saveData: '',
-                state: 0,
-                inside: data[element]
-            }
-            takeinfo[element]=objaux
+            configuration[element]=data[element]
         })
       })
     ).done(function(){
@@ -78,7 +65,7 @@ $(document).ready(function() {
                     numWidget=widgetSaved.id
                   }
                   if(widgetSaved.type=="HighInfo"){
-                    var widget= new HighInfo(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.title,widgetSaved.series)
+                    var widget= new HighInfo(widgetSaved.id,id,widgetSaved.color,widgetSaved.from,widgetSaved.jsons,widgetSaved.title,widgetSaved.series)
                     panel.pushElement(widget)
                   }else if(widgetSaved.type=="HighDemo"){
                     var widget= new HighDemo(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.title,widgetSaved.series)
@@ -265,7 +252,7 @@ function showConfiguration(panel,type,extraData){
   numWidget++;
 
   if(type=="HighInfo"){
-    var widget= new HighInfo(numWidget,panel,color);
+    var widget= new HighInfo(numWidget,panel,color,extraData);
     
   }else if(type=="HighDemo"){
     var widget= new HighDemo(numWidget,panel,color);

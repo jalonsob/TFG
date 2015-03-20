@@ -1,21 +1,23 @@
 //Widget oriented to make a chart of kind INFO with Highcharts
 
-function HighInfo(id,panel,color,json,title,serie){
+function HighInfo(id,panel,color,from,json,title,serie){
 	HighWidget.call(this,id,panel,color,12,8)
 	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
 	this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
-	this.title=title || "Grafico "+this.id;
+	this.title=title || "Graph "+from+" info "+this.id;
+	this.from=from;
 	var series=serie || [];
-	if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
+	if((Object.getOwnPropertyNames(configuration).length === 0)){
 		var json= "" ;
 
 	}else{
-		var json= takeinfo.static.inside
+		var json= configuration["static-"+from].inside
 	}
 	this.flatten= function(){
 		var objaux={}
 		objaux.type="HighInfo";
 		objaux.series= series;
+		objaux.from= from;
 		objaux.id= id;
 		objaux.title=this.title;
 		objaux.color= color;
@@ -25,7 +27,7 @@ function HighInfo(id,panel,color,json,title,serie){
 
 	//Function that creates a menu where we can select the data that we want represent.
 	this.makeMenu= function(){
-		var keys= configuration.static
+		var keys= configuration["static-"+from].values
 		if(json==""){
 			$("#conten").append('<div id="currentCreation"></div>')
 			$("#currentCreation").append('<p>Configuration files have not been loaded well. Please check your internet connection.<p>');
@@ -34,11 +36,36 @@ function HighInfo(id,panel,color,json,title,serie){
 			if($("#currentCreation")){
 				$("#currentCreation").remove();
 			}
-			$("#conten").append('<div id="currentCreation"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
+			$("#conten").append('<div id="currentCreation"><div id="list" style="height: 200px; overflow-y: scroll;"><table id="table" style="width:100%"></table></div></div>')
 			$("#currentCreation").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column">Columnas <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras </p>');
-			keys.forEach(function(element){
-				$("#currentCreation #list").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
+
+			var titles="<tr><td>Periods</td>";
+			configuration["static-"+from].periods.forEach(function(period){
+				if(period==""){
+					titles=titles+"<td>Total</td>"
+				}else{
+					titles=titles+"<td>"+period+"</td>"
+				}
 			})
+			titles=titles+"</tr>"
+			$("#currentCreation #table").append(titles)
+
+			keys.forEach(function(element){
+				var newDiv="<tr><td>"+element.nameUser+"</td>"
+				configuration["static-"+from].periods.forEach(function(period){
+					
+					if(element.periods.indexOf(period)!=-1){
+						newDiv=newDiv+'<td><input name="'+element.nameUser+" "+period.split("_")[period.split("_").length-1]+'" value="'+element.realName+period+'" type="checkbox"></td>'
+					}else{
+						newDiv=newDiv+'<td>  </td>'
+					}
+
+				})
+				newDiv=newDiv+"</tr>"
+				$("#currentCreation #table").append(newDiv)
+
+			})
+
 			$("#currentCreation").append('<p>Title</p><p><input placeholder="'+this.title+'" id="title" class="form-control"></div></p>')
 			$("#currentCreation").append('<button onclick="FillWidget('+id+')" type="button" class="btn btn-xs btn-default">Create</button>')
 			$("#currentCreation").append('<button onclick="deleteCreation('+id+')" type="button" class="btn btn-xs btn-default">Cancel</button>')
@@ -59,6 +86,7 @@ function HighInfo(id,panel,color,json,title,serie){
 		    $("#current"+state+" input[type='checkbox']:checked").each(function() {
 		      objaux={
 		        name:$(this).attr('value'),
+		        nameUser: $(this).attr('name'),
 		        type: form
 		      }
 		      selected.push(objaux);
@@ -97,42 +125,41 @@ function HighInfo(id,panel,color,json,title,serie){
 		var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
 		gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight);
 		//In the right way i will draw the graph
-		$("#"+this.id).on("DrawInfo",function(event,trigger,data){
+		$("#"+this.id).on("DrawInfo"+from,function(event,trigger,data){
 			var serieChart= parser(selected,data)
 			draw(serieChart,title)
 			$("#"+this.id).off()
 		})
 
 		//In the wrong way i will draw an error widget
-		$("#"+this.id).on("ErrorGraphInfo",function(){
+		$("#"+this.id).on("ErrorGraphInfo"+from,function(){
 		  drawError()
 		  $("#"+this.id).off()
 		})
 
 		//If we haven't the data in cache we will request them
-		if(takeinfo.static.state==0){
+		if(configuration["static-"+from].state==0){
 			//We actualise the state of data
-			takeinfo.static.state=1;
+			configuration["static-"+from].state=1;
 			//The request is on course
 
-			$.getJSON(takeinfo.static.inside).success(function(data) {
-			    takeinfo.static.saveData=data
-			    takeinfo.static.state=2;
+			$.getJSON(configuration["static-"+from].reference).success(function(data) {
+			    configuration["static-"+from].saveData=data
+			    configuration["static-"+from].state=2;
 
-			    $("*").trigger("DrawInfo",["DrawInfo",data])
+			    $("*").trigger("DrawInfo"+from,["DrawInfo"+from,data])
 			  }).error(function(){
 			    //In case of error we will throw the error event
-			    $("*").trigger("ErrorGraphInfo")
-			    takeinfo.static.static=0;
+			    $("*").trigger("ErrorGraphInfo"+from)
+			    configuration["static"+from].state=0;
 
 			});
-		}else if(takeinfo.static.state==2){
+		}else if(configuration["static-"+from].state==2){
 			//If we have the data in caché we will use it
-			if(takeinfo.static.inside==json){
-				$("#"+this.id).off()
-				var serieChart= parser(selected,takeinfo.static.saveData)
-				draw(serieChart,title)
-			}
+
+			$("#"+this.id).off()
+			var serieChart= parser(selected,configuration["static-"+from].saveData)
+			draw(serieChart,title)
 		}
 	}
 
@@ -145,7 +172,7 @@ function HighInfo(id,panel,color,json,title,serie){
 			arrayAux=[dataAux]
 			obj={
 			  type: element.type,
-			  name: element.name,
+			  name: element.nameUser,
 			  data: arrayAux
 			}
 			selection.push(obj)
@@ -187,25 +214,51 @@ function HighInfo(id,panel,color,json,title,serie){
 		var chart = $('#'+id).highcharts();
 		var existLabel= this.existLabel
 		if(chart!=undefined){
-			var keys=configuration.static
+			var keys=configuration["static-"+from].values
 
 			if($("#currentSettings")){
 			  $("#currentSettings").remove();
 			}
 
-			$("#conten").append('<div id="currentSettings"><p id="list" style="height: 200px; overflow-y: scroll;"></p></div>')
+			$("#conten").append('<div id="currentSettings"><div id="list" style="height: 200px; overflow-y: scroll;"><table id="table" style="width:100%"></table></div></div>')
+
+			var titles="<tr><td>Periods</td>";
+			configuration["static-"+from].periods.forEach(function(period){
+				if(period==""){
+					titles=titles+"<td>Total</td>"
+				}else{
+					titles=titles+"<td>"+period+"</td>"
+				}
+			})
+			titles=titles+"</tr>"
+			$("#currentSettings #table").append(titles)
+
+			keys.forEach(function(element){
+				var newDiv="<tr><td>"+element.nameUser+"</td>"
+				configuration["static-"+from].periods.forEach(function(period){
+					
+					if(element.periods.indexOf(period)!=-1){
+						if(existLabel(chart,element.nameUser+" "+period.split("_")[period.split("_").length-1])){
+							newDiv=newDiv+'<td><input checked name="'+element.nameUser+" "+period.split("_")[period.split("_").length-1]+'" value="'+element.realName+period+'" type="checkbox"></td>'
+						}else{
+							newDiv=newDiv+'<td><input name="'+element.nameUser+" "+period.split("_")[period.split("_").length-1]+'" value="'+element.realName+period+'" type="checkbox"></td>'
+						}
+					}else{
+						newDiv=newDiv+'<td>  </td>'
+					}
+
+				})
+				newDiv=newDiv+"</tr>"
+				$("#currentSettings #table").append(newDiv)
+
+			})
+
 			if(chart.series[0].type=="column"){
 			  $("#currentSettings").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column" checked>Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras  </p>');
 			}else{
 			  $("#currentSettings").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column">Columnas  <input type="radio" name="toSeeOptions" class="radios" value="bar" checked>Barras  </p>');
 			}
-			keys.forEach(function(element){
-			  if(existLabel(chart,element)){
-			    $("#currentSettings #list").append('<p><input type="checkbox" value="'+element+'" checked> '+element+'</p>')
-			  }else{
-			    $("#currentSettings #list").append('<p><input type="checkbox" value="'+element+'"> '+element+'</p>')
-			  }
-			})
+			
 			$("#currentSettings").append('<p>Title</p><p><input placeholder="'+this.title+'" id="title" class="form-control"></div></p>')
 			$("#currentSettings").append('<button onclick="ChangeValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Create</button>')
 			$("#currentSettings").append('<button onclick="deleteSettings()" type="button" class="btn btn-xs btn-default">Cancel</button>')
@@ -218,12 +271,9 @@ function HighInfo(id,panel,color,json,title,serie){
 		this.takeData("Settings");
 		var chart = $('#'+id).highcharts();
     	chart.destroy()
-    	if(takeinfo.static.inside==json){
-    		var serieChart= this.Parser(series,takeinfo.static.saveData)
-    		this.Draw(serieChart,this.title)
-    	}else{
-    		alert("cuidado que hemos cambiado")
-    	}
+		var serieChart= this.Parser(series,configuration["static-"+from].saveData)
+		this.Draw(serieChart,this.title)
+    	
     	
 	}
 	
