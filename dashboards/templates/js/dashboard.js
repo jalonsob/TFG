@@ -34,7 +34,7 @@ $(document).ready(function() {
       //Each kind of data has three states:
       // --0: not, --1: in demand, --2: is there
 
-      $.getJSON("templates/json/configurationfile.json").success(function(data){
+      $.getJSON("templates/json/configuration.json").success(function(data){
         Object.keys(data).forEach(function(element){
             configuration[element]=data[element]
         })
@@ -65,19 +65,19 @@ $(document).ready(function() {
                     numWidget=widgetSaved.id
                   }
                   if(widgetSaved.type=="HighInfo"){
-                    var widget= new HighInfo(widgetSaved.id,id,widgetSaved.color,widgetSaved.from,widgetSaved.jsons,widgetSaved.title,widgetSaved.series)
+                    var widget= new HighInfo(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.jsons,widgetSaved.title,widgetSaved.series)
                     panel.pushElement(widget)
                   }else if(widgetSaved.type=="HighDemo"){
-                    var widget= new HighDemo(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.title,widgetSaved.series)
+                    var widget= new HighDemo(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.jsons,widgetSaved.title,widgetSaved.series)
                     panel.pushElement(widget)
                   }else if(widgetSaved.type=="HighTime"){
-                    var widget= new HighTime(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.title,widgetSaved.series,widgetSaved.from,widgetSaved.to,widgetSaved.size)
+                    var widget= new HighTime(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.jsons,widgetSaved.title,widgetSaved.series,widgetSaved.from,widgetSaved.to,widgetSaved.size)
                     panel.pushElement(widget)
                   }else if(widgetSaved.type=="VideoWidget"){
                     var widget= new VideoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.url,widgetSaved.content,widgetSaved.width,widgetSaved.height)
                     panel.pushElement(widget)
                   }else if(widgetSaved.type=="HtmlInfoWidget"){
-                    var widget= new HtmlInfoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.jsons,widgetSaved.series)
+                    var widget= new HtmlInfoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.jsons,widgetSaved.series)
                     panel.pushElement(widget)
                   }
                 })
@@ -255,16 +255,17 @@ function showConfiguration(panel,type,extraData){
     var widget= new HighInfo(numWidget,panel,color,extraData);
     
   }else if(type=="HighDemo"){
-    var widget= new HighDemo(numWidget,panel,color);
+    var widget= new HighDemo(numWidget,panel,color,extraData);
     
   }else if(type=="HighTime"){
-    var widget= new HighTime(numWidget,panel,color);
+
+    var widget= new HighTime(numWidget,panel,color,extraData);
     
   }else if(type=="VideoWidget"){
     var widget= new VideoWidget(numWidget,panel,color)
 
   }else if(type=="HtmlInfoWidget"){
-    var widget= new HtmlInfoWidget(numWidget,panel,color)
+    var widget= new HtmlInfoWidget(numWidget,panel,color,extraData)
 
   }
 

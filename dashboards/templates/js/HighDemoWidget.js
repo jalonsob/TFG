@@ -1,12 +1,13 @@
 //Widget oriented to make a chart of kind AGES with Highcharts
 
-function HighDemo(id,panel,color,jsons,title,serie){
+function HighDemo(id,panel,color,typeData,jsons,title,serie){
 	HighWidget.call(this,id,panel,color,16,15)
 	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
 	this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
-	this.title=title || "Grafico "+this.id;
+	this.title=title || "Grafico "+typeData+" "+this.id;
+	this.typeData=typeData;
 	var series=serie || [];
-	if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
+	if((Object.getOwnPropertyNames(configuration).length === 0)){
 		var json= "" ;
 
 	}else{
@@ -17,6 +18,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		objaux.type="HighDemo";
 		objaux.series= series;
 		objaux.id= this.id;
+		objaux.typeData=this.typeData
 		objaux.title=this.title;
 		objaux.color= this.color;
 		objaux.jsons= json
@@ -40,7 +42,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		$("#conten").append('<div id="currentCreation"></div>')
 		$("#currentCreation").append('<p><div class="form-group"><label><input id="aging" type="checkbox" value="aging">Aging</label><input placeholder="#4D8FB8" id="agingColor" class="form-control"></div></p>')
 		$("#currentCreation").append('<p><div class="form-group"><label><input id="birth" type="checkbox" value="birth">Birth</label><input placeholder="#081923" id="birthColor" class="form-control"></div></p>')
-		$("#currentCreation").append('<p>Title</p><p><input placeholder="Demograph graph '+this.id+'" id="title" class="form-control"></div></p>')
+		$("#currentCreation").append('<p>Title</p><p><input placeholder="Demograph graph '+this.typeData+" "+this.id+'" id="title" class="form-control"></div></p>')
 		$("#currentCreation").append('<button onclick="FillWidget('+this.id+')" type="button" class="btn btn-xs btn-default">Create</button>')
 		$("#currentCreation").append('<button onclick="deleteCreation('+this.id+')" type="button" class="btn btn-xs btn-default">Cancel</button>')
 		}
@@ -63,7 +65,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 
 		if($("#aging").is(':checked')){
 
-			json.push(takeinfo.aging.inside)
+			json.push(configuration["aging-"+typeData].reference)
 			var colorbar;
 
 			if($("#current"+state+" #agingColor").val()==''){
@@ -82,7 +84,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 
 		if($("#birth").is(':checked')){
 
-			json.push(takeinfo.birth.inside)
+			json.push(configuration["birth-"+typeData].reference)
 			var colorbar;
 
 			if($("#current"+state+" #birthColor").val()==''){
@@ -129,7 +131,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		if(series.length==1){
 
 		    //En caso de que la llamada sea positiva serializo con lso datos obtenidos
-		    $("#"+id).on("DrawAges",function(event,trigger,data){
+		    $("#"+id).on("DrawAges"+typeData,function(event,trigger,data){
 		      //parseamos los datos
 		      var serieChart=[]
 			  var dato= parser(data)
@@ -149,33 +151,33 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		    })
 
 		    //En caso negativo dibujo un widget roto
-		    $("#"+id).on("ErrorGraphAges",function(){
+		    $("#"+id).on("ErrorGraphAges"+typeData,function(){
 		      drawError()
 		      $("#"+id).off()
 		    })
 
 			//If we haven't the data in cache we will request them
-		    if(takeinfo[series[0].name].state==0){
+		    if(configuration[series[0].name+"-"+this.typeData].state==0){
 		      //We actualise the state of data
-		      takeinfo[series[0].name].state=1
+		      configuration[series[0].name+"-"+this.typeData].state=1
 
 		      	//The request is on course
 
-		      $.getJSON(takeinfo[series[0].name].inside).success(function(data) {
-		        takeinfo[series[0].name].state=2
-		        takeinfo[series[0].name].saveData=data
+		      $.getJSON(configuration[series[0].name+"-"+this.typeData].reference).success(function(data) {
+		        configuration[series[0].name+"-"+typeData].state=2
+		        configuration[series[0].name+"-"+typeData].saveData=data
 
 		        //In case of error we will throw the error event
-		        $("*").trigger("DrawAges",["DrawAges",data])
+		        $("*").trigger("DrawAges"+typeData,["DrawAges"+typeData,data])
 		      }).error(function(){
-		        $("*").trigger("ErrorGraphAges")
+		        $("*").trigger("ErrorGraphAges"+typeData)
 
 		      })
 
 			//If we have the data in caché we will use it
-		    }else if(takeinfo[series[0].name].state==2){
+		    }else if(configuration[series[0].name+"-"+this.typeData].state==2){
 		      $("#"+this.id).off()
-		      var data=takeinfo[series[0].name].saveData
+		      var data=configuration[series[0].name+"-"+this.typeData].saveData
 
 		      var serieChart=[]
 			  var dato= parser(data)
@@ -196,7 +198,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 
 		}else if(series.length==2){
 			var save=[];
-		    $("#"+this.id).on("DrawAgesD",function(event,trigger){
+		    $("#"+this.id).on("DrawAgesD"+typeData,function(event,trigger){
 
 		      	var serieChart=[]
 
@@ -234,51 +236,51 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		      	$("#"+this.id).off()
 		    })
 
-		    $("#"+this.id).on("ErrorGraphAgesD",function(){
+		    $("#"+this.id).on("ErrorGraphAgesD"+typeData,function(){
 		      drawError()
 		      $("#"+this.id).off()
 		    })
 
-			if((takeinfo[series[0].name].state==0) || (takeinfo[series[1].name].state==0)){
-				takeinfo[series[0].name].state=1
-				takeinfo[series[1].name].state=1
-
+			if((configuration[series[0].name+"-"+typeData].state==0) || (configuration[series[1].name+"-"+typeData].state==0)){
+				configuration[series[0].name+"-"+typeData].state=1
+				configuration[series[1].name+"-"+typeData].state=1
+				alert
 				$.when(
-					$.getJSON(takeinfo[series[0].name].inside).success(function(data) { 
+
+					$.getJSON(configuration[series[0].name+"-"+typeData].reference).success(function(data) { 
 					    save[0] = data;
 					}),
-					$.getJSON(takeinfo[series[1].name].inside).success(function(data) {
+					$.getJSON(configuration[series[1].name+"-"+typeData].reference).success(function(data) {
 					    save[1] = data;
 					})
 				).done(function() {
+			        configuration[series[0].name+"-"+typeData].state=2
+			        configuration[series[0].name+"-"+typeData].saveData=save[0]
 
-			        takeinfo[series[0].name].state=2
-			        takeinfo[series[0].name].saveData=save[0]
+			        configuration[series[1].name+"-"+typeData].state=2
+			        configuration[series[1].name+"-"+typeData].saveData=save[1]
 
-			        takeinfo[series[1].name].state=2
-			        takeinfo[series[1].name].saveData=save[1]
-
-			        $("*").trigger("DrawAgesD",["DrawAgesD",data])
+			        $("*").trigger("DrawAgesD"+typeData,["DrawAgesD"+typeData,data])
 
 				}).fail(function(){
-					takeinfo[series[0].name].state=0
-					takeinfo[series[1].name].state=0
+					configuration[series[0].name+"-"+typeData].state=0
+					configuration[series[1].name+"-"+typeData].state=0
 
-					$("*").trigger("ErrorGraphAgesD")
+					$("*").trigger("ErrorGraphAgesD"+typeData)
 
 				})
 
-		    }else if((takeinfo[series[0].name].state==2) && (takeinfo[series[1].name].state==2)){
+		    }else if((configuration[series[0].name+"-"+typeData].state==2) && (configuration[series[1].name+"-"+typeData].state==2)){
 		    	$("#"+this.id).off()
 				var serieChart=[]
 
-				if(parser(takeinfo[series[0].name].saveData).length>=parser(takeinfo[series[1].name].saveData).length){
-					max=parser(takeinfo[series[0].name].saveData).length
+				if(parser(configuration[series[0].name+"-"+typeData].saveData).length>=parser(configuration[series[1].name+"-"+typeData].saveData).length){
+					max=parser(configuration[series[0].name+"-"+typeData].saveData).length
 				}else{
-					max=parser(takeinfo[series[1].name].saveData).length
+					max=parser(configuration[series[1].name+"-"+typeData].saveData).length
 				}
 
-				var dato=parser(takeinfo[series[0].name].saveData).reverse()
+				var dato=parser(configuration[series[0].name+"-"+typeData].saveData).reverse()
 
 				var objaux={
 				    type: "bar",
@@ -289,7 +291,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 
 				serieChart.push(objaux)
 
-				var dato=parser(takeinfo[series[1].name].saveData).reverse()
+				var dato=parser(configuration[series[1].name+"-"+typeData].saveData).reverse()
 
 				var objaux={
 				    type: "bar",
@@ -313,7 +315,7 @@ function HighDemo(id,panel,color,jsons,title,serie){
 		var result=[];
 
 		data.persons.age.forEach(function(element){
-			aux=Math.floor(element/181);
+			aux=Math.floor(element.split(" days,")[0]/181);
 			if(result[aux]==undefined){
 			  result[aux]=1;
 			}else{

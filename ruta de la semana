@@ -210,14 +210,18 @@ Día 17 de marzo a las 12:00
 
 ——————————————————————
 
-- scm, its, mls, scr, irc
-- crear configuración entre fuentes de datos con distintos botones
-- simplificar times series
++ scm, its, mls, scr, irc
+	*aging solo en scam, its y mls
+	* de evo solo tienen scm,its,mls,scr
++ crear configuración entre fuentes de datos con distintos botones
++ simplificar times series
 - quitar directorios relativos en el html
 - que funcione con gh-pages
 	*usar github como sitio de almacenamiento
 	*django que acepte cabeceras “cors”
-- escribir siguiente ciclo y pasar memoria escrita hasta la fecha
++ escribir siguiente ciclo y pasar memoria escrita hasta la fecha
+
+*No se ha podido avanzar más porque ha aparecido un problema con los ficheros de configuracion
 
 Después de Quan el martes
 
@@ -250,7 +254,7 @@ links:
 
 
 Hojas:
-40
+60
 
 Referencias:
 

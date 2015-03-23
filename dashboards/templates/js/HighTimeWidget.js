@@ -1,15 +1,15 @@
 //Widget oriented to make a chart of kind TIMES with Highcharts
 
-function HighTime(id,panel,color,json,title,serie,from,to,size){
+function HighTime(id,panel,color,typeData,json,title,serie,from,to,size){
 
 	var series=serie || [];
-	if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
+	if((Object.getOwnPropertyNames(configuration).length === 0)){
 		var json= "" ;
 
 	}else{
-		var json= takeinfo.evolutionary.inside;
+		var json= configuration["evolutionary-"+from];
 	}
-
+	this.typeData=typeData;
 	if(size!=undefined){
 		this.size=size
 		if((this.size)<=12 && (this.size)>=8){
@@ -47,6 +47,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 		objaux.id= this.id;
 		objaux.title=this.title;
 		objaux.color= this.color;
+		objaux.typeData=this.typeData
 		objaux.jsons= json
 		objaux.from= this.from;
 		objaux.to= this.to;
@@ -69,14 +70,14 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 
 			$("#conten").append('<div id="currentCreation"><div id="list" style="height: 200px; overflow-y: scroll;"></div></div>')
 
-			configuration.evolutionary.forEach(function(element){
-				$("#currentCreation #list").append('<p><button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset </button>    '+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas</p>')
+			configuration["evolutionary-"+typeData].values.forEach(function(element){
+				$("#currentCreation #list").append('<p><button onclick="resetRatios('+element.realName+'_$bar,'+element.realName+'_$line)" type="button" class="btn btn-xs btn-default">Reset </button>    '+element.nameUser+':   <input id="'+element.realName+'_$bar" type="radio" name="'+element.nameUser+'" class="radios" value="column">Barras<input id="'+element.realName+'_$line" type="radio" name="'+element.nameUser+'" class="radios" value="spline">Lineas</p>')
 			})
 
 			$("#currentCreation").append('From')
 			$("#currentCreation").append('<select id="from" class="form-control">')
 
-			configuration.time.forEach(function(element){
+			configuration["evolutionary-"+typeData].time.forEach(function(element){
 				$("#currentCreation #from").append('<option value="'+element+'">'+element+'</option>')
 			})
 
@@ -85,14 +86,14 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 			$("#currentCreation").append('To')
 			$("#currentCreation").append('<select id="to" class="form-control">')
 
-			configuration.time.forEach(function(element){
-			$("#currentCreation #to").append('<option value="'+element+'">'+element+'</option>')
+			configuration["evolutionary-"+typeData].time.forEach(function(element){
+				$("#currentCreation #to").append('<option value="'+element+'">'+element+'</option>')
 			})
 
 			$("#currentCreation").append('</select>')
-			$("#to").val(configuration.time[configuration.time.length-1])
+			$("#to").val(configuration["evolutionary-"+typeData].time[configuration["evolutionary-"+typeData].time.length-1])
 
-			$("#currentCreation").append('<p>Title</p><p><input placeholder="Time graph '+this.id+'" id="title" class="form-control"></div></p>')
+			$("#currentCreation").append('<p>Title</p><p><input placeholder="Time '+typeData+' graph '+this.id+'" id="title" class="form-control"></div></p>')
 			$("#currentCreation").append('<button onclick="FillWidget('+this.id+')" type="button" class="btn btn-xs btn-default">Create</button>')
 			$("#currentCreation").append('<button onclick="deleteCreation('+this.id+')" type="button" class="btn btn-xs btn-default">Cancel</button>')
     	}
@@ -109,8 +110,9 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 		var selected = [];
 		$("#current"+state+" input[type='radio']:checked").each(function() {
 			objaux={
-			name:$(this).attr('name'),
-			form: $(this).attr('value')
+				name:$(this).attr("id").split("_"+$(this).attr("id").split("_")[$(this).attr("id").split("_").length-1])[0],
+				nameUser:$(this).attr('name'),
+				form: $(this).attr('value')
 			}
 			selected.push(objaux);
 		});
@@ -124,7 +126,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 		this.to=$("#to option:selected").text()
 		this.from=$("#from option:selected").text()
 		
-		this.size= configuration.time.indexOf(this.to.toString()) - configuration.time.indexOf(this.from.toString()) +1;
+		this.size= configuration["evolutionary-"+typeData].time.indexOf(this.to.toString()) - configuration["evolutionary-"+typeData].time.indexOf(this.from.toString()) +1;
 
 		if((this.size)<=12 && (this.size)>=8){
 
@@ -178,7 +180,8 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
  		gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight);
 
 		//In the right way i will draw the graph
-		$("#"+this.id).on("DrawTimes",function(event,trigger,data,serie){
+		$("#"+this.id).on("DrawTimes"+typeData,function(event,trigger,data,serie){
+			console.log(data)
 			var serieChart= parser(from,to,data,series);
 		    var x= createX(data,from,to)
 		    draw(serieChart,x,title,size,this.id)
@@ -186,41 +189,40 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 		})
 
 		//In the wrong way i will draw an error widget
-		$("#"+this.id).on("ErrorGraphTimes",function(){
+		$("#"+this.id).on("ErrorGraphTimes"+typeData,function(){
 		    drawError()
 			$("#"+this.id).off()
 		})
 
 		//If we haven't the data in cache we will request them
-		if(takeinfo.evolutionary.state==0){
+		if(configuration["evolutionary-"+typeData].state==0){
 			//We actualise the state of data
-			takeinfo.evolutionary.state==1;
+			configuration["evolutionary-"+typeData].state==1;
 			//The request is on course
 
-			$.getJSON(takeinfo.evolutionary.inside).success(function(data){
+			$.getJSON(configuration["evolutionary-"+typeData].reference).success(function(data){
 
 			  //We actualise the state of data again
-			  takeinfo.evolutionary.saveData=data
-			  takeinfo.evolutionary.state=2;
+			  configuration["evolutionary-"+typeData].saveData=data
+			  configuration["evolutionary-"+typeData].state=2;
 
-			  $("*").trigger("DrawTimes",["DrawTimes",data,serie])
+			  $("*").trigger("DrawTimes"+typeData,["DrawTimes"+typeData,data,serie])
 			 
 			}).error(function(){
 			  //In case of error we will throw the error event
-			  $("*").trigger("ErrorGraphTimes")
+			  $("*").trigger("ErrorGraphTimes"+typeData)
 			  takeinfo.static.static=0;
 			});
-		}else if(takeinfo.evolutionary.state==2){
+		}else if(configuration["evolutionary-"+typeData].state==2){
 			//If we have the data in caché we will use it
 		
-			if(takeinfo.evolutionary.inside==json){
-				$("#"+this.id).off()
-				var serieChart= parser(from,to,takeinfo.evolutionary.saveData,series);
-			
-			    var x= createX(takeinfo.evolutionary.saveData,from,to)
-			    
-			    draw(serieChart,x,title,size,this.id)
-    		}
+			$("#"+this.id).off()
+			var serieChart= parser(from,to,configuration["evolutionary-"+typeData].saveData,series);
+		
+		    var x= createX(configuration["evolutionary-"+typeData].saveData,from,to)
+		    
+		    draw(serieChart,x,title,size,this.id)
+		
 		}
 	}
 
@@ -232,7 +234,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 		  dataAux=data[element.name].slice(data.date.indexOf(from),data.date.indexOf(to)+1)
 		  obj={
 		      type: element.form,
-		      name: element.name,
+		      name: element.nameUser,
 		      data: dataAux
 		  }
 		  selection.push(obj)
@@ -313,7 +315,7 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 	//In this case, there will be some checkbox selected with the data that the widget already has.
 	this.settings= function(){
 		var chart = $('#'+this.id).highcharts();
-		var keys=configuration.evolutionary
+		var keys=configuration["evolutionary-"+typeData].values
 		var auxseries;
 		var getSerie=this.getSerie
 		var existLabel= this.existLabel
@@ -325,36 +327,36 @@ function HighTime(id,panel,color,json,title,serie,from,to,size){
 		$("#conten").append('<div id="currentSettings"><div id="list" style="height: 200px; overflow-y: scroll;"></div></div>')
 
 		keys.forEach(function(element){
-			if(existLabel(chart,element)){
-			  auxseries=getSerie(chart,element);
+			if(existLabel(chart,element.nameUser)){
+			  auxseries=getSerie(chart,element.nameUser);
 			  if(auxseries.type=="column"){
-			    $("#currentSettings #list").append('<p><button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button>    '+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column" checked>Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas </p>');
+			  	$("#currentSettings #list").append('<p><button onclick="resetRatios('+element.realName+'_$bar,'+element.realName+'_$line)" type="button" class="btn btn-xs btn-default">Reset </button>    '+element.nameUser+':   <input id="'+element.realName+'_$bar" type="radio" name="'+element.nameUser+'" class="radios" value="column" checked>Barras<input id="'+element.realName+'_$line" type="radio" name="'+element.nameUser+'" class="radios" value="spline">Lineas</p>')
 			  }else{
-			    $("#currentSettings #list").append('<p><button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button>    '+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column" >Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline" checked>Lineas </p>');
+			  	$("#currentSettings #list").append('<p><button onclick="resetRatios('+element.realName+'_$bar,'+element.realName+'_$line)" type="button" class="btn btn-xs btn-default">Reset </button>    '+element.nameUser+':   <input id="'+element.realName+'_$bar" type="radio" name="'+element.nameUser+'" class="radios" value="column" >Barras<input id="'+element.realName+'_$line" type="radio" name="'+element.nameUser+'" class="radios" value="spline" checked>Lineas</p>')
 			  }
 			}else{
-			  $("#currentSettings #list").append('<p><button onclick="resetRatios('+element+'bar,'+element+'line)" type="button" class="btn btn-xs btn-default">Reset</button>    '+element+':   <input id="'+element+'bar" type="radio" name="'+element+'" class="radios" value="column">Barras<input id="'+element+'line" type="radio" name="'+element+'" class="radios" value="spline">Lineas</p>');
+			  	$("#currentSettings #list").append('<p><button onclick="resetRatios('+element.realName+'_$bar,'+element.realName+'_$line)" type="button" class="btn btn-xs btn-default">Reset </button>    '+element.nameUser+':   <input id="'+element.realName+'_$bar" type="radio" name="'+element.nameUser+'" class="radios" value="column" >Barras<input id="'+element.realName+'_$line" type="radio" name="'+element.nameUser+'" class="radios" value="spline">Lineas</p>')
 			}
 		})
 		$("#currentSettings").append('From')
 		$("#currentSettings").append('<select id="from" class="form-control">')
-		configuration.time.forEach(function(element){
+		configuration["evolutionary-"+typeData].time.forEach(function(element){
 			$("#currentSettings #from").append('<option value="'+element+'">'+element+'</option>')
 		})
 		$("#currentSettings").append('</select>')
 		$("#currentSettings").append('To')
 		$("#currentSettings").append('<select id="to" class="form-control">')
-		configuration.time.forEach(function(element){
+		configuration["evolutionary-"+typeData].time.forEach(function(element){
 			$("#currentSettings #to").append('<option value="'+element+'">'+element+'</option>')
 		})
 		$("#currentSettings").append('</select>')
 
 		var position=chart.series[0].data.length-1;
-		var position2= configuration.time.indexOf(chart.series[0].data[position-1].category)
-		var month= configuration.time[position2+1]
+		var position2= configuration["evolutionary-"+typeData].time.indexOf(chart.series[0].data[position-1].category)
+		var month= configuration["evolutionary-"+typeData].time[position2+1]
 
 		$("#from").val(chart.series[0].data[0].category)
-		$("#to").val(configuration.time[position2+1])
+		$("#to").val(configuration["evolutionary-"+typeData].time[position2+1])
 		$("#currentSettings").append('<p>Title</p><p><input placeholder="'+chart.title.textStr+'" id="title" class="form-control"></div></p>')
 		$("#currentSettings").append('<button onclick="ChangeValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Redraw</button>')
 		$("#currentSettings").append('<button onclick="deleteSettings()" type="button" class="btn btn-xs btn-default">Cancel</button>')

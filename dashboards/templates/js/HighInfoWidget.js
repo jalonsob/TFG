@@ -1,23 +1,23 @@
 //Widget oriented to make a chart of kind INFO with Highcharts
 
-function HighInfo(id,panel,color,from,json,title,serie){
+function HighInfo(id,panel,color,typeData,json,title,serie){
 	HighWidget.call(this,id,panel,color,12,8)
 	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
 	this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
-	this.title=title || "Graph "+from+" info "+this.id;
-	this.from=from;
+	this.title=title || "Graph "+typeData+" info "+this.id;
+	this.typeData=typeData;
 	var series=serie || [];
 	if((Object.getOwnPropertyNames(configuration).length === 0)){
 		var json= "" ;
 
 	}else{
-		var json= configuration["static-"+from].inside
+		var json= configuration["static-"+typeData].inside
 	}
 	this.flatten= function(){
 		var objaux={}
 		objaux.type="HighInfo";
 		objaux.series= series;
-		objaux.from= from;
+		objaux.typeData= typeData;
 		objaux.id= id;
 		objaux.title=this.title;
 		objaux.color= color;
@@ -27,7 +27,7 @@ function HighInfo(id,panel,color,from,json,title,serie){
 
 	//Function that creates a menu where we can select the data that we want represent.
 	this.makeMenu= function(){
-		var keys= configuration["static-"+from].values
+		var keys= configuration["static-"+typeData].values
 		if(json==""){
 			$("#conten").append('<div id="currentCreation"></div>')
 			$("#currentCreation").append('<p>Configuration files have not been loaded well. Please check your internet connection.<p>');
@@ -40,7 +40,7 @@ function HighInfo(id,panel,color,from,json,title,serie){
 			$("#currentCreation").append('<p><input type="radio" name="toSeeOptions" class="radios" value="column">Columnas <input type="radio" name="toSeeOptions" class="radios" value="bar">Barras </p>');
 
 			var titles="<tr><td>Periods</td>";
-			configuration["static-"+from].periods.forEach(function(period){
+			configuration["static-"+typeData].periods.forEach(function(period){
 				if(period==""){
 					titles=titles+"<td>Total</td>"
 				}else{
@@ -52,7 +52,7 @@ function HighInfo(id,panel,color,from,json,title,serie){
 
 			keys.forEach(function(element){
 				var newDiv="<tr><td>"+element.nameUser+"</td>"
-				configuration["static-"+from].periods.forEach(function(period){
+				configuration["static-"+typeData].periods.forEach(function(period){
 					
 					if(element.periods.indexOf(period)!=-1){
 						newDiv=newDiv+'<td><input name="'+element.nameUser+" "+period.split("_")[period.split("_").length-1]+'" value="'+element.realName+period+'" type="checkbox"></td>'
@@ -125,40 +125,40 @@ function HighInfo(id,panel,color,from,json,title,serie){
 		var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
 		gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight);
 		//In the right way i will draw the graph
-		$("#"+this.id).on("DrawInfo"+from,function(event,trigger,data){
+		$("#"+this.id).on("DrawInfo"+typeData,function(event,trigger,data){
 			var serieChart= parser(selected,data)
 			draw(serieChart,title)
 			$("#"+this.id).off()
 		})
 
 		//In the wrong way i will draw an error widget
-		$("#"+this.id).on("ErrorGraphInfo"+from,function(){
+		$("#"+this.id).on("ErrorGraphInfo"+typeData,function(){
 		  drawError()
 		  $("#"+this.id).off()
 		})
 
 		//If we haven't the data in cache we will request them
-		if(configuration["static-"+from].state==0){
+		if(configuration["static-"+typeData].state==0){
 			//We actualise the state of data
-			configuration["static-"+from].state=1;
+			configuration["static-"+typeData].state=1;
 			//The request is on course
 
-			$.getJSON(configuration["static-"+from].reference).success(function(data) {
-			    configuration["static-"+from].saveData=data
-			    configuration["static-"+from].state=2;
+			$.getJSON(configuration["static-"+typeData].reference).success(function(data) {
+			    configuration["static-"+typeData].saveData=data
+			    configuration["static-"+typeData].state=2;
 
-			    $("*").trigger("DrawInfo"+from,["DrawInfo"+from,data])
+			    $("*").trigger("DrawInfo"+typeData,["DrawInfo"+typeData,data])
 			  }).error(function(){
 			    //In case of error we will throw the error event
-			    $("*").trigger("ErrorGraphInfo"+from)
-			    configuration["static"+from].state=0;
+			    $("*").trigger("ErrorGraphInfo"+typeData)
+			    configuration["static"+typeData].state=0;
 
 			});
-		}else if(configuration["static-"+from].state==2){
+		}else if(configuration["static-"+typeData].state==2){
 			//If we have the data in caché we will use it
 
 			$("#"+this.id).off()
-			var serieChart= parser(selected,configuration["static-"+from].saveData)
+			var serieChart= parser(selected,configuration["static-"+typeData].saveData)
 			draw(serieChart,title)
 		}
 	}
@@ -214,7 +214,7 @@ function HighInfo(id,panel,color,from,json,title,serie){
 		var chart = $('#'+id).highcharts();
 		var existLabel= this.existLabel
 		if(chart!=undefined){
-			var keys=configuration["static-"+from].values
+			var keys=configuration["static-"+typeData].values
 
 			if($("#currentSettings")){
 			  $("#currentSettings").remove();
@@ -223,7 +223,7 @@ function HighInfo(id,panel,color,from,json,title,serie){
 			$("#conten").append('<div id="currentSettings"><div id="list" style="height: 200px; overflow-y: scroll;"><table id="table" style="width:100%"></table></div></div>')
 
 			var titles="<tr><td>Periods</td>";
-			configuration["static-"+from].periods.forEach(function(period){
+			configuration["static-"+typeData].periods.forEach(function(period){
 				if(period==""){
 					titles=titles+"<td>Total</td>"
 				}else{
@@ -235,7 +235,7 @@ function HighInfo(id,panel,color,from,json,title,serie){
 
 			keys.forEach(function(element){
 				var newDiv="<tr><td>"+element.nameUser+"</td>"
-				configuration["static-"+from].periods.forEach(function(period){
+				configuration["static-"+typeData].periods.forEach(function(period){
 					
 					if(element.periods.indexOf(period)!=-1){
 						if(existLabel(chart,element.nameUser+" "+period.split("_")[period.split("_").length-1])){
@@ -271,7 +271,7 @@ function HighInfo(id,panel,color,from,json,title,serie){
 		this.takeData("Settings");
 		var chart = $('#'+id).highcharts();
     	chart.destroy()
-		var serieChart= this.Parser(series,configuration["static-"+from].saveData)
+		var serieChart= this.Parser(series,configuration["static-"+typeData].saveData)
 		this.Draw(serieChart,this.title)
     	
     	

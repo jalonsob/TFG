@@ -6,9 +6,9 @@ function Panel(idPanel,color,wid){
 	var id=idPanel;
 	var widgets=wid || [];
 	var color=color || getRandomColor();
-	var statc='<a class="dropdown">'+
-				'<a href="#" class="dropdown-toggle" data-toggle="dropdown">Info Widgets</b></a>'+
-					'<ul class="dropdown-menu alert-dropdown">'+
+	var statc='<li class="dropdown">'+
+				'<a href="#" class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown">Info Widgets</a>'+
+					'<ul class="dropdown-menu statc">'+
 						'<li>'+
 							'</button><button onclick="'+"showConfiguration("+id+",'HighInfo','scm')"+'" type="button" class="btn btn-xs btn-default">SCM Info widget</button>'+
 						'</li>'+
@@ -25,8 +25,61 @@ function Panel(idPanel,color,wid){
 							'</button><button onclick="'+"showConfiguration("+id+",'HighInfo','irc')"+'" type="button" class="btn btn-xs btn-default">IRC Info widget</button>'+
 						'</li>'+
 					'</ul>'+
-			'</a>'
-	var settings= '<div id="settings"><ul><button onclick="'+"showConfiguration("+id+",'HighTime')"+'" type="button" class="btn btn-xs btn-default">Time series chart</button><button onclick="'+"showConfiguration("+id+",'HighDemo')"+'" type="button" class="btn btn-xs btn-default">Aging chart</button>'+statc+'<button onclick="'+"showConfiguration("+id+",'VideoWidget')"+'" type="button" class="btn btn-xs btn-default">Video Widget</button><button onclick="'+"showConfiguration("+id+",'HtmlInfoWidget')"+'" type="button" class="btn btn-xs btn-default">HtmlInfoWidget</button></ul></div>'
+				'</li>'
+	var Htmlstatc='<li class="dropdown">'+
+				'<a href="#" class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown">HTML Info Widgets</a>'+
+					'<ul class="dropdown-menu statc">'+
+						'<li>'+
+							'</button><button onclick="'+"showConfiguration("+id+",'HtmlInfoWidget','scm')"+'" type="button" class="btn btn-xs btn-default">SCM Info widget</button>'+
+						'</li>'+
+						'<li>'+
+							'</button><button onclick="'+"showConfiguration("+id+",'HtmlInfoWidget','its')"+'" type="button" class="btn btn-xs btn-default">ITS Info widget</button>'+
+						'</li>'+
+						'<li>'+
+							'</button><button onclick="'+"showConfiguration("+id+",'HtmlInfoWidget','mls')"+'" type="button" class="btn btn-xs btn-default">MLS Info widget</button>'+
+						'</li>'+
+						'<li>'+
+							'</button><button onclick="'+"showConfiguration("+id+",'HtmlInfoWidget','scr')"+'" type="button" class="btn btn-xs btn-default">SCR Info widget</button>'+
+						'</li>'+
+						'<li>'+
+							'</button><button onclick="'+"showConfiguration("+id+",'HtmlInfoWidget','irc')"+'" type="button" class="btn btn-xs btn-default">IRC Info widget</button>'+
+						'</li>'+
+					'</ul>'+
+				'</li>'
+			  	  
+	var evolutionary='<li class="dropdown">'+
+				'<a href="#" class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown">Time Widgets</a>'+
+					'<ul class="dropdown-menu evol">'+
+						'<li>'+
+							'</button><button onclick="'+"showConfiguration("+id+",'HighTime','scm')"+'" type="button" class="btn btn-xs btn-default">SCM Time widget</button>'+
+						'</li>'+
+						'<li>'+
+							'</button><button onclick="'+"showConfiguration("+id+",'HighTime','its')"+'" type="button" class="btn btn-xs btn-default">ITS Time widget</button>'+
+						'</li>'+
+						'<li>'+
+							'</button><button onclick="'+"showConfiguration("+id+",'HighTime','mls')"+'" type="button" class="btn btn-xs btn-default">MLS Time widget</button>'+
+						'</li>'+
+						'<li>'+
+							'</button><button onclick="'+"showConfiguration("+id+",'HighTime','scr')"+'" type="button" class="btn btn-xs btn-default">SCR Time widget</button>'+
+						'</li>'+
+					'</ul>'+
+				'</li>'
+	var demog='<li class="dropdown">'+
+				'<a href="#" class="dropdown-toggle btn btn-xs btn-default" data-toggle="dropdown">Demographic widgets</a>'+
+					'<ul class="dropdown-menu evol">'+
+						'<li>'+
+							'</button><button onclick="'+"showConfiguration("+id+",'HighDemo','scm')"+'" type="button" class="btn btn-xs btn-default">SCM Time widget</button>'+
+						'</li>'+
+						'<li>'+
+							'</button><button onclick="'+"showConfiguration("+id+",'HighDemo','its')"+'" type="button" class="btn btn-xs btn-default">ITS Time widget</button>'+
+						'</li>'+
+						'<li>'+
+							'</button><button onclick="'+"showConfiguration("+id+",'HighDemo','mls')"+'" type="button" class="btn btn-xs btn-default">MLS Time widget</button>'+
+						'</li>'+
+					'</ul>'+
+				'</li>'
+
+	var settings= '<ul style="display: flex; list-style:none ">'+evolutionary+demog+statc+Htmlstatc+'<li><button onclick="'+"showConfiguration("+id+",'VideoWidget')"+'" type="button" class="btn btn-xs btn-default">Video Widget</button></li></ul>'
 	var gridster= '<div id="panel'+id+'" class="gridster ready" style="background-color:'+color+'"><ul></ul></div>'
 	
 	this.writeSettings=function(){
