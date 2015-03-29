@@ -1,16 +1,29 @@
 //Widget oriented to make a charts with Highcharts
 
-function HtmlInfoWidget(id,panel,color,typeData,json,serie){
+function HtmlInfoWidget(id,panel,color,typeData,readingData,json,serie){
 	HighWidget.call(this,id,panel,color,12,7)
 	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
 	this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
 	var series=serie || {up:[],down:[]};
 	this.typeData=typeData
+	this.readingData=readingData
+
 	if((Object.getOwnPropertyNames(configuration).length === 0)){
 		var json= "" ;
 
 	}else{
-		var json= json || configuration["static-"+typeData].inside
+		if(typeData==this.readingData){
+			var json= configuration["reference"]+typeData+"-static.json"
+		}else{
+			var json=configuration["reference"]+this.readingData+"-"+typeData+"-com-static.json"
+		}
+	}
+
+	if(!(json in cacheData)){
+		cacheData[json]={
+			"state":0,
+			"saveData":{}
+		}
 	}
 	this.flatten= function(){
 		var objaux={}
@@ -18,6 +31,7 @@ function HtmlInfoWidget(id,panel,color,typeData,json,serie){
 		objaux.series= series;
 		objaux.id= id;
 		objaux.typeData=this.typeData
+		objaux.readingData=this.readingData
 		objaux.color= color;
 		objaux.jsons= json
 		return objaux
@@ -119,11 +133,12 @@ function HtmlInfoWidget(id,panel,color,typeData,json,serie){
 	this.MakeWidget=function(){
 		var selected= series;
 		var drawError = this.drawErrorWidget
+		var readingData=this.readingData
 
 		var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
 		gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight);
 		//In the right way i will draw the graph
-		$("#"+this.id).on("DrawInfoHTML"+typeData,function(event,trigger,data){
+		$("#"+this.id).on("DrawInfoHTML"+typeData+json,function(event,trigger,data){
 			var up="";
 			selected.up.forEach(function(element){
 				up=  up+'<div style="float: left; width: '+(100/selected.up.length)+'%;"><p><strong>'+element.nameUser+':</strong></p><p>'+data[element.name]+'</p></div>'
@@ -132,38 +147,44 @@ function HtmlInfoWidget(id,panel,color,typeData,json,serie){
 			selected.down.forEach(function(element){
 				down=  down+'<div style="float: left; width: '+(100/selected.down.length)+'%;"><p><strong>'+element.nameUser+':</strong></p><p>'+data[element.name]+'</p></div>'
 			})
-			result='<p>Stadistics from '+typeData+' '+this.id+'</p>'+up+"<hr>"+down
+			if(readingData==typeData){
+				result='<p>Stadistics from '+typeData+" "+this.id+'</p>'+up+"<hr>"+down
+
+			}else{
+				result='<p>Stadistics from '+typeData+' '+readingData+" "+this.id+'</p>'+up+"<hr>"+down
+
+			}
 			$("#"+this.id).html(result)
 			$("#"+this.id).off()
 
 		})
 
 		//In the wrong way i will draw an error widget
-		$("#"+this.id).on("ErrorGraphInfoHTML"+typeData,function(){
+		$("#"+this.id).on("ErrorGraphInfoHTML"+typeData+json,function(){
 		  drawError()
 		  $("#"+this.id).off()
 		})
 
 		//If we haven't the data in cache we will request them
-		if(configuration["static-"+typeData].state==0){
+		if(cacheData[json].state==0){
 			//We actualise the state of data
-			configuration["static-"+typeData].state=1;
+			cacheData[json].state=1;
 			//The request is on course
 
-			$.getJSON(configuration["static-"+typeData].reference).success(function(data) {
-			    configuration["static-"+typeData].saveData=data
-			    configuration["static-"+typeData].state=2;
+			$.getJSON(json).success(function(data) {
+			    cacheData[json].saveData=data
+			    cacheData[json].state=2;
 
-			    $("*").trigger("DrawInfoHTML"+typeData,["DrawInfoHTML"+typeData,data])
+			    $("*").trigger("DrawInfoHTML"+typeData+json,["DrawInfoHTML"+typeData+json,data])
 			  }).error(function(){
 			    //In case of error we will throw the error event
-			    $("*").trigger("ErrorGraphInfoHTML"+typeData)
-			    configuration["static-"+typeData].state=0;
+			    $("*").trigger("ErrorGraphInfoHTML"+typeData+json)
+			    cacheData[json].state=0;
 
 			});
-		}else if(configuration["static-"+typeData].state==2){
-			
-			$("*").trigger("DrawInfoHTML"+typeData,["DrawInfoHTML"+typeData,configuration["static-"+typeData].saveData])
+		}else if(cacheData[json].state==2){
+			data=cacheData[json].saveData
+			$("*").trigger("DrawInfoHTML"+typeData+json,["DrawInfoHTML"+typeData+json,data])
 
 		}		
 	}
@@ -248,13 +269,19 @@ function HtmlInfoWidget(id,panel,color,typeData,json,serie){
 		this.takeData("Settings");
 		var up="";
 		series.up.forEach(function(element){
-			up=  up+'<div style="float: left; width: '+(100/series.up.length)+'%;"><p><strong>'+element.name+':</strong></p><p>'+configuration["static-"+typeData].saveData[element.name]+'</p></div>'
+			up=  up+'<div style="float: left; width: '+(100/series.up.length)+'%;"><p><strong>'+element.nameUser+':</strong></p><p>'+cacheData[json].saveData[element.name]+'</p></div>'
 		})
 		var down="";
 		series.down.forEach(function(element){
-			down=  down+'<div style="float: left; width: '+(100/series.down.length)+'%;"><p><strong>'+element.name+':</strong></p><p>'+configuration["static-"+typeData].saveData[element.name]+'</p></div>'
+			down=  down+'<div style="float: left; width: '+(100/series.down.length)+'%;"><p><strong>'+element.nameUser+':</strong></p><p>'+cacheData[json].saveData[element.name]+'</p></div>'
 		})
-		var result=up+"<hr>"+down
+		if(this.readingData==typeData){
+			result='<p>Stadistics from '+typeData+" "+this.id+'</p>'+up+"<hr>"+down
+
+		}else{
+			result='<p>Stadistics from '+typeData+' '+this.readingData+" "+this.id+'</p>'+up+"<hr>"+down
+
+		}
 		$("#"+this.id).html(result)
 	}
 	

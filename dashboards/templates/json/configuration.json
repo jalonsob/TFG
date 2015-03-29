@@ -21,10 +21,7 @@
 					},{
 					"nameUser":"repositories",
 					"realName":"repositories"
-					}],
-					"state":0,
-					"saveData":{},
-					"reference": "templates/json/scm-evolutionary.json"
+					}]
 	},
 	"evolutionary-its":{
 		"values": [{
@@ -54,10 +51,7 @@
 					},{
 					"nameUser":"trackers",
 					"realName":"trackers"
-					}],
-					"state":0,
-					"saveData":{},
-					"reference": "templates/json/its-evolutionary.json"
+					}]
 	},
 	"evolutionary-mls":{
 		"values": [{
@@ -84,10 +78,7 @@
 					},{
 					"nameUser":"threads",
 					"realName":"threads"
-					}],
-					"state":0,
-					"saveData":{},
-					"reference": "templates/json/mls-evolutionary.json"
+					}]
 	},
 	"evolutionary-scr":{
 		"values": [{
@@ -114,10 +105,7 @@
 					},{
 					"nameUser":"threads",
 					"realName":"threads"
-					}],
-					"state":0,
-					"saveData":{},
-					"reference": "templates/json/scr-evolutionary.json"
+					}]
 	},
 	"static-scm":{
 				"values":[{
@@ -225,10 +213,7 @@
 					"realName":"repositories",
 					"periods":[""]
 					}],
-				"periods":["","_365","_30", "_7"],
-				"state":0,
-				"saveData":{},
-				"reference": "templates/json/scm-static.json"
+				"periods":["","_365","_30", "_7"]
 	},
 	"static-its":{
 				"values":[{
@@ -328,10 +313,7 @@
 					"realName":"trackers",
 					"periods":[""]
 					}],
-				"periods":["","_365","_30", "_7"],
-				"state":0,
-				"saveData":{},
-				"reference": "templates/json/its-static.json"
+				"periods":["","_365","_30", "_7"]
 	},
 	"static-mls":{
 				"values":[{
@@ -383,10 +365,7 @@
 					"realName":"threads",
 					"periods":[""]
 					}],
-				"periods":["","_365","_30", "_7"],
-				"state":0,
-				"saveData":{},
-				"reference": "templates/json/mls-static.json"
+				"periods":["","_365","_30", "_7"]
 	},
 	"static-scr":{
 				"values":[{
@@ -510,10 +489,7 @@
 					"realName":"verified",
 					"periods":[""]
 					}],
-				"periods":["","_365","_30", "_7"],
-				"state":0,
-				"saveData":{},
-				"reference": "templates/json/scr-static.json"
+				"periods":["","_365","_30", "_7"]
 	},
 	"static-irc":{
 				"values":[{
@@ -545,39 +521,8 @@
 					"realName":"sent",
 					"periods":["","_30", "_365", "_7"]
 					}],
-				"periods":["","_365","_30", "_7"],
-				"state":0,
-				"saveData":{},
-				"reference": "templates/json/irc-static.json"
+				"periods":["","_365","_30", "_7"]
 	},
-	"aging-scm":{
-				"state":0,
-				"saveData":{},
-				"reference": "templates/json/scm-demographics-aging.json"
-	},
-	"birth-scm":{
-				"state":0,
-				"saveData":{},
-				"reference": "templates/json/scm-demographics-birth.json"
-	},
-	"aging-its":{
-				"state":0,
-				"saveData":{},
-				"reference": "templates/json/its-demographics-aging.json"
-	},
-	"birth-its":{
-				"state":0,
-				"saveData":{},
-				"reference": "templates/json/its-demographics-birth.json"
-	},
-	"aging-mls":{
-				"state":0,
-				"saveData":{},
-				"reference": "templates/json/mls-demographics-aging.json"
-	},
-	"birth-mls":{
-				"state":0,
-				"saveData":{},
-				"reference": "templates/json/mls-demographics-birth.json"
-	}
+	"reference":"templates/json/"
+
 }

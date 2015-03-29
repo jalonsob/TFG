@@ -41,7 +41,7 @@ def actualizeDash(request):
 		T_Plantilla= Plantilla.objects.get(n=d)
 		return HttpResponse(T_Plantilla.json)
 
-def allTemplates(request):
+def allCompanies(request):
 	d=os.getcwd()+"/templates/json"
 	listdir =os.listdir(d)
 	result={"scm":[],"its":[],"mls":[],"scr":[],"irc":[]}
@@ -73,7 +73,8 @@ def allTemplates(request):
 				result["irc"].append(arraySplit[0])
 		
 		i += 1
-
-	return HttpResponse(result)
+	result=str(result)
+	result=result.replace("'",'"')
+	return HttpResponse(str(result))
 
 	

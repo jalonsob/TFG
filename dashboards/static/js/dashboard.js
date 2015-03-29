@@ -22,9 +22,20 @@ var numWidget=0;
 var dashConfiguration=[];
 //configuration of files where we will read
 var configuration={};
-//Caché that has all widgets
-var panels=[]
-
+//Cache that has all widgets
+var panels=[];
+//Cache for saved data
+var cacheData={};
+//Reading data
+var actualReadingData={
+  "scm":"scm",
+  "its":"its",
+  "mls":"mls",
+  "scr":"scr",
+  "irc":"irc"
+};
+//Companies from the reading directory
+var companies={};
 
 $(document).ready(function() {
     //Request of configuration keys
@@ -40,6 +51,15 @@ $(document).ready(function() {
         })
       })
     ).done(function(){
+
+      $.ajax({
+            type: "GET",
+            url: "/companies",
+            data: "request",
+            success: function(data){
+              companies=JSON.parse(data)
+            }
+      });
 
       //Zone of loading of a json configuration of a determinate personalized dashboard
       if(document.URL.split("/")[document.URL.split("/").length-1]!=''){
@@ -65,19 +85,19 @@ $(document).ready(function() {
                     numWidget=widgetSaved.id
                   }
                   if(widgetSaved.type=="HighInfo"){
-                    var widget= new HighInfo(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.jsons,widgetSaved.title,widgetSaved.series)
+                    var widget= new HighInfo(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.readingData,widgetSaved.jsons,widgetSaved.title,widgetSaved.series)
                     panel.pushElement(widget)
                   }else if(widgetSaved.type=="HighDemo"){
                     var widget= new HighDemo(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.jsons,widgetSaved.title,widgetSaved.series)
                     panel.pushElement(widget)
                   }else if(widgetSaved.type=="HighTime"){
-                    var widget= new HighTime(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.jsons,widgetSaved.title,widgetSaved.series,widgetSaved.from,widgetSaved.to,widgetSaved.size)
+                    var widget= new HighTime(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.readingData,widgetSaved.jsons,widgetSaved.title,widgetSaved.series,widgetSaved.from,widgetSaved.to,widgetSaved.size)
                     panel.pushElement(widget)
                   }else if(widgetSaved.type=="VideoWidget"){
                     var widget= new VideoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.url,widgetSaved.content,widgetSaved.width,widgetSaved.height)
                     panel.pushElement(widget)
                   }else if(widgetSaved.type=="HtmlInfoWidget"){
-                    var widget= new HtmlInfoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.jsons,widgetSaved.series)
+                    var widget= new HtmlInfoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.readingData,widgetSaved.jsons,widgetSaved.series)
                     panel.pushElement(widget)
                   }
                 })
@@ -135,6 +155,32 @@ $(document).ready(function() {
     })
   
 
+  //Companies configuration button
+  $("#configurationCompanies").click(function(){
+    $("#settings").remove()
+    $("#currentSettings").remove()
+    if($("#currentCreation").length!=0){
+        $("#currentCreation").remove()
+        deleteCreation(numWidget);
+        numWidget--;
+    }
+    $("#widgets").slideUp("slow");
+    $("#companies").slideDown("slow");
+    $("#companiesList").append("<p>*By default the menu has an auto reference to the general files of the project if you haven't selected another place to read the data.</p>")
+    Object.keys(companies).forEach(function(element){
+      $("#companiesList").append("<p>"+element+":</p>")
+      $("#companiesList").append('<select id="'+element+'" class="form-control">')
+      $("#companiesList #"+element).append('<option value="'+element+'">'+element+'</option>')
+      companies[element].forEach(function(company){
+        $("#companiesList #"+element).append('<option value="'+company+'">'+company+'</option>')
+      }) 
+      $("#companiesList #"+element).val(actualReadingData[element])
+      $("#companiesList").append('</select>')
+
+    })
+      $("#companiesList").append('<button onclick="changeReadFile()" type="button" class="btn btn-xs btn-default">Change companies</button>')
+      $("#companiesList").append('<button onclick="cancelChangeReadFile()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+  })
 
   //Save button
   $("#save").click(function(){
@@ -206,6 +252,12 @@ $(document).ready(function() {
   })
 
   $("#addPanel").click(function(){
+    $("#companies").slideUp("slow");
+    if($("#companiesList").length!=0){
+        $("#companiesList").html("")
+        
+    }
+
     PanelCreation()
   })
 
@@ -224,6 +276,11 @@ function showSettings(panel){
       numWidget--;
   }
   objectPanel.writeSettings()
+  $("#companies").slideUp("slow");
+  if($("#companiesList").length!=0){
+      $("#companiesList").html("")
+      
+  }
 
 
 }
@@ -234,9 +291,13 @@ function showSettings(panel){
 
 //This function creates the configuration menu to draw a graph. In the menu will be the metrics to select what we want to draw.
 function showConfiguration(panel,type,extraData){
-
   $("#settings").remove();
   $("#widgets").slideUp("slow");
+  $("#companies").slideUp("slow");
+  if($("#companiesList").length!=0){
+      $("#companiesList").html("")
+      
+  }
 
   var aux=$("#currentCreation").length
   if(aux!=0){
@@ -252,20 +313,20 @@ function showConfiguration(panel,type,extraData){
   numWidget++;
 
   if(type=="HighInfo"){
-    var widget= new HighInfo(numWidget,panel,color,extraData);
+    var widget= new HighInfo(numWidget,panel,color,extraData,actualReadingData[extraData]);
     
   }else if(type=="HighDemo"){
     var widget= new HighDemo(numWidget,panel,color,extraData);
     
   }else if(type=="HighTime"){
 
-    var widget= new HighTime(numWidget,panel,color,extraData);
+    var widget= new HighTime(numWidget,panel,color,extraData,actualReadingData[extraData]);
     
   }else if(type=="VideoWidget"){
     var widget= new VideoWidget(numWidget,panel,color)
 
   }else if(type=="HtmlInfoWidget"){
-    var widget= new HtmlInfoWidget(numWidget,panel,color,extraData)
+    var widget= new HtmlInfoWidget(numWidget,panel,color,extraData,actualReadingData[extraData])
 
   }
 
@@ -296,6 +357,11 @@ function ShowValuesGraph(id){
       numWidget--;
   }
   $("#widgets").slideUp("slow");
+  $("#companies").slideUp("slow");
+  if($("#companiesList").length!=0){
+      $("#companiesList").html("")
+      
+  }
   var widget=GetWidget(id);
   widget.settings();
 }
@@ -340,7 +406,11 @@ function ChangePanelMenu (id){
   var widget=GetWidget(id);
 
   $("#making").slideDown("slow")
-
+  $("#companies").slideUp("slow");
+  if($("#companiesList").length!=0){
+      $("#companiesList").html("")
+      
+  }
   $("#conten").append('<div id="currentSettings"></div>')
   for(i=1; i<=numPanel; i++){
     if(widget.panel==i){
@@ -378,7 +448,11 @@ function ChangePanel (id){
 
     $("#currentSettings").remove();
     $("#making").slideUp("slow");
-
+    $("#companies").slideUp("slow");
+    if($("#companiesList").length!=0){
+        $("#companiesList").html("")
+        
+    }
   });
 
 }
@@ -445,6 +519,11 @@ function showPanel(panel){
     $("#settings").remove();
     $("#making").slideUp("slow")
     $("#widgets").slideUp("slow");
+    $("#companies").slideUp("slow");
+    if($("#companiesList").length!=0){
+        $("#companiesList").html("")
+        
+    }
     $("#currentMenu").remove();
     $("#panel"+panel).slideDown("slow");
     if($("#currentCreation").length!=0){
@@ -481,4 +560,21 @@ function resetRatios(element1,element2){
   element2.checked=false;
 }
 
+function changeReadFile(){
+  Object.keys(actualReadingData).forEach(function(element){
+    actualReadingData[element]=$("#"+element).val()
+  })
+  $("#companies").slideUp("slow");
+  if($("#companiesList").length!=0){
+      $("#companiesList").html("")
+      
+  }
+}
 
+function cancelChangeReadFile(){
+  $("#companies").slideUp("slow");
+  if($("#companiesList").length!=0){
+      $("#companiesList").html("")
+      
+  }
+}

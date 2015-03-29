@@ -13,6 +13,6 @@ urlpatterns = patterns('',
     url(r'^db/default$','dinamic.views.defaultDash'),
     url(r'templates/(?P<path>.*)$','django.views.static.serve',{'document_root':'templates'}),
     url(r'^\d*$','dinamic.views.home'),
-    url(r'^allTemplates/','dinamic.views.allTemplates'),
+    url(r'^companies/','dinamic.views.allCompanies'),
 
 )

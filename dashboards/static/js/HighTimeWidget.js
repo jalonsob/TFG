@@ -1,15 +1,40 @@
 //Widget oriented to make a chart of kind TIMES with Highcharts
 
-function HighTime(id,panel,color,typeData,json,title,serie,from,to,size){
+function HighTime(id,panel,color,typeData,readingData,json,title,serie,from,to,size){
+		
+	var months =["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+	var ages=[];
 
+	var today = new Date();
+	var month = today.getMonth();
+	var firstAge=1970
+	var lastAge= today.getFullYear();
+	for(i=firstAge; i<=lastAge; i++){
+		months.forEach(function(element){
+			ages.push(element+" "+i)
+		})
+	}
+	
+
+
+	this.readingData=readingData
 	var series=serie || [];
 	if((Object.getOwnPropertyNames(configuration).length === 0)){
 		var json= "" ;
 
 	}else{
-		var json= configuration["evolutionary-"+from];
+		if(typeData==this.readingData){
+			var json= configuration["reference"]+typeData+"-evolutionary.json"
+		}else{
+			var json= configuration["reference"]+this.readingData+"-"+typeData+"-com-evolutionary.json"
+		}
 	}
-	var ages=[];
+	if(!(json in cacheData)){
+		cacheData[json]={
+			"state":0,
+			"saveData":{}
+		}
+	}
 	this.typeData=typeData;
 	if(size!=undefined){
 		this.size=size
@@ -32,10 +57,15 @@ function HighTime(id,panel,color,typeData,json,title,serie,from,to,size){
 
 	HighWidget.call(this,id,panel,color,this.gridsterWidth,this.gridsterheight)
 
-
 	this.from=from || "";
 	this.to=to || "";
-	this.title=title || "Grafico "+this.id;
+	if(typeData==this.readingData){
+		this.title=title || "Graph "+typeData+" evolutionary "+this.id;
+
+	}else{
+		this.title=title || "Graph "+typeData+" from "+this.readingData+" info "+this.id;
+
+	}
 	
 	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
 	this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
@@ -49,6 +79,7 @@ function HighTime(id,panel,color,typeData,json,title,serie,from,to,size){
 		objaux.title=this.title;
 		objaux.color= this.color;
 		objaux.typeData=this.typeData
+		objaux.readingData=this.readingData
 		objaux.jsons= json
 		objaux.from= this.from;
 		objaux.to= this.to;
@@ -59,11 +90,6 @@ function HighTime(id,panel,color,typeData,json,title,serie,from,to,size){
 
 	//Function that creates a menu where we can select the data that we want represent.
 	this.makeMenu= function(){
-		var months =["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-		var firstAge=1970;
-		var today = new Date();
-		var month = today.getMonth();
-		var lastAge = today.getFullYear();
 
 		if(json==""){
 			$("#conten").append('<div id="currentCreation"></div>')
@@ -98,13 +124,12 @@ function HighTime(id,panel,color,typeData,json,title,serie,from,to,size){
 			for(i=firstAge; i<=lastAge; i++){
 				months.forEach(function(element){
 					$("#currentCreation #to").append('<option value="'+element+" "+i+'">'+element+" "+i+'</option>')
-					ages.push(element+" "+i)
 				})
 			}
 			$("#currentCreation").append('</select>')
 			$("#to").val(months[month]+" "+lastAge)
 
-			$("#currentCreation").append('<p>Title</p><p><input placeholder="Time '+typeData+' graph '+this.id+'" id="title" class="form-control"></div></p>')
+			$("#currentCreation").append('<p>Title</p><p><input placeholder="'+this.title+'" id="title" class="form-control"></div></p>')
 			$("#currentCreation").append('<button onclick="FillWidget('+this.id+')" type="button" class="btn btn-xs btn-default">Create</button>')
 			$("#currentCreation").append('<button onclick="deleteCreation('+this.id+')" type="button" class="btn btn-xs btn-default">Cancel</button>')
     	}
@@ -190,8 +215,7 @@ function HighTime(id,panel,color,typeData,json,title,serie,from,to,size){
  		gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight);
 
 		//In the right way i will draw the graph
-		$("#"+this.id).on("DrawTimes"+typeData,function(event,trigger,data,serie){
-			console.log(data)
+		$("#"+this.id).on("DrawTimes"+typeData+json,function(event,trigger,data,serie){
 			var serieChart= parser(from,to,data,series);
 		    var x= createX(data,from,to)
 		    draw(serieChart,x,title,size,this.id)
@@ -199,37 +223,37 @@ function HighTime(id,panel,color,typeData,json,title,serie,from,to,size){
 		})
 
 		//In the wrong way i will draw an error widget
-		$("#"+this.id).on("ErrorGraphTimes"+typeData,function(){
+		$("#"+this.id).on("ErrorGraphTimes"+typeData+json,function(){
 		    drawError()
 			$("#"+this.id).off()
 		})
 
 		//If we haven't the data in cache we will request them
-		if(configuration["evolutionary-"+typeData].state==0){
+		if(cacheData[json].state==0){
 			//We actualise the state of data
-			configuration["evolutionary-"+typeData].state==1;
+			cacheData[json].state==1;
 			//The request is on course
 
-			$.getJSON(configuration["evolutionary-"+typeData].reference).success(function(data){
+			$.getJSON(json).success(function(data){
 
 			  //We actualise the state of data again
-			  configuration["evolutionary-"+typeData].saveData=data
-			  configuration["evolutionary-"+typeData].state=2;
+			  cacheData[json].saveData=data
+			  cacheData[json].state=2;
 
-			  $("*").trigger("DrawTimes"+typeData,["DrawTimes"+typeData,data,serie])
+			  $("*").trigger("DrawTimes"+typeData+json,["DrawTimes"+typeData+json,data,serie])
 			 
 			}).error(function(){
 			  //In case of error we will throw the error event
-			  $("*").trigger("ErrorGraphTimes"+typeData)
+			  $("*").trigger("ErrorGraphTimes"+typeData+json)
 			  takeinfo.static.static=0;
 			});
-		}else if(configuration["evolutionary-"+typeData].state==2){
+		}else if(cacheData[json].state==2){
 			//If we have the data in caché we will use it
 		
 			$("#"+this.id).off()
-			var serieChart= parser(from,to,configuration["evolutionary-"+typeData].saveData,series);
+			var serieChart= parser(from,to,cacheData[json].saveData,series);
 		
-		    var x= createX(configuration["evolutionary-"+typeData].saveData,from,to)
+		    var x= createX(cacheData[json].saveData,from,to)
 		    
 		    draw(serieChart,x,title,size,this.id)
 		
@@ -335,7 +359,6 @@ function HighTime(id,panel,color,typeData,json,title,serie,from,to,size){
 		var auxseries;
 		var getSerie=this.getSerie
 		var existLabel= this.existLabel
-
 		var months =["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 		var firstAge=1970;
 		var today = new Date();
@@ -384,7 +407,7 @@ function HighTime(id,panel,color,typeData,json,title,serie,from,to,size){
 
 		$("#from").val(chart.series[0].data[0].category)
 		$("#to").val(ages[position2+1])
-		$("#currentSettings").append('<p>Title</p><p><input placeholder="'+chart.title.textStr+'" id="title" class="form-control"></div></p>')
+		$("#currentSettings").append('<p>Title</p><p><input placeholder="'+this.title+'" id="title" class="form-control"></div></p>')
 		$("#currentSettings").append('<button onclick="ChangeValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Redraw</button>')
 		$("#currentSettings").append('<button onclick="deleteSettings()" type="button" class="btn btn-xs btn-default">Cancel</button>')
 

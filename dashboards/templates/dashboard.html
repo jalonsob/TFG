@@ -75,6 +75,8 @@
           $( "#making" ).hide();
           $( "#widgets" ).draggable();
           $( "#widgets" ).hide();
+          $( "#companies" ).draggable();
+          $( "#companies" ).hide();
         });
     </script>
 </head>
@@ -88,6 +90,7 @@
             <!-- Top Menu Items -->
             <ul class="nav navbar-right top-nav">
 
+                <li><a id="configurationCompanies" href="javascript:void(0)">Configuration Companies</a></li>
                 <li><a id="save" href="javascript:void(0)">Save</a></li>
                 <li>
                     <a id="addPanel" href="javascript:void(0)"><i class="fa fa-fw fa-edit"></i> Add Panel</a>
@@ -102,6 +105,16 @@
             </div>
             <!-- /.navbar-collapse -->
         </nav>
+        <div id="companies">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Companies menu</h3>
+                </div>
+                <div id="companiesList" class="panel-body">
+                    
+                </div>
+            </div>
+        </div>
         <div id="making">
             <div class="panel panel-default">
                 <div class="panel-heading">

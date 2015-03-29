@@ -12,6 +12,21 @@ function HighDemo(id,panel,color,typeData,jsons,title,serie){
 
 	}else{
 		var json= jsons || []
+		if(jsons!=undefined){
+			if(!(jsons[0] in cacheData)){
+				cacheData[jsons[0]]={
+					"state":0,
+					"saveData":{}
+				}
+			}
+
+			if(!(jsons[1] in cacheData)){
+				cacheData[jsons[1]]={
+					"state":0,
+					"saveData":{}
+				}
+			}
+		}
 	}
 	this.flatten= function(){
 		var objaux={}
@@ -65,7 +80,16 @@ function HighDemo(id,panel,color,typeData,jsons,title,serie){
 
 		if($("#aging").is(':checked')){
 
-			json.push(configuration["aging-"+typeData].reference)
+			json.push(configuration.reference+typeData+"-demographics-birth.json")
+
+			if(!(json[json.length-1] in cacheData)){
+				cacheData[json[json.length-1]]={
+					"state":0,
+					"saveData":{}
+				}
+			}
+
+			
 			var colorbar;
 
 			if($("#current"+state+" #agingColor").val()==''){
@@ -84,8 +108,15 @@ function HighDemo(id,panel,color,typeData,jsons,title,serie){
 
 		if($("#birth").is(':checked')){
 
-			json.push(configuration["birth-"+typeData].reference)
+			json.push(configuration.reference+typeData+"-demographics-birth.json")
 			var colorbar;
+
+			if(!(json[json.length-1] in cacheData)){
+				cacheData[json[json.length-1]]={
+					"state":0,
+					"saveData":{}
+				}
+			}
 
 			if($("#current"+state+" #birthColor").val()==''){
 				colorbar=($("#current"+state+" #birthColor").attr("placeholder"))
@@ -157,15 +188,15 @@ function HighDemo(id,panel,color,typeData,jsons,title,serie){
 		    })
 
 			//If we haven't the data in cache we will request them
-		    if(configuration[series[0].name+"-"+this.typeData].state==0){
+		    if(cacheData[json[0]].state==0){
 		      //We actualise the state of data
-		      configuration[series[0].name+"-"+this.typeData].state=1
+		      cacheData[json[0]].state.state=1
 
 		      	//The request is on course
 
-		      $.getJSON(configuration[series[0].name+"-"+this.typeData].reference).success(function(data) {
-		        configuration[series[0].name+"-"+typeData].state=2
-		        configuration[series[0].name+"-"+typeData].saveData=data
+		      $.getJSON(json[0]).success(function(data) {
+		        cacheData[json[0]].state.state=2
+		        cacheData[json[0]].state.saveData=data
 
 		        //In case of error we will throw the error event
 		        $("*").trigger("DrawAges"+typeData,["DrawAges"+typeData,data])
@@ -175,9 +206,9 @@ function HighDemo(id,panel,color,typeData,jsons,title,serie){
 		      })
 
 			//If we have the data in caché we will use it
-		    }else if(configuration[series[0].name+"-"+this.typeData].state==2){
+		    }else if(cacheData[json[0]].state==2){
 		      $("#"+this.id).off()
-		      var data=configuration[series[0].name+"-"+this.typeData].saveData
+		      var data=cacheData[json[0]].saveData
 
 		      var serieChart=[]
 			  var dato= parser(data)
@@ -241,46 +272,45 @@ function HighDemo(id,panel,color,typeData,jsons,title,serie){
 		      $("#"+this.id).off()
 		    })
 
-			if((configuration[series[0].name+"-"+typeData].state==0) || (configuration[series[1].name+"-"+typeData].state==0)){
-				configuration[series[0].name+"-"+typeData].state=1
-				configuration[series[1].name+"-"+typeData].state=1
-				alert
+			if((cacheData[json[0]].state==0) || (cacheData[json[1]].state==0)){
+				cacheData[json[0]].state=1
+				cacheData[json[1]].state=1
 				$.when(
 
-					$.getJSON(configuration[series[0].name+"-"+typeData].reference).success(function(data) { 
+					$.getJSON(json[0]).success(function(data) { 
 					    save[0] = data;
 					}),
-					$.getJSON(configuration[series[1].name+"-"+typeData].reference).success(function(data) {
+					$.getJSON(json[1]).success(function(data) {
 					    save[1] = data;
 					})
 				).done(function() {
-			        configuration[series[0].name+"-"+typeData].state=2
-			        configuration[series[0].name+"-"+typeData].saveData=save[0]
+			        cacheData[json[0]].state=2
+			        cacheData[json[0]].saveData=save[0]
 
-			        configuration[series[1].name+"-"+typeData].state=2
-			        configuration[series[1].name+"-"+typeData].saveData=save[1]
+			        cacheData[json[1]].state=2
+			        cacheData[json[1]].saveData=save[1]
 
 			        $("*").trigger("DrawAgesD"+typeData,["DrawAgesD"+typeData,data])
 
 				}).fail(function(){
-					configuration[series[0].name+"-"+typeData].state=0
-					configuration[series[1].name+"-"+typeData].state=0
+					cacheData[json[0]].state=0
+					cacheData[json[1]].state=0
 
 					$("*").trigger("ErrorGraphAgesD"+typeData)
 
 				})
 
-		    }else if((configuration[series[0].name+"-"+typeData].state==2) && (configuration[series[1].name+"-"+typeData].state==2)){
+		    }else if((cacheData[json[0]].state==2) && (cacheData[json[1]].state)){
 		    	$("#"+this.id).off()
 				var serieChart=[]
 
-				if(parser(configuration[series[0].name+"-"+typeData].saveData).length>=parser(configuration[series[1].name+"-"+typeData].saveData).length){
-					max=parser(configuration[series[0].name+"-"+typeData].saveData).length
+				if(parser(cacheData[json[0]].saveData).length>=parser(cacheData[json[1]].saveData).length){
+					max=parser(cacheData[json[0]].saveData).length
 				}else{
-					max=parser(configuration[series[1].name+"-"+typeData].saveData).length
+					max=parser(cacheData[json[1]].saveData).length
 				}
 
-				var dato=parser(configuration[series[0].name+"-"+typeData].saveData).reverse()
+				var dato=parser(cacheData[json[0]].saveData).reverse()
 
 				var objaux={
 				    type: "bar",
@@ -291,7 +321,7 @@ function HighDemo(id,panel,color,typeData,jsons,title,serie){
 
 				serieChart.push(objaux)
 
-				var dato=parser(configuration[series[1].name+"-"+typeData].saveData).reverse()
+				var dato=parser(cacheData[json[1]].saveData).reverse()
 
 				var objaux={
 				    type: "bar",

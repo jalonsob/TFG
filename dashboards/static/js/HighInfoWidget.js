@@ -1,18 +1,36 @@
 //Widget oriented to make a chart of kind INFO with Highcharts
 
-function HighInfo(id,panel,color,typeData,json,title,serie){
+function HighInfo(id,panel,color,typeData,readingData,json,title,serie){
 	HighWidget.call(this,id,panel,color,12,8)
+	this.readingData=readingData
 	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
 	this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
-	this.title=title || "Graph "+typeData+" info "+this.id;
+	if(typeData==readingData){
+		this.title=title || "Graph "+typeData+" info "+this.id;
+
+	}else{
+		this.title=title || "Graph "+typeData+" from "+readingData+" info "+this.id;
+
+	}
 	this.typeData=typeData;
 	var series=serie || [];
 	if((Object.getOwnPropertyNames(configuration).length === 0)){
 		var json= "" ;
 
 	}else{
-		var json= configuration["static-"+typeData].inside
+		if(typeData==readingData){
+			var json= configuration["reference"]+typeData+"-static.json"
+		}else{
+			var json= configuration["reference"]+this.readingData+"-"+typeData+"-com-static.json"
+		}
 	}
+	if(!(json in cacheData)){
+		cacheData[json]={
+			"state":0,
+			"saveData":{}
+		}
+	}
+
 	this.flatten= function(){
 		var objaux={}
 		objaux.type="HighInfo";
@@ -20,6 +38,7 @@ function HighInfo(id,panel,color,typeData,json,title,serie){
 		objaux.typeData= typeData;
 		objaux.id= id;
 		objaux.title=this.title;
+		objaux.readingData=this.readingData
 		objaux.color= color;
 		objaux.jsons= json
 		return objaux
@@ -121,44 +140,43 @@ function HighInfo(id,panel,color,typeData,json,title,serie){
 		var draw=this.Draw
 		var title= this.title
 		var drawError = this.drawErrorWidget
-
 		var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
 		gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight);
 		//In the right way i will draw the graph
-		$("#"+this.id).on("DrawInfo"+typeData,function(event,trigger,data){
+		$("#"+this.id).on("DrawInfo"+typeData+json,function(event,trigger,data){
 			var serieChart= parser(selected,data)
 			draw(serieChart,title)
 			$("#"+this.id).off()
 		})
 
 		//In the wrong way i will draw an error widget
-		$("#"+this.id).on("ErrorGraphInfo"+typeData,function(){
+		$("#"+this.id).on("ErrorGraphInfo"+typeData+json,function(){
 		  drawError()
 		  $("#"+this.id).off()
 		})
 
 		//If we haven't the data in cache we will request them
-		if(configuration["static-"+typeData].state==0){
+		if(cacheData[json].state==0){
 			//We actualise the state of data
-			configuration["static-"+typeData].state=1;
+			cacheData[json].state=1;
 			//The request is on course
 
-			$.getJSON(configuration["static-"+typeData].reference).success(function(data) {
-			    configuration["static-"+typeData].saveData=data
-			    configuration["static-"+typeData].state=2;
+			$.getJSON(json).success(function(data) {
+			    cacheData[json].saveData=data
+			    cacheData[json].state=2;
 
-			    $("*").trigger("DrawInfo"+typeData,["DrawInfo"+typeData,data])
+			    $("*").trigger("DrawInfo"+typeData+json,["DrawInfo"+typeData+json,data])
 			  }).error(function(){
 			    //In case of error we will throw the error event
-			    $("*").trigger("ErrorGraphInfo"+typeData)
-			    configuration["static"+typeData].state=0;
+			    $("*").trigger("ErrorGraphInfo"+typeData+json)
+			    cacheData[json].state=0;
 
 			});
-		}else if(configuration["static-"+typeData].state==2){
+		}else if(cacheData[json].state==2){
 			//If we have the data in caché we will use it
 
 			$("#"+this.id).off()
-			var serieChart= parser(selected,configuration["static-"+typeData].saveData)
+			var serieChart= parser(selected,cacheData[json].saveData)
 			draw(serieChart,title)
 		}
 	}
@@ -271,7 +289,7 @@ function HighInfo(id,panel,color,typeData,json,title,serie){
 		this.takeData("Settings");
 		var chart = $('#'+id).highcharts();
     	chart.destroy()
-		var serieChart= this.Parser(series,configuration["static-"+typeData].saveData)
+		var serieChart= this.Parser(series,cacheData[json].saveData)
 		this.Draw(serieChart,this.title)
     	
     	
