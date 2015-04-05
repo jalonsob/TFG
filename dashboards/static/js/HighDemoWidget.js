@@ -3,7 +3,7 @@
 function HighDemo(id,panel,color,typeData,jsons,title,serie){
 	HighWidget.call(this,id,panel,color,16,15)
 	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
-	this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
+	this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div id="header'+this.id+'" class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
 	this.title=title || "Grafico "+typeData+" "+this.id;
 	this.typeData=typeData;
 	var series=serie || [];
@@ -80,7 +80,7 @@ function HighDemo(id,panel,color,typeData,jsons,title,serie){
 
 		if($("#aging").is(':checked')){
 
-			json.push(configuration.reference+typeData+"-demographics-birth.json")
+			json.push(configuration.reference+typeData+"-demographics-aging.json")
 
 			if(!(json[json.length-1] in cacheData)){
 				cacheData[json[json.length-1]]={
@@ -157,6 +157,21 @@ function HighDemo(id,panel,color,typeData,jsons,title,serie){
 		if(mode!="remake"){
 			var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
 			gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight);
+			$("#header"+this.id).hide()
+			$("#widget"+this.id).click(function(){
+				$("#header"+id).slideDown("slow")
+			})
+			$(document).mouseup(function (e)
+				{
+				    var container = $("#header"+id);
+
+				    if (!container.is(e.target) // if the target of the click isn't the container...
+				        && container.has(e.target).length === 0) // ... nor a descendant of the container
+				    {
+				        container.slideUp("slow");
+				    }
+			});
+			
 		}
 
 		if(series.length==1){
@@ -196,7 +211,7 @@ function HighDemo(id,panel,color,typeData,jsons,title,serie){
 
 		      $.getJSON(json[0]).success(function(data) {
 		        cacheData[json[0]].state.state=2
-		        cacheData[json[0]].state.saveData=data
+		        cacheData[json[0]].saveData=data
 
 		        //In case of error we will throw the error event
 		        $("*").trigger("DrawAges"+typeData,["DrawAges"+typeData,data])

@@ -4,7 +4,7 @@ function VideoWidget(id,panel,color,direction,content,x,y){
 	Widget.call(this,id,panel,color,x,y)
 	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
 	this.content=content||'<img id="load'+id+'" src="/templates/images/cargando.gif" height="42" width="42">'
-	this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
+	this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div id="header'+this.id+'" class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
 	if(direction!=undefined){
 		this.direction=direction
 		direction="http://www.youtube.com/embed/"+(this.direction.split("/")[this.direction.split("/").length-1])
@@ -73,7 +73,21 @@ function VideoWidget(id,panel,color,direction,content,x,y){
 
 		var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
  		gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight);
+ 		$("#header"+this.id).hide()
+		$("#widget"+this.id).click(function(){
+			$("#header"+id).slideDown("slow")
+		})
+		$(document).mouseup(function (e)
+			{
+			    var container = $("#header"+id);
 
+			    if (!container.is(e.target) // if the target of the click isn't the container...
+			        && container.has(e.target).length === 0) // ... nor a descendant of the container
+			    {
+			        container.slideUp("slow");
+			    }
+		});
+			
 	}
 
 

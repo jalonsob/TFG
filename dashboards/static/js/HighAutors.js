@@ -4,7 +4,7 @@ function HighAutors(id,panel,color,jsons,title,serie){
 	HighWidget.call(this,id,panel,color,16,15)
 	this.title= "Autors from "+title+" between ages "+serie || "Autors "+this.id;
 	var series=serie || [];
-	if((Object.getOwnPropertyNames(takeinfo).length === 0) || (Object.getOwnPropertyNames(configuration).length === 0)){
+	if((Object.getOwnPropertyNames(configuration).length === 0)){
 		var json= "" ;
 
 	}else{
@@ -33,20 +33,19 @@ function HighAutors(id,panel,color,jsons,title,serie){
 
 		if(json.length==2){
 
-			data= takeinfo[json[0].split("-")[json[0].split("-").length-1].split(".")[0]].saveData
-			
+			data= cacheData[json[0]].saveData
+			console.log(data)
 			var serieChart= this.ParseLookInfo(from,to,data)
 
-			data= takeinfo[json[1].split("-")[json[1].split("-").length-1].split(".")[0]].saveData
+			data= cacheData[json[1]].saveData
 			
 			serieChart=this.ParseLookInfo(from,to,data,serieChart)
 
 			serieChart=this.ParserAutorsData(serieChart)
 
 		}else{
-			
-			data= takeinfo[json[0].split("-")[json[0].split("-").length-1].split(".")[0]].saveData
-			
+			data= cacheData[json[0]].saveData
+
 			var serieChart= this.ParseLookInfo(from,to,data)
 			serieChart=this.ParserAutorsData(serieChart)
 
@@ -83,9 +82,9 @@ function HighAutors(id,panel,color,jsons,title,serie){
 		}
 		var i=0;
 		data.persons.age.forEach(function(element){
-			aux=Math.floor(element/181)
+			aux=Math.floor(element.split(" days,")[0]/181)
 			if(aux>=Math.floor(from/181) && aux<Math.floor(to/181)){
-				result.dato.push(element)
+				result.dato.push(element.split(" days,")[0]/181)
 				result.xAxis.push(data.persons.name[i])
 
 			}

@@ -551,7 +551,7 @@ function makePanel(panel){
 
 //Function get a random color from a list
 function getRandomColor() {
-    var colors= ["#25A2E1","#AED4E8","#4FBDFF","#79ACCC","#67B0E3"]
+    var colors= ["#444444","#777777","#aaaaaa","#bbbbbb","#cccccc"]
     return colors[Math.floor(Math.random() * 5)]
 }
 

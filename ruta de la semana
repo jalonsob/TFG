@@ -16,7 +16,7 @@ bibliotecas de visualización de datos
 	o pillar de un fichero json
 +Buscar bibliotecas dashboard open source
 +Buscar scrum
--Empezar a usar plantilla en latex para el proyecto
++Empezar a usar plantilla en latex para el proyecto
 +bootstrap
 +hacer ejemplo con higcharts
 	*Me permite modificar el chart a mi gusto y como yo quiera
@@ -66,7 +66,7 @@ Jueves 20 a las 10h
 +Capturas de pantalla para la memoria
 +Documentar al menos el primer ciclo
 +Explorar gridster
--Que el código de creación sea el mismo de configuración
++Que el código de creación sea el mismo de configuración
 --Intentar relacionar gráficas (click en zonas)
 —-Mirar angular como opcional, y grister con angular
 
@@ -226,6 +226,23 @@ Día 17 de marzo a las 12:00
 Después de Quan el martes
 
 ——————————
+
++cambiar fechas
++mirar menu de descarga del highchart
++conseguir nombre de todas las compañías, script en python
++esconder barra de herramientas
++mejorar colores
+-implementar iconos por botones
+—- cambiarformato de video a html5
+	*no se puede si no es desde un archivo de video 
++Pintar un tipo de gráfico con cualquier tipo de empresa
+	+implementar esto para todas las gráficas
+		+Info +HTML +Time 
+
+Martes después de la semana santa
+
+——————————
+
 
 Notas de latex:
 

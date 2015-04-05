@@ -80,7 +80,7 @@ function Panel(idPanel,color,wid){
 				'</li>'
 
 	var settings= '<ul style="display: flex; list-style:none ">'+evolutionary+demog+statc+Htmlstatc+'<li><button onclick="'+"showConfiguration("+id+",'VideoWidget')"+'" type="button" class="btn btn-xs btn-default">Video </button></li></ul>'
-	var gridster= '<div id="panel'+id+'" class="gridster ready" style="background-color:'+color+'"><ul></ul></div>'
+	var gridster= '<div id="panel'+id+'" class="gridster ready" style="background-color:'+color+'"><div style="background: linear-gradient(to bottom, '+color+', #222222)"><ul></ul><div></div>'
 	
 	this.writeSettings=function(){
 		$("#widgetButtons").html(settings)

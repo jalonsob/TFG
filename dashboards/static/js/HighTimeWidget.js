@@ -68,7 +68,7 @@ function HighTime(id,panel,color,typeData,readingData,json,title,serie,from,to,s
 	}
 	
 	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
-	this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
+	this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div id="header'+this.id+'" class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
 
 	this.flatten= function(){
 		var objaux={}
@@ -209,13 +209,28 @@ function HighTime(id,panel,color,typeData,readingData,json,title,serie,from,to,s
 		var serie= this.series;
 		var createX= this.CreateX
 		var drawError = this.drawErrorWidget
-
+		var id=this.id
 
 		var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
  		gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight);
+ 		$("#header"+this.id).hide()
+		$("#widget"+this.id).click(function(){
+			$("#header"+id).slideDown("slow")
+		})
+		$(document).mouseup(function (e)
+			{
+			    var container = $("#header"+id);
 
+			    if (!container.is(e.target) // if the target of the click isn't the container...
+			        && container.has(e.target).length === 0) // ... nor a descendant of the container
+			    {
+			        container.slideUp("slow");
+			    }
+		});
+			
 		//In the right way i will draw the graph
 		$("#"+this.id).on("DrawTimes"+typeData+json,function(event,trigger,data,serie){
+			
 			var serieChart= parser(from,to,data,series);
 		    var x= createX(data,from,to)
 		    draw(serieChart,x,title,size,this.id)
@@ -421,7 +436,7 @@ function HighTime(id,panel,color,typeData,readingData,json,title,serie,from,to,s
   		numWidget++
 
 		this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
-		this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
+		this.square='<div id= "widget'+this.id+'" class="panel panel-primary" style="border-style: groove;border-color: black;border-width: 3px"><div id="header'+this.id+'" class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
 
   		this.takeData("Settings");
   		this.MakeWidget()
