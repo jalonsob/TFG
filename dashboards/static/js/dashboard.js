@@ -49,17 +49,11 @@ $(document).ready(function() {
         Object.keys(data).forEach(function(element){
             configuration[element]=data[element]
         })
+      }),
+      $.getJSON("templates/json/companies.json").success(function(data){
+        companies=data
       })
     ).done(function(){
-
-      $.ajax({
-            type: "GET",
-            url: "/companies",
-            data: "request",
-            success: function(data){
-              companies=JSON.parse(data)
-            }
-      });
 
       //Zone of loading of a json configuration of a determinate personalized dashboard
       if(document.URL.split("/")[document.URL.split("/").length-1]!=''){
