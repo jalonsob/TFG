@@ -149,7 +149,6 @@ function HighInfo(id,panel,color,typeData,readingData,json,title,serie,x,y){
 		var drawError = this.drawErrorWidget
 		var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
 		if(this.x!="" && this.y!=""){
-			console.log("pinto en otro sitio")
 			gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight,this.x,this.y);
 
 			this.x="";

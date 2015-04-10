@@ -67,14 +67,15 @@ $(document).ready(function() {
             data: N.toString(),
             dataType: "json",
             success: function(data){
-              Object.keys(data).forEach(function(element){
-                PanelCreation(data[element].panel.color);
+              $("#titleApp").val(data.name.toString())
+              Object.keys(data.panels).forEach(function(element){
+                PanelCreation(data.panels[element].panel.color);
                 var id=element.split("panel")[1]
                 dashConfiguration.push(id)
                 var panel= GetPanel(id)
 
                 //With the panel created we pass to create the object of the widgets to draw them when we want to see each panel.
-                data[element].widgets.forEach(function(widgetSaved){
+                data.panels[element].widgets.forEach(function(widgetSaved){
                   if(numWidget<widgetSaved.id){
                     numWidget=widgetSaved.id
                   }
@@ -104,42 +105,42 @@ $(document).ready(function() {
       }else{
         
         //In other case we request the default configuration file
-        $.ajax({
-            type: "GET",
-            url: "/db/0",
-            data: "0",
-            dataType: "json",
-            success: function(data){
-              Object.keys(data).forEach(function(element){
-                PanelCreation(data[element].panel.color);
-                var id=element.split("panel")[1]
-                dashConfiguration.push(id)
-                var panel= GetPanel(id)
-                data[element].widgets.forEach(function(widgetSaved){
-                  if(numWidget<widgetSaved.id){
-                    numWidget=widgetSaved.id
-                  }
-                  if(widgetSaved.type=="HighInfo"){
-                    var widget= new HighInfo(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.jsons,widgetSaved.title,widgetSaved.series)
-                    panel.pushElement(widget)
-                  }else if(widgetSaved.type=="HighDemo"){
-                    var widget= new HighDemo(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.jsons,widgetSaved.title,widgetSaved.series)
-                    panel.pushElement(widget)
-                  }else if(widgetSaved.type=="HighTime"){
-                    var widget= new HighTime(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.jsons,widgetSaved.title,widgetSaved.series,widgetSaved.from,widgetSaved.to,widgetSaved.size)
-                    panel.pushElement(widget)
-                  }else if(widgetSaved.type=="VideoWidget"){
-                    var widget= new VideoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.url,widgetSaved.content,widgetSaved.width,widgetSaved.height)
-                    panel.pushElement(widget)
-                  }else if(widgetSaved.type=="HtmlInfoWidget"){
-                    var widget= new HtmlInfoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.jsons,widgetSaved.series)
-                    panel.pushElement(widget)
-                  }
-                })
-              })
-              $("#panel"+1).slideDown("slow");
-              makePanel(1)
-            }
+        $.getJSON("templates/json/0.json").success(function(data){
+          
+          $("#titleApp").val(data.name.toString())
+          Object.keys(data.panels).forEach(function(element){
+            PanelCreation(data.panels[element].panel.color);
+            var id=element.split("panel")[1]
+            dashConfiguration.push(id)
+            var panel= GetPanel(id)
+
+            //With the panel created we pass to create the object of the widgets to draw them when we want to see each panel.
+            data.panels[element].widgets.forEach(function(widgetSaved){
+              if(numWidget<widgetSaved.id){
+                numWidget=widgetSaved.id
+              }
+              if(widgetSaved.type=="HighInfo"){
+                var widget= new HighInfo(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.readingData,widgetSaved.jsons,widgetSaved.title,widgetSaved.series,widgetSaved.x,widgetSaved.y)
+                panel.pushElement(widget)
+              }else if(widgetSaved.type=="HighDemo"){
+                var widget= new HighDemo(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.jsons,widgetSaved.title,widgetSaved.series,widgetSaved.x,widgetSaved.y)
+                panel.pushElement(widget)
+              }else if(widgetSaved.type=="HighTime"){
+                var widget= new HighTime(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.readingData,widgetSaved.jsons,widgetSaved.title,widgetSaved.series,widgetSaved.from,widgetSaved.to,widgetSaved.size,widgetSaved.x,widgetSaved.y)
+                panel.pushElement(widget)
+              }else if(widgetSaved.type=="VideoWidget"){
+                var widget= new VideoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.url,widgetSaved.content,widgetSaved.width,widgetSaved.height,widgetSaved.x,widgetSaved.y)
+                panel.pushElement(widget)
+              }else if(widgetSaved.type=="HtmlInfoWidget"){
+                var widget= new HtmlInfoWidget(widgetSaved.id,id,widgetSaved.color,widgetSaved.typeData,widgetSaved.readingData,widgetSaved.jsons,widgetSaved.series,widgetSaved.x,widgetSaved.y)
+                panel.pushElement(widget)
+              }
+            })
+          })
+          $("#panel"+1).slideDown("slow");
+          //makepanel is a function that creates a panel with the configuration saved
+          makePanel(1)
+        
         });
         
       }
@@ -186,8 +187,10 @@ $(document).ready(function() {
     //Before to save we check that we have one dashboard at least
     if(numPanel>0){
         var info={};
+        info.panels={}
+        info.name=$("#titleApp").val()
         panels.forEach(function(element){
-          info[(Object.keys(element.flatten())[0])]=(element.flatten()[(Object.keys(element.flatten())[0])])
+          info.panels[(Object.keys(element.flatten())[0])]=(element.flatten()[(Object.keys(element.flatten())[0])])
         })
       
       //To save we have to see if we are working in a created environment or we are creating a new dashboard.

@@ -81,7 +81,6 @@ function VideoWidget(id,panel,color,direction,content,width,height,x,y){
 
 		var gridster = $("#panel"+this.panel+" ul").gridster().data('gridster');
 		if(this.x!="" && this.y!=""){
-			console.log("pinto en otro sitio")
 			gridster.add_widget(this.square, this.gridsterWidth, this.gridsterheight,this.x,this.y);
 
 			this.x="";
