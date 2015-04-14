@@ -181,15 +181,15 @@ Martes 24 a las 12:00
 ———————————
 *Libresoft en IRC para acceder al chat de ayuda
 
-- cambiar parámetros de x e y
++ cambiar parámetros de x e y
 - - quitar la propiedad de panel
 	*Es necesaria para que el botón de borrado funcione
 + crear objeto panel
-- quitar dashToSave
-- widgets por paneles
++ quitar dashToSave
++ widgets por paneles
 - mirar herramientas javascript de desarrollo 
 - mirar las funciones de template de moustache
-- crear widgets como una propiedad de panel
++ crear widgets como una propiedad de panel
 
 Día 10 de marzo a las 12:00
 
