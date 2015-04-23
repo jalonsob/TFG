@@ -1,6 +1,6 @@
 
 #making {
-	margin-left: 55%;
+	margin-right: 55%;
 	width: 30%;
 	z-index: 100;
 	position: fixed;
@@ -13,7 +13,21 @@
 }
 
 #companies {
-	margin-left: 43%;
+	margin-right: 55%;
+	width: 30%;
+	z-index: 100;
+	position: fixed;
+}
+
+#panelMaker {
+	margin-left: 55%;
+	width: 30%;
+	z-index: 100;
+	position: fixed;
+}
+
+#panelSettings {
+	margin-right: 55%;
 	width: 30%;
 	z-index: 100;
 	position: fixed;

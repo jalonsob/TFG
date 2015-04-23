@@ -27,6 +27,13 @@ var panels=[];
 //Cache for saved data
 var cacheData={};
 //Reading data
+var DefaultReadingData={
+  "scm":"scm",
+  "its":"its",
+  "mls":"mls",
+  "scr":"scr",
+  "irc":"irc"
+};
 var actualReadingData={
   "scm":"scm",
   "its":"its",
@@ -54,9 +61,8 @@ $(document).ready(function() {
         companies=data
       })
     ).done(function(){
-
       //Zone of loading of a json configuration of a determinate personalized dashboard
-      if(document.URL.split("/")[document.URL.split("/").length-1]!=''){
+      if((document.URL.split("/")[document.URL.split("/").length-1]!='') && !isNaN(parseInt(document.URL.split("/")[document.URL.split("/").length-1]))){
 
           var N= document.URL.split("/")[document.URL.split("/").length-1]
 
@@ -69,11 +75,11 @@ $(document).ready(function() {
             success: function(data){
               $("#titleApp").val(data.name.toString())
               Object.keys(data.panels).forEach(function(element){
-                PanelCreation(data.panels[element].panel.color);
-                var id=element.split("panel")[1]
+                PanelCreation(data.panels[element].panel.color,data.panels[element].panel.name,data.panels[element].panel.reading);
+                
+                var id=data.panels[element].panel.id
                 dashConfiguration.push(id)
                 var panel= GetPanel(id)
-
                 //With the panel created we pass to create the object of the widgets to draw them when we want to see each panel.
                 data.panels[element].widgets.forEach(function(widgetSaved){
                   if(numWidget<widgetSaved.id){
@@ -97,19 +103,21 @@ $(document).ready(function() {
                   }
                 })
               })
+              actualPanel=1;
+              var panel= GetPanel(1)
+              console.log(panel.reading)
+              actualReadingData=panel.reading
               $("#panel"+1).slideDown("slow");
               //makepanel is a function that creates a panel with the configuration saved
               makePanel(1)
             }
           });
       }else{
-        
         //In other case we request the default configuration file
         $.getJSON("templates/json/0.json").success(function(data){
-          
           $("#titleApp").val(data.name.toString())
           Object.keys(data.panels).forEach(function(element){
-            PanelCreation(data.panels[element].panel.color);
+            PanelCreation(data.panels[element].panel.color,data.panels[element].panel.name);
             var id=element.split("panel")[1]
             dashConfiguration.push(id)
             var panel= GetPanel(id)
@@ -148,36 +156,7 @@ $(document).ready(function() {
     }).fail(function(){
       alert("Los archivos de configuración no se han cargado correctamente. Sus gráficas no pueden ser reproducidas")
     })
-  
 
-  //Companies configuration button
-  $("#configurationCompanies").click(function(){
-    if($("#companiesList *").length==0){
-      $("#settings").remove()
-      $("#currentSettings").remove()
-      if($("#currentCreation").length!=0){
-          $("#currentCreation").remove()
-          deleteCreation(numWidget);
-          numWidget--;
-      }
-      $("#widgets").slideUp("slow");
-      $("#companies").slideDown("slow");
-      $("#companiesList").append("<p>*By default the menu has an auto reference to the general files of the project if you haven't selected another place to read the data.</p>")
-      Object.keys(companies).forEach(function(element){
-        $("#companiesList").append("<p>"+element+":</p>")
-        $("#companiesList").append('<select id="'+element+'" class="form-control">')
-        $("#companiesList #"+element).append('<option value="'+element+'">'+element+'</option>')
-        companies[element].forEach(function(company){
-          $("#companiesList #"+element).append('<option value="'+company+'">'+company+'</option>')
-        }) 
-        $("#companiesList #"+element).val(actualReadingData[element])
-        $("#companiesList").append('</select>')
-
-      })
-        $("#companiesList").append('<button onclick="changeReadFile()" type="button" class="btn btn-xs btn-default">Change companies</button>')
-        $("#companiesList").append('<button onclick="cancelChangeReadFile()" type="button" class="btn btn-xs btn-default">Cancel</button>')
-    }
-  })
 
   //Save button
   $("#save").click(function(){
@@ -251,16 +230,55 @@ $(document).ready(function() {
   })
 
   $("#addPanel").click(function(){
+    $("#panelMaker").slideDown("slow");
     $("#companies").slideUp("slow");
     if($("#companiesList").length!=0){
         $("#companiesList").html("")
         
     }
 
-    PanelCreation()
+    $("#panelConten").append('<p>Name : <input  width="5" placeholder="Panel '+(numPanel+1)+'" id="namep" ></p> ')
+    $("#panelConten").append('<p>Color : <input  width="5" placeholder="'+getRandomColor()+'" id="colorp" ></p> ')
+    $("#panelConten").append('<button onclick="PanelCreation()" type="button" class="btn btn-xs btn-default">Create</button>')
+    $("#panelConten").append('<button onclick="CancelPanel()" type="button" class="btn btn-xs btn-default">Cancel</button>')
   })
 
 });
+
+function CancelPanel(){
+  $("#panelConten").html("")
+  $("#panelMaker").slideUp()
+}
+
+  //Companies configuration button
+  function CompaniesSettings(id){
+    if($("#companiesList *").length==0){
+      $("#settings").remove()
+      $("#currentSettings").remove()
+      if($("#currentCreation").length!=0){
+          $("#currentCreation").remove()
+          deleteCreation(numWidget);
+          numWidget--;
+      }
+      $("#widgets").slideUp("slow");
+      $("#companies").slideDown("slow");
+      var panel= GetPanel(id)
+      $("#companiesList").append("<p>*By default the menu has an auto reference to the general files of the project if you haven't selected another place to read the data.</p>")
+      Object.keys(companies).forEach(function(element){
+        $("#companiesList").append("<p>"+element+":</p>")
+        $("#companiesList").append('<select id="'+element+'" class="form-control">')
+        $("#companiesList #"+element).append('<option value="'+element+'">'+element+'</option>')
+        companies[element].forEach(function(company){
+          $("#companiesList #"+element).append('<option value="'+company+'">'+company+'</option>')
+        }) 
+        $("#companiesList #"+element).val(panel.reading[element])
+        $("#companiesList").append('</select>')
+
+      })
+        $("#companiesList").append('<button onclick="changeReadFile()" type="button" class="btn btn-xs btn-default">Change companies</button>')
+        $("#companiesList").append('<button onclick="cancelChangeReadFile()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+    }
+  }
 
 //Function to show the settings to create new widgets
 function showSettings(panel){
@@ -371,14 +389,24 @@ function ChangeValuesGraph(id){
 }
 
 //Function to create a new panel
-function PanelCreation(color){
+function PanelCreation(color,name,reading){
   numPanel+=1;
-  if(color!=undefined){
-    var panel= new Panel(numPanel,color)
-  }else{
-    var panel= new Panel(numPanel)
+  if(name==undefined){
+    name=$("#namep").val() || $("#namep").attr("placeholder")
 
   }
+  
+  if(color==undefined){
+    color=$("#colorp").val() || $("#colorp").attr("placeholder")
+  }
+  if(reading==undefined){
+    reading=DefaultReadingData;
+  }
+
+  var panel= new Panel(numPanel,color,name,reading)
+
+  $("#panelConten").html("")
+  $("#panelMaker").slideUp()
 
   panels.push(panel)
   $(".container-fluid").append(panel.getContent())
@@ -395,11 +423,47 @@ function PanelCreation(color){
         };
     }
   }).data('gridster');
-  $("#panels").append('<li onclick="showPanel('+numPanel+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollPanel'+numPanel+'"><i class="fa fa-fw fa-edit"></i> Panel '+numPanel+' <i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollPanel'+numPanel+'" class="collapse"><li><a onclick="showSettings('+numPanel+')" href="javascript:void(0)">Add Graph</a></li><li><a onclick="deleteAllWidgets('+numPanel+')" href="javascript:void(0)">Delete all</a></li></ul></li>')
+  if(actualPanel==0){
+    $("#panels").append('<li onclick="showPanel('+numPanel+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollPanel'+numPanel+'"><i id="actived'+numPanel+'"><i class="fa fa-fw fa-edit"></i></i></i><i id="scrollPanelName"> '+panel.name+' </i><i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollPanel'+numPanel+'" class="collapse"><li><a onclick="showSettings('+numPanel+')" href="javascript:void(0)">Add Graph</a></li><li><a onclick="deleteAllWidgets('+numPanel+')" href="javascript:void(0)">Delete all</a></li><li><a onclick="CompaniesSettings('+numPanel+')" href="javascript:void(0)">Companies</a></li><li><a onclick="PanelSettings('+numPanel+')" href="javascript:void(0)">Settings</a></li></ul></li>')
+    $("#activedPanel").html(panel.name)
+
+  }else{
+    $("#panels").append('<li onclick="showPanel('+numPanel+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollPanel'+numPanel+'"><i id="actived'+numPanel+'"></i></i><i id="scrollPanelName"> '+panel.name+' </i><i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollPanel'+numPanel+'" class="collapse"><li><a onclick="showSettings('+numPanel+')" href="javascript:void(0)">Add Graph</a></li><li><a onclick="deleteAllWidgets('+numPanel+')" href="javascript:void(0)">Delete all</a></li><li><a onclick="CompaniesSettings('+numPanel+')" href="javascript:void(0)">Companies</a></li><li><a onclick="PanelSettings('+numPanel+')" href="javascript:void(0)">Settings</a></li></ul></li>')
+
+  }
   if(actualPanel==0){
     actualPanel=1;
   }
 }
+
+function PanelSettings(id){
+
+  var panel= GetPanel(id)
+
+  $("#panelSettings").slideDown("slow")
+  $("#panelSettingsConten").html("")
+  
+  $("#panelSettingsConten").append('<p>Name : <input  width="5" placeholder="'+panel.name+'" id="nameps" ></p> ')
+  $("#panelSettingsConten").append('<button onclick="PanelSettingsChanging('+id+')" type="button" class="btn btn-xs btn-default">Create</button>')
+  $("#panelSettingsConten").append('<button onclick="CancelPanelSettings()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+}
+
+function CancelPanelSettings(){
+  $("#panelSettings").slideUp("slow")
+  $("#panelSettingsConten").html("")
+}
+
+function PanelSettingsChanging(id){
+  var name=$("#nameps").val() || $("#nameps").attr("placeholder")
+  $("#panelSettings").slideUp("slow")
+  $("#panelSettingsConten").html("")
+  panel=GetPanel(id)
+  panel.name=name;
+  $("#activedPanel").html(panel.name)
+  $("#scrollPanelName").html(name)
+
+}
+
 //This function shows a configuration menu to change the widget to other panel
 function ChangePanelMenu (id){
   var widget=GetWidget(id);
@@ -431,20 +495,19 @@ function ChangePanel (id){
   gridster.remove_widget("#widget"+id,function(){
     var NowPanel= GetPanel(actualPanel)
     NowPanel.deleteElement(widget)
-
-    $("#panel"+actualPanel).slideUp("slow");
-
     $("#currentSettings input[type='radio']:checked").each(function() {
       newPanel=$(this).attr('value')
     });
 
-    $("#panel"+newPanel).slideDown("slow");
-
     widget.panel=parseInt(newPanel);
     var ToPanel= GetPanel(newPanel)
     ToPanel.pushElement(widget)
-    widget.MakeWidget();
-
+    if(dashConfiguration.indexOf(parseInt(newPanel))==-1){
+      widget.MakeWidget()
+    }else{
+      makePanel(newPanel)
+    }
+    showPanel(newPanel)
     $("#currentSettings").remove();
     $("#making").slideUp("slow");
     $("#companies").slideUp("slow");
@@ -453,7 +516,6 @@ function ChangePanel (id){
         
     }
   });
-
 }
 
 
@@ -515,6 +577,7 @@ function showPanel(panel){
   if(actualPanel!=panel){
     //We hide the previous panel and we show the new
     $("#panel"+actualPanel).slideUp("slow");
+    $("#actived"+actualPanel).html("")
     $("#settings").remove();
     $("#making").slideUp("slow")
     $("#widgets").slideUp("slow");
@@ -530,10 +593,14 @@ function showPanel(panel){
       numWidget--;
     }
     actualPanel=panel;
-
-    if(dashConfiguration.indexOf(panel.toString())!=-1){
+    $("#actived"+actualPanel).append('<i class="fa fa-fw fa-edit"></i>')
+    var panel=GetPanel(actualPanel)
+    $("#activedPanel").html(panel.name)
+    if(dashConfiguration.indexOf(panel)!=-1){
       makePanel(panel)
     }
+    objPanel= GetPanel(panel)
+    actualReadingData=objPanel.reading;
   }
 
 }
@@ -541,7 +608,8 @@ function showPanel(panel){
 //Function that creates all components in a panel.
 function makePanel(panel){
   var panel= GetPanel(panel)
-  dashConfiguration.splice(dashConfiguration.indexOf(panel.getId().toString()),1)
+  console.log(panel.getWidgets())
+  dashConfiguration.splice(dashConfiguration.indexOf(panel.getId()),1)
   var widgets= panel.getWidgets()
   widgets.forEach(function(widget){
     widget.MakeWidget()
@@ -563,6 +631,8 @@ function changeReadFile(){
   Object.keys(actualReadingData).forEach(function(element){
     actualReadingData[element]=$("#"+element).val()
   })
+  var panel= GetPanel(actualPanel)
+  panel.reading=actualReadingData;
   $("#companies").slideUp("slow");
   if($("#companiesList").length!=0){
       $("#companiesList").html("")

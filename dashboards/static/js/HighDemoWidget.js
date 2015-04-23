@@ -401,9 +401,11 @@ function HighDemo(id,panel,color,typeData,jsons,title,serie,x,y){
 			chart:{
 			    renderTo:id.toString(),
 			    width: 460,
-			    height: 395
+			    height: 405
 			},
-
+			credits: {
+     		 enabled: false
+  		  	},
 			xAxis: {
 			  categories: axisx
 			},

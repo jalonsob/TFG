@@ -40,15 +40,15 @@ function HighTime(id,panel,color,typeData,readingData,json,title,serie,from,to,s
 	if(size!=undefined){
 		this.size=size
 		if((this.size)<=12 && (this.size)>=8){
-			this.gridsterWidth=15;
+			this.gridsterWidth=14;
 			this.gridsterheight=12;
 
 		}else if((this.size)<8){
-			this.gridsterWidth=12;
-			this.gridsterheight=8;
+			this.gridsterWidth=11;
+			this.gridsterheight=10;
 
 		}else{
-			this.gridsterWidth=31;
+			this.gridsterWidth=27;
 			this.gridsterheight=13;
 
 		}
@@ -172,17 +172,17 @@ function HighTime(id,panel,color,typeData,readingData,json,title,serie,from,to,s
 
 		if((this.size)<=12 && (this.size)>=8){
 
-			this.gridsterWidth=15;
+			this.gridsterWidth=14;
 			this.gridsterheight=12;
 
 		}else if((this.size)<8){
 
-			this.gridsterWidth=12;
-			this.gridsterheight=8;
+			this.gridsterWidth=11;
+			this.gridsterheight=10;
 
 		}else{
 
-			this.gridsterWidth=31;
+			this.gridsterWidth=27;
 			this.gridsterheight=13;
 
 		}
@@ -326,11 +326,22 @@ function HighTime(id,panel,color,typeData,readingData,json,title,serie,from,to,s
 	    var options={
 	      chart:{
 	          renderTo:id.toString(),
-	          width: 430,
+	          width: 415,
 	          height: 307
 	      },
+	      credits: {
+     		 enabled: false
+  		  },
+	      yAxis:{
+	      	floor:0,
+	      	title: {
+                text: ''
+            }
+	      },
 	      xAxis: {
-	        categories: x
+	        categories: x,
+	        tickInterval: 2
+
 	      },
 	      title: {
 	          text: title
@@ -343,8 +354,17 @@ function HighTime(id,panel,color,typeData,readingData,json,title,serie,from,to,s
 	    var options={
 	      chart:{
 	          renderTo:id.toString(),
-	          width: 340,
-	          height: 177
+	          width: 315,
+	          height: 240
+	      },
+	      credits: {
+     		 enabled: false
+  		  },
+	      yAxis:{
+	      	floor:0,
+	      	title: {
+                text: ''
+            }
 	      },
 	      xAxis: {
 	        categories: x
@@ -359,11 +379,23 @@ function HighTime(id,panel,color,typeData,readingData,json,title,serie,from,to,s
 	    var options={
 	      chart:{
 	          renderTo:id.toString(),
-	          width: 900,
-	          height: 337
+	          width: 830,
+	          height: 339
+	      },
+	      credits: {
+     		 enabled: false
+  		  },
+	      yAxis:{
+	      	floor:0,
+	      	title: {
+                text: ''
+            }
 	      },
 	      xAxis: {
-	        categories: x
+	        categories: x,
+	        tickInterval: 20,
+	        labels : { y : 20, rotation: -35, align: 'right' } 
+
 	      },
 	      title: {
 	          text: title

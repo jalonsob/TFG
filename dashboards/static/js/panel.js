@@ -2,8 +2,10 @@
 //*************Object panel**************//
 //**************************************//
 
-function Panel(idPanel,color,wid){
+function Panel(idPanel,color,name,reading,wid){
 	var id=idPanel;
+	this.name= name || "Panel "+idPanel
+	this.reading= reading || {}
 	var widgets=wid || [];
 	var color=color || getRandomColor();
 	var statc='<li class="dropdown">'+
@@ -104,10 +106,14 @@ function Panel(idPanel,color,wid){
 
 	this.flatten=function(){
 		var objaux={};
+		var name= this.name
+		var reading= this.reading
 		objaux["panel"+id]={};
 		objaux["panel"+id].panel={
 			color: color,
-			id: id
+			id: id,
+			name: name,
+			reading: reading
 		};
 		objaux["panel"+id].widgets=[];
 		widgets.forEach(function(element){

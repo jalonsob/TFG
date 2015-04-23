@@ -60,7 +60,13 @@ function VideoWidget(id,panel,color,direction,content,width,height,x,y){
 		}
 		if(draw){
 			this.direction=(($("#current"+state+" #url").val() || $("#current"+state+" #url").attr("placeholder")))
-			direction="http://www.youtube.com/embed/"+(this.direction.split("/")[this.direction.split("/").length-1])
+			if(this.direction.split("https://")[1].split("/")[0]=="youtu.be"){
+				direction="http://www.youtube.com/embed/"+(this.direction.split("/")[this.direction.split("/").length-1])
+
+			}else if(this.direction.split("https://")[1].split("/")[0]=="vimeo.com"){
+				direction="https://player.vimeo.com/video/"+(this.direction.split("/")[this.direction.split("/").length-1])
+
+			}
 			this.gridsterWidth=parseInt(($("#current"+state+" #x").val())) || parseInt(($("#current"+state+" #x").attr("placeholder"))) 
 			this.gridsterheight=parseInt(($("#current"+state+" #y").val())) || parseInt(($("#current"+state+" #y").attr("placeholder")))
 			if($('#play').is(':checked')){

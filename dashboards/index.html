@@ -76,6 +76,10 @@
           $( "#widgets" ).hide();
           $( "#companies" ).draggable();
           $( "#companies" ).hide();
+          $( "#panelMaker" ).draggable();
+          $( "#panelMaker" ).hide();
+          $( "#panelSettings" ).draggable();
+          $( "#panelSettings" ).hide();
         });
     </script>
 </head>
@@ -89,7 +93,7 @@
             <!-- Top Menu Items -->
             <ul class="nav navbar-right top-nav">
 
-                <li><a id="configurationCompanies" href="javascript:void(0)">Configuration Companies</a></li>
+             
                 <li><a id="save" href="javascript:void(0)">Save</a></li>
                 <li>
                     <a id="addPanel" href="javascript:void(0)"><i class="fa fa-fw fa-edit"></i> Add Panel</a>
@@ -104,6 +108,26 @@
             </div>
             <!-- /.navbar-collapse -->
         </nav>
+        <div id="panelSettings">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Settings panel</h3>
+                </div>
+                <div id="panelSettingsConten" class="panel-body">
+                    
+                </div>
+            </div>
+        </div>
+        <div id="panelMaker">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <h3 class="panel-title">Maker panel</h3>
+                </div>
+                <div id="panelConten" class="panel-body">
+                    
+                </div>
+            </div>
+        </div>
         <div id="companies">
             <div class="panel panel-default">
                 <div class="panel-heading">

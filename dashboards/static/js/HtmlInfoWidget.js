@@ -179,10 +179,10 @@ function HtmlInfoWidget(id,panel,color,typeData,readingData,json,serie,x,y){
 				down=  down+'<div style="float: left; width: '+(100/selected.down.length)+'%;"><p><strong>'+element.nameUser+':</strong></p><p>'+data[element.name]+'</p></div>'
 			})
 			if(readingData==typeData){
-				result='<p>Stadistics from '+typeData+" "+this.id+'</p>'+up+"<hr>"+down
+				result='<p style="margin-left: 25%">Stadistics from '+typeData+" "+this.id+'</p>'+up+"<hr>"+down
 
 			}else{
-				result='<p>Stadistics from '+typeData+' '+readingData+" "+this.id+'</p>'+up+"<hr>"+down
+				result='<p style="margin-left: 25%">Stadistics from '+typeData+' '+readingData+" "+this.id+'</p>'+up+"<hr>"+down
 
 			}
 			$("#"+this.id).html(result)
@@ -307,10 +307,10 @@ function HtmlInfoWidget(id,panel,color,typeData,readingData,json,serie,x,y){
 			down=  down+'<div style="float: left; width: '+(100/series.down.length)+'%;"><p><strong>'+element.nameUser+':</strong></p><p>'+cacheData[json].saveData[element.name]+'</p></div>'
 		})
 		if(this.readingData==typeData){
-			result='<p>Stadistics from '+typeData+" "+this.id+'</p>'+up+"<hr>"+down
+			result='<p style="margin-left: 25%">Stadistics from '+typeData+" "+this.id+'</p>'+up+"<hr>"+down
 
 		}else{
-			result='<p>Stadistics from '+typeData+' '+this.readingData+" "+this.id+'</p>'+up+"<hr>"+down
+			result='<p style="margin-left: 25%">Stadistics from '+typeData+' '+this.readingData+" "+this.id+'</p>'+up+"<hr>"+down
 
 		}
 		$("#"+this.id).html(result)

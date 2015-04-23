@@ -1,7 +1,7 @@
 //Widget oriented to make a chart of kind INFO with Highcharts
 
 function HighInfo(id,panel,color,typeData,readingData,json,title,serie,x,y){
-	HighWidget.call(this,id,panel,color,12,8)
+	HighWidget.call(this,id,panel,color,12,9)
 	this.readingData=readingData
 	this.buttons='<button onclick="deleteWidget('+this.panel+','+this.id+')" type="button" class="btn btn-xs btn-default">Delete</button><button onclick="ChangePanelMenu('+this.id+')" type="button" class="btn btn-xs btn-default">Move to</button><button onclick="ShowValuesGraph('+this.id+')" type="button" class="btn btn-xs btn-default">Settings</button>'
 	this.square='<div id= "widget'+this.id+'" class="panel panel-primary widgetDrop" style="border-style: groove;border-color: black;border-width: 3px"><div id="header'+this.id+'" class="panel-heading" style="background-color:'+this.color+'">'+this.buttons+'</div><div id="'+this.id+'" class="panel-body">'+this.content+'</div></div>';
@@ -237,9 +237,17 @@ function HighInfo(id,panel,color,typeData,readingData,json,title,serie,x,y){
 			chart:{
 			  renderTo: id.toString(),
 			  width: 350,
-			  height: 177
+			  height: 212
 			},
-
+			credits: {
+     		 enabled: false
+  		  	},
+			yAxis:{
+		      	floor:0,
+		      	title: {
+	                text: ''
+	            }
+	      	},
 			xAxis: {
 			categories: ["Total"]
 			},
