@@ -77,4 +77,7 @@ def allCompanies(request):
 	result=result.replace("'",'"')
 	return HttpResponse(str(result))
 
-	
+def hello(request):
+	if request.method=='GET':
+		return HttpResponse("hello")
+

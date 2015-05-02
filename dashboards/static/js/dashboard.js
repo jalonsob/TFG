@@ -18,7 +18,7 @@
 var actualPanel=0;
 var numPanel=0;
 var numWidget=0;
-//variables to get the configuration from a dashboard
+//variables to get the configuration from a dashboard that we have to draw
 var dashConfiguration=[];
 //configuration of files where we will read
 var configuration={};
@@ -27,13 +27,6 @@ var panels=[];
 //Cache for saved data
 var cacheData={};
 //Reading data
-var DefaultReadingData={
-  "scm":"scm",
-  "its":"its",
-  "mls":"mls",
-  "scr":"scr",
-  "irc":"irc"
-};
 var actualReadingData={
   "scm":"scm",
   "its":"its",
@@ -43,6 +36,8 @@ var actualReadingData={
 };
 //Companies from the reading directory
 var companies={};
+//Used platform
+var plataform="";
 
 $(document).ready(function() {
     //Request of configuration keys
@@ -61,6 +56,36 @@ $(document).ready(function() {
         companies=data
       })
     ).done(function(){
+      //In this zone we check what we are using (django or other)
+        $.ajax({
+          type: "GET",
+          url: "/db/",
+          success: function(){
+            plataform="django"
+                     
+          },
+          error: function () {
+            plataform="github"
+            
+            var github = new Github({
+              token: "e2cd531cc328875f79e7570fd4734fe8233bb672",
+              auth: "oauth"
+            });
+            var user = github.getUser();
+            user.userRepos("jalonsob", function(err, repos) {
+              console.log(err,repos)
+            });
+            myrepo = github.getRepo("jalonsob", "Ejemplo");
+            myrepo.write('master', 'datafile', 
+             new Date().toLocaleString(),
+             "Updating data", function(err) {
+                 console.log (err)
+              });
+            myrepo.read('master', 'datafile', function(err, data) {
+              console.log (err, data);
+            });
+          }
+        });
       //Zone of loading of a json configuration of a determinate personalized dashboard
       if((document.URL.split("/")[document.URL.split("/").length-1]!='') && !isNaN(parseInt(document.URL.split("/")[document.URL.split("/").length-1]))){
 
@@ -201,7 +226,7 @@ $(document).ready(function() {
                 url: "/db/",
                 data: JSON.stringify(send),
                 success: function(data){
-                  alert(data)
+                  alert(data+"\n\n URL:   "+document.URL)
                 }
               });
 
@@ -250,35 +275,35 @@ function CancelPanel(){
   $("#panelMaker").slideUp()
 }
 
-  //Companies configuration button
-  function CompaniesSettings(id){
-    if($("#companiesList *").length==0){
-      $("#settings").remove()
-      $("#currentSettings").remove()
-      if($("#currentCreation").length!=0){
-          $("#currentCreation").remove()
-          deleteCreation(numWidget);
-          numWidget--;
-      }
-      $("#widgets").slideUp("slow");
-      $("#companies").slideDown("slow");
-      var panel= GetPanel(id)
-      $("#companiesList").append("<p>*By default the menu has an auto reference to the general files of the project if you haven't selected another place to read the data.</p>")
-      Object.keys(companies).forEach(function(element){
-        $("#companiesList").append("<p>"+element+":</p>")
-        $("#companiesList").append('<select id="'+element+'" class="form-control">')
-        $("#companiesList #"+element).append('<option value="'+element+'">'+element+'</option>')
-        companies[element].forEach(function(company){
-          $("#companiesList #"+element).append('<option value="'+company+'">'+company+'</option>')
-        }) 
-        $("#companiesList #"+element).val(panel.reading[element])
-        $("#companiesList").append('</select>')
-
-      })
-        $("#companiesList").append('<button onclick="changeReadFile()" type="button" class="btn btn-xs btn-default">Change companies</button>')
-        $("#companiesList").append('<button onclick="cancelChangeReadFile()" type="button" class="btn btn-xs btn-default">Cancel</button>')
+//Companies configuration button
+function CompaniesSettings(id){
+  if($("#companiesList *").length==0){
+    $("#settings").remove()
+    $("#currentSettings").remove()
+    if($("#currentCreation").length!=0){
+        $("#currentCreation").remove()
+        deleteCreation(numWidget);
+        numWidget--;
     }
+    $("#widgets").slideUp("slow");
+    $("#companies").slideDown("slow");
+    var panel= GetPanel(id)
+    $("#companiesList").append("<p>*By default the menu has an auto reference to the general files of the project if you haven't selected another place to read the data.</p>")
+    Object.keys(companies).forEach(function(element){
+      $("#companiesList").append("<p>"+element+":</p>")
+      $("#companiesList").append('<select id="'+element+'" class="form-control">')
+      $("#companiesList #"+element).append('<option value="'+element+'">General '+element+'</option>')
+      companies[element].forEach(function(company){
+        $("#companiesList #"+element).append('<option value="'+company+'">'+company+'</option>')
+      }) 
+      $("#companiesList #"+element).val(panel.reading[element])
+      $("#companiesList").append('</select>')
+
+    })
+      $("#companiesList").append('<button onclick="changeReadFile()" type="button" class="btn btn-xs btn-default">Change companies</button>')
+      $("#companiesList").append('<button onclick="cancelChangeReadFile()" type="button" class="btn btn-xs btn-default">Cancel</button>')
   }
+}
 
 //Function to show the settings to create new widgets
 function showSettings(panel){
@@ -400,7 +425,13 @@ function PanelCreation(color,name,reading){
     color=$("#colorp").val() || $("#colorp").attr("placeholder")
   }
   if(reading==undefined){
-    reading=DefaultReadingData;
+    reading={
+      "scm":"scm",
+      "its":"its",
+      "mls":"mls",
+      "scr":"scr",
+      "irc":"irc"
+    };
   }
 
   var panel= new Panel(numPanel,color,name,reading)
@@ -424,11 +455,11 @@ function PanelCreation(color,name,reading){
     }
   }).data('gridster');
   if(actualPanel==0){
-    $("#panels").append('<li onclick="showPanel('+numPanel+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollPanel'+numPanel+'"><i id="actived'+numPanel+'"><i class="fa fa-fw fa-edit"></i></i></i><i id="scrollPanelName"> '+panel.name+' </i><i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollPanel'+numPanel+'" class="collapse"><li><a onclick="showSettings('+numPanel+')" href="javascript:void(0)">Add Graph</a></li><li><a onclick="deleteAllWidgets('+numPanel+')" href="javascript:void(0)">Delete all</a></li><li><a onclick="CompaniesSettings('+numPanel+')" href="javascript:void(0)">Companies</a></li><li><a onclick="PanelSettings('+numPanel+')" href="javascript:void(0)">Settings</a></li></ul></li>')
+    $("#panels").append('<li onclick="showPanel('+numPanel+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollPanel'+numPanel+'"><i id="actived'+numPanel+'"><i class="fa fa-fw fa-edit"></i></i></i><i id="scrollPanelName'+numPanel+'"> '+panel.name+' </i><i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollPanel'+numPanel+'" class="collapse"><li><a onclick="showSettings('+numPanel+')" href="javascript:void(0)">Add Graph</a></li><li><a onclick="deleteAllWidgets('+numPanel+')" href="javascript:void(0)">Delete all</a></li><li><a onclick="CompaniesSettings('+numPanel+')" href="javascript:void(0)">Companies</a></li><li><a onclick="PanelSettings('+numPanel+')" href="javascript:void(0)">Settings</a></li></ul></li>')
     $("#activedPanel").html(panel.name)
 
   }else{
-    $("#panels").append('<li onclick="showPanel('+numPanel+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollPanel'+numPanel+'"><i id="actived'+numPanel+'"></i></i><i id="scrollPanelName"> '+panel.name+' </i><i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollPanel'+numPanel+'" class="collapse"><li><a onclick="showSettings('+numPanel+')" href="javascript:void(0)">Add Graph</a></li><li><a onclick="deleteAllWidgets('+numPanel+')" href="javascript:void(0)">Delete all</a></li><li><a onclick="CompaniesSettings('+numPanel+')" href="javascript:void(0)">Companies</a></li><li><a onclick="PanelSettings('+numPanel+')" href="javascript:void(0)">Settings</a></li></ul></li>')
+    $("#panels").append('<li onclick="showPanel('+numPanel+')"><a href="javascript:;" data-toggle="collapse" data-target="#scrollPanel'+numPanel+'"><i id="actived'+numPanel+'"></i></i><i id="scrollPanelName'+numPanel+'"> '+panel.name+' </i><i class="fa fa-fw fa-caret-down"></i></a><ul id="scrollPanel'+numPanel+'" class="collapse"><li><a onclick="showSettings('+numPanel+')" href="javascript:void(0)">Add Graph</a></li><li><a onclick="deleteAllWidgets('+numPanel+')" href="javascript:void(0)">Delete all</a></li><li><a onclick="CompaniesSettings('+numPanel+')" href="javascript:void(0)">Companies</a></li><li><a onclick="PanelSettings('+numPanel+')" href="javascript:void(0)">Settings</a></li></ul></li>')
 
   }
   if(actualPanel==0){
@@ -460,7 +491,7 @@ function PanelSettingsChanging(id){
   panel=GetPanel(id)
   panel.name=name;
   $("#activedPanel").html(panel.name)
-  $("#scrollPanelName").html(name)
+  $("#scrollPanelName"+id).html(name)
 
 }
 
@@ -596,11 +627,10 @@ function showPanel(panel){
     $("#actived"+actualPanel).append('<i class="fa fa-fw fa-edit"></i>')
     var panel=GetPanel(actualPanel)
     $("#activedPanel").html(panel.name)
-    if(dashConfiguration.indexOf(panel)!=-1){
-      makePanel(panel)
+    if(dashConfiguration.indexOf(actualPanel)!=-1){
+      makePanel(actualPanel)
     }
-    objPanel= GetPanel(panel)
-    actualReadingData=objPanel.reading;
+    actualReadingData=panel.reading;
   }
 
 }
@@ -628,11 +658,13 @@ function resetRatios(element1,element2){
 }
 
 function changeReadFile(){
+  var reading= {}
+  var panel= GetPanel(actualPanel)
   Object.keys(actualReadingData).forEach(function(element){
     actualReadingData[element]=$("#"+element).val()
+    reading[element]=$("#"+element).val()
   })
-  var panel= GetPanel(actualPanel)
-  panel.reading=actualReadingData;
+  panel.reading=reading;
   $("#companies").slideUp("slow");
   if($("#companiesList").length!=0){
       $("#companiesList").html("")

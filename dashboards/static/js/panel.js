@@ -18,7 +18,7 @@ function Panel(idPanel,color,name,reading,wid){
 							'</button><button onclick="'+"showConfiguration("+id+",'HighInfo','its')"+'" type="button" class="btn btn-xs btn-default">ITS (Intelligent Tutoring System)</button>'+
 						'</li>'+
 						'<li>'+
-							'</button><button onclick="'+"showConfiguration("+id+",'HighInfo','mls')"+'" type="button" class="btn btn-xs btn-default">MLS (Major League Soccer)</button>'+
+							'</button><button onclick="'+"showConfiguration("+id+",'HighInfo','mls')"+'" type="button" class="btn btn-xs btn-default">MLS (Multiple Listing Service)</button>'+
 						'</li>'+
 						'<li>'+
 							'</button><button onclick="'+"showConfiguration("+id+",'HighInfo','scr')"+'" type="button" class="btn btn-xs btn-default">SCR (Sustained Cell Rate)</button>'+
@@ -38,7 +38,7 @@ function Panel(idPanel,color,name,reading,wid){
 							'</button><button onclick="'+"showConfiguration("+id+",'HtmlInfoWidget','its')"+'" type="button" class="btn btn-xs btn-default">ITS (Intelligent Tutoring System)</button>'+
 						'</li>'+
 						'<li>'+
-							'</button><button onclick="'+"showConfiguration("+id+",'HtmlInfoWidget','mls')"+'" type="button" class="btn btn-xs btn-default">MLS (Major League Soccer)</button>'+
+							'</button><button onclick="'+"showConfiguration("+id+",'HtmlInfoWidget','mls')"+'" type="button" class="btn btn-xs btn-default">MLS (Multiple Listing Service)</button>'+
 						'</li>'+
 						'<li>'+
 							'</button><button onclick="'+"showConfiguration("+id+",'HtmlInfoWidget','scr')"+'" type="button" class="btn btn-xs btn-default">SCR (Sustained Cell Rate)</button>'+
@@ -59,7 +59,7 @@ function Panel(idPanel,color,name,reading,wid){
 							'</button><button onclick="'+"showConfiguration("+id+",'HighTime','its')"+'" type="button" class="btn btn-xs btn-default">ITS (Intelligent Tutoring System)</button>'+
 						'</li>'+
 						'<li>'+
-							'</button><button onclick="'+"showConfiguration("+id+",'HighTime','mls')"+'" type="button" class="btn btn-xs btn-default">MLS (Major League Soccer)</button>'+
+							'</button><button onclick="'+"showConfiguration("+id+",'HighTime','mls')"+'" type="button" class="btn btn-xs btn-default">MLS (Multiple Listing Service)</button>'+
 						'</li>'+
 						'<li>'+
 							'</button><button onclick="'+"showConfiguration("+id+",'HighTime','scr')"+'" type="button" class="btn btn-xs btn-default">SCR (Sustained Cell Rate)</button>'+
@@ -76,7 +76,7 @@ function Panel(idPanel,color,name,reading,wid){
 							'</button><button onclick="'+"showConfiguration("+id+",'HighDemo','its')"+'" type="button" class="btn btn-xs btn-default">ITS (Intelligent Tutoring System)</button>'+
 						'</li>'+
 						'<li>'+
-							'</button><button onclick="'+"showConfiguration("+id+",'HighDemo','mls')"+'" type="button" class="btn btn-xs btn-default">MLS (Major League Soccer)</button>'+
+							'</button><button onclick="'+"showConfiguration("+id+",'HighDemo','mls')"+'" type="button" class="btn btn-xs btn-default">MLS (Multiple Listing Service)</button>'+
 						'</li>'+
 					'</ul>'+
 				'</li>'
